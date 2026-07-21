@@ -265,7 +265,11 @@
 
   function buildDayText(hits, signIndex, dayNum) {
     var top = hits.slice(0, 1);
-    if (!top.length) return pickFrom(DAILY_TEXTS.fallbacks.day, signIndex, dayNum, 0);
+    if (!top.length) {
+      var fallbacks = DAILY_TEXTS.fallbacks.day;
+      var idx = (signIndex * 7 + dayNum) % fallbacks.length;
+      return fallbacks[idx];
+    }
 
     var h = top[0];
     var tpl = pickAspectTemplate(h.type, signIndex, dayNum, 0);
