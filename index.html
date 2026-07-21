@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АстроКомпас — твоят космически пътеводител</title>
+<meta name="description" content="Дневен хороскоп, натална карта и лунни фази — изчислено по VSOP87, за размисъл и вдъхновение.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="appbar" id="appbar">
+  <div class="appbar-inner">
+    <a class="brand" href="#hero">
+      <span class="brand-mark">✦</span>
+      <span class="brand-name">АстроКомпас</span>
+    </a>
+    <nav class="appbar-nav">
+      <a href="#hero">Начало</a>
+      <a href="#moon">Луна</a>
+      <a href="#horoscope">Хороскоп</a>
+      <a href="#natal">Натална карта</a>
+    </nav>
+    <button class="menu-btn" id="menu-open-btn" aria-label="Меню">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="drawer-overlay" id="drawer-overlay">
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <span class="brand-name">АстроКомпас</span>
+      <button class="drawer-close" id="drawer-close-btn" aria-label="Затвори">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      <a href="#hero">Начало</a>
+      <a href="#moon">Луна</a>
+      <a href="#horoscope">Хороскоп</a>
+      <a href="#natal">Натална карта</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section id="hero" class="hero">
+    <div class="hero-bg">
+      <img src="img/hero-nebula.jpg" alt="Мъглявина в Орион — облаци газ и звезди в розово, златно и виолетово">
+      <div class="hero-scrim-1"></div>
+      <div class="hero-scrim-2"></div>
+    </div>
+    <div class="hero-content">
+      <span class="eyebrow">✦ Твоят космически пътеводител</span>
+      <h1>Открий какво казват <span class="accent">звездите</span> за теб</h1>
+      <p class="hero-lead">Работя за твоето вдъхновение, забавление и размисъл.</p>
+      <div class="hero-actions">
+        <a href="#natal" class="btn btn-filled">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
+          Виж наталната си карта
+        </a>
+        <a href="#horoscope" class="btn btn-tonal">Дневен хороскоп</a>
+      </div>
+      <div class="hero-scroll-cue">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ MOON ═══════════════════════ -->
+  <section id="moon">
+    <div class="container-narrow reveal" data-reveal>
+      <div class="card moon-card">
+        <p class="section-kicker">Луната днес</p>
+        <div class="moon-illustration" id="moon-illustration"></div>
+        <div class="moon-illum-row">
+          <div class="moon-illum-track"><div class="moon-illum-fill" id="moon-illum-fill"></div></div>
+          <span class="moon-illum-label" id="moon-illum-label"></span>
+        </div>
+        <h3 class="moon-phase-name" id="moon-phase-name"></h3>
+        <p class="moon-sign-line" id="moon-sign-line"></p>
+        <div class="moon-guidance" id="moon-guidance"></div>
+        <p class="moon-meta" id="moon-meta"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ HOROSCOPE ═══════════════════════ -->
+  <section id="horoscope">
+    <div class="container reveal" data-reveal>
+      <div class="section-head">
+        <p class="section-kicker">Астрология</p>
+        <h2>Дневен хороскоп</h2>
+        <p id="horoscope-date"></p>
+      </div>
+      <div class="horoscope-grid" id="horoscope-grid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ NATAL CHART ═══════════════════════ -->
+  <section id="natal">
+    <div class="container reveal" data-reveal>
+      <div class="section-head">
+        <p class="section-kicker">Персонализирано</p>
+        <h2>Натална карта</h2>
+        <p>Въведете рождените си данни и разкрийте уникалния космически отпечатък на личността ви</p>
+      </div>
+
+      <form class="card natal-form-card" id="natal-form" style="max-width:960px; margin:0 auto;">
+        <div class="m3-field" id="name-field-wrap" style="margin-bottom:20px;">
+          <span class="m3-field-label" id="name-field-label">Име (по избор)</span>
+          <div class="m3-field-box">
+            <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" id="birth-name" autocomplete="off" placeholder="напр. Мария Иванова">
+          </div>
+        </div>
+        <div class="natal-form-grid">
+          <div class="m3-field">
+            <span class="m3-field-label" id="date-field-label">Дата на раждане</span>
+            <button type="button" class="m3-field-box m3-field-btn" id="date-field-btn">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+              <span class="m3-field-value" id="date-field-value"></span>
+              <svg class="m3-field-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="m3-field">
+            <span class="m3-field-label" id="time-field-label">Час на раждане</span>
+            <button type="button" class="m3-field-box m3-field-btn" id="time-field-btn">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+              <span class="m3-field-value" id="time-field-value"></span>
+              <svg class="m3-field-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div class="m3-field" id="city-field-wrap">
+            <span class="m3-field-label">Място на раждане</span>
+            <div class="m3-field-box" id="city-field-box">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <input type="text" id="city-input" autocomplete="off" placeholder="напр. София">
+            </div>
+            <div class="city-dropdown" id="city-dropdown"></div>
+            <p class="field-error" id="city-error"></p>
+          </div>
+        </div>
+        <div class="natal-submit-row">
+          <button type="submit" class="btn btn-filled" id="calc-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
+            <span id="calc-btn-label">Изчисли картата</span>
+          </button>
+        </div>
+      </form>
+
+      <div id="natal-results">
+
+        <div class="wheel-bigthree">
+          <div class="card wheel-card">
+            <div id="wheel-container"></div>
+          </div>
+          <div class="bigthree-col">
+            <h3>Голямата тройка</h3>
+            <div id="bigthree-container" class="bigthree-list"></div>
+            <button type="button" class="btn btn-text download-btn" id="download-pdf-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span id="download-pdf-label">Изтегли картата (PDF)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-card-head"><h3>Планети и позиции</h3></div>
+          <div id="planets-table"></div>
+        </div>
+
+        <div class="card table-card">
+          <div class="table-card-head"><h3>Аспекти</h3></div>
+          <div id="aspects-list"></div>
+        </div>
+
+        <div class="card explainer-card">
+          <h3>Какво е натална карта?</h3>
+          <p>Наталната карта (или хороскоп на раждането) е астрологична карта на небето в момента на вашето раждане. Тя показва позициите на Слънцето, Луната и планетите в зодиакалните знаци и 12-те астрологични дома. Картата се изчислява по точно определено астрономично място и час на раждане. Всяка планета представлява различен аспект на личността — от его и емоции до начина на общуване и амбиции. Наталната карта не диктува съдбата, а разкрива вродените потенциали и предразположения, предоставяйки ценен инструмент за самопознание и вдъхновение.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <span class="brand-name">АстроКомпас</span>
+      </div>
+      <p class="footer-tagline">Изчисления по VSOP87 · за размисъл и вдъхновение</p>
+      <p class="footer-disclaimer">Съдържанието е с цел развлечение и самопознание. Не е предназначено за медицински, финансови или юридически съвети.</p>
+    </div>
+    <div>
+      <p class="footer-nav-label">Навигация</p>
+      <nav class="footer-nav">
+        <a href="#hero">Начало</a>
+        <a href="#moon">Луна</a>
+        <a href="#horoscope">Хороскоп</a>
+        <a href="#natal">Натална карта</a>
+      </nav>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 АстроКомпас</p>
+    <div class="footer-glyphs"><span>✦</span><span>☽</span><span>☉</span><span>✶</span></div>
+  </div>
+</footer>
+
+<script src="js/astro-core.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/cities.js"></script>
+<script src="js/vendor/jspdf.umd.min.js"></script>
+<script src="js/vendor/svg2pdf.umd.min.js"></script>
+<script src="js/vendor/pdf-fonts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
