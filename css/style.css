@@ -299,7 +299,9 @@ section { padding: 96px 20px; }
 }
 .sign-card h3 { font-size: 0.85rem; font-weight: 600; color: var(--foreground); }
 .sign-dates { font-size: 0.75rem; margin: 2px 0 12px; color: #ADA0BB; }
-.sign-day-text { font-size: 0.9rem; line-height: 1.6; color: var(--muted-foreground); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sign-day-text { font-size: 0.9rem; line-height: 1.6; color: var(--muted-foreground); }
+.sign-card.open .sign-day-text { font-size: 1rem; }
+.sign-card.open .sign-detail { font-size: 0.95rem; }
 .sign-expand-row { position: absolute; bottom: 12px; right: 12px; display: flex; justify-content: flex-end; align-items: center; }
 .sign-expand-row svg { color: var(--outline); transition: transform 0.3s ease; }
 .sign-card.open .sign-expand-row svg { transform: rotate(180deg); }
@@ -312,12 +314,12 @@ section { padding: 96px 20px; }
 
 @media (min-width: 540px) { .horoscope-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 840px) {
-  .horoscope-grid { grid-template-columns: repeat(3, 1fr); }
-  .sign-card.open { grid-column: 1 / -1; }
+  .horoscope-grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: auto; }
+  .sign-card.open { grid-column: span 2; grid-row: span 2; }
 }
 @media (min-width: 1120px) {
   .horoscope-grid { grid-template-columns: repeat(4, 1fr); }
-  .sign-card.open { grid-column: 1 / -1; }
+  .sign-card.open { grid-column: span 2; grid-row: span 2; }
 }
 
 /* ── Natal form ───────────────────────────────────────────────────── */
