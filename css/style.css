@@ -284,13 +284,13 @@ section { padding: 96px 20px; }
 .moon-meta { margin-top: 20px; font-size: 0.8rem; color: var(--outline); }
 
 /* ── Horoscope grid ───────────────────────────────────────────────── */
-.horoscope-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.horoscope-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 .sign-card {
   border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease;
   background: var(--card); border: 1px solid var(--border-soft);
   grid-column: span 1;
 }
-.sign-card.open { background: var(--card-2); grid-column: span 2; box-shadow: 0 8px 36px rgba(0,0,0,0.25); }
+.sign-card.open { background: var(--card-2); grid-column: span 1; box-shadow: 0 8px 36px rgba(0,0,0,0.25); }
 .sign-card:hover:not(.open) { border-color: rgba(182,157,232,0.35); }
 .sign-card-inner { padding: 20px; }
 .sign-glyph-circle {
@@ -299,7 +299,7 @@ section { padding: 96px 20px; }
 }
 .sign-card h3 { font-size: 0.85rem; font-weight: 600; color: var(--foreground); }
 .sign-dates { font-size: 0.75rem; margin: 2px 0 12px; color: #ADA0BB; }
-.sign-day-text { font-size: 0.9rem; line-height: 1.6; color: var(--muted-foreground); }
+.sign-day-text { font-size: 0.9rem; line-height: 1.6; color: var(--muted-foreground); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .sign-expand-row { display: flex; justify-content: flex-end; margin-top: 12px; }
 .sign-expand-row svg { color: var(--outline); transition: transform 0.3s ease; }
 .sign-card.open .sign-expand-row svg { transform: rotate(180deg); }
@@ -310,8 +310,9 @@ section { padding: 96px 20px; }
 .sign-tag { font-size: 0.72rem; padding: 4px 12px; border-radius: var(--radius-pill); }
 .sign-tag.muted { background: rgba(74,63,84,0.35); color: var(--muted-foreground); }
 
-@media (min-width: 620px) { .horoscope-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 900px) { .horoscope-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 540px) { .horoscope-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 840px) { .horoscope-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1120px) { .horoscope-grid { grid-template-columns: repeat(4, 1fr); } }
 
 /* ── Natal form ───────────────────────────────────────────────────── */
 .natal-form-card { padding: 32px; margin-bottom: 40px; }
