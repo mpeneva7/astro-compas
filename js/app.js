@@ -71,7 +71,10 @@
   };
 
   var BG_MONTHS_GEN = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+  var BG_MONTHS = ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
   var BG_WEEKDAYS = ['неделя', 'понеделник', 'вторник', 'сряда', 'четвъртък', 'петък', 'събота'];
+  var BG_DAYS_ABBR = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']; // за getDay() (0=неделя)
+  var BG_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']; // за седмичния хедър (започва в понеделник)
   var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
   var CITY_COORDS = {
@@ -514,15 +517,215 @@
     URL.revokeObjectURL(a.href);
   }
 
+  /* ───────────────────────── M3 дата/час пикери ───────────────────────── */
+
+  function openDatePicker(initial, onConfirm) {
+    var today = new Date();
+    var sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
+    var viewYear = (sel || today).getFullYear();
+    var viewMonth = (sel || today).getMonth();
+    var mode = 'day';
+    var YEAR_START = 1900, YEAR_END = today.getFullYear();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'm3-modal-overlay';
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    function render() {
+      var hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
+      var html = '<div class="m3-modal-panel">';
+      html += '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
+
+      if (mode === 'day') {
+        html += '<div class="m3-nav-row">' +
+          '<button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+          '</div>';
+        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
+
+        var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        var startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+        var prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+        var cells = [];
+        for (var i = 0; i < startDow; i++) cells.push({ d: prevMonthDays - startDow + 1 + i, kind: 'prev' });
+        for (var d = 1; d <= daysInMonth; d++) cells.push({ d: d, kind: 'cur' });
+        while (cells.length < 42) cells.push({ d: cells.length - startDow - daysInMonth + 1, kind: 'next' });
+
+        html += '<div class="m3-day-grid">';
+        cells.forEach(function (c) {
+          var cur = c.kind === 'cur';
+          var isSel = cur && sel && sel.getDate() === c.d && sel.getMonth() === viewMonth && sel.getFullYear() === viewYear;
+          var isToday = cur && c.d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+          var cls = 'm3-day-cell' + (cur ? '' : ' outside') + (isSel ? ' selected' : '') + (isToday && !isSel ? ' today' : '');
+          html += '<button type="button" class="' + cls + '" ' + (cur ? 'data-act="pickday" data-day="' + c.d + '"' : 'disabled') + '>' + c.d + '</button>';
+        });
+        html += '</div>';
+      } else if (mode === 'month') {
+        html += '<div class="m3-nav-row"><span style="flex:1;"></span>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear" style="flex:0 0 auto; padding-left:14px; padding-right:14px;">' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+          '</div>';
+        html += '<div class="m3-month-grid">';
+        BG_MONTHS.forEach(function (name, i) {
+          var active = i === viewMonth;
+          var isCurMonth = viewYear === today.getFullYear() && i === today.getMonth();
+          html += '<button type="button" class="m3-chip' + (active ? ' selected' : '') + (isCurMonth && !active ? ' today' : '') + '" data-act="pickmonth" data-month="' + i + '">' + name + '</button>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span>' +
+          '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+          '</div>';
+        html += '<div class="m3-year-scroll" id="m3-year-scroll"><div class="m3-year-grid-inner">';
+        for (var y = YEAR_START; y <= YEAR_END; y++) {
+          var activeY = y === viewYear;
+          html += '<button type="button" class="m3-chip' + (activeY ? ' selected' : '') + (y === today.getFullYear() && !activeY ? ' today' : '') + '" data-act="pickyear" data-year="' + y + '" ' + (activeY ? 'data-selected="1"' : '') + '>' + y + '</button>';
+        }
+        html += '</div></div>';
+      }
+
+      html += '<div class="m3-modal-divider"></div>';
+      html += '<div class="m3-modal-actions">' +
+        '<button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button>' +
+        '<button type="button" class="m3-modal-btn filled" data-act="ok"' + (sel ? '' : ' disabled') + '>OK</button>' +
+        '</div></div>';
+
+      overlay.innerHTML = html;
+
+      overlay.querySelectorAll('[data-act]').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var act = el.dataset.act;
+          if (act === 'prevmonth') { if (viewMonth === 0) { viewMonth = 11; viewYear--; } else viewMonth--; render(); }
+          else if (act === 'nextmonth') { if (viewMonth === 11) { viewMonth = 0; viewYear++; } else viewMonth++; render(); }
+          else if (act === 'toyear') { mode = 'year'; render(); }
+          else if (act === 'todayview') { mode = 'day'; render(); }
+          else if (act === 'pickday') { sel = new Date(viewYear, viewMonth, parseInt(el.dataset.day, 10)); render(); }
+          else if (act === 'pickmonth') { viewMonth = parseInt(el.dataset.month, 10); mode = 'day'; render(); }
+          else if (act === 'pickyear') { viewYear = parseInt(el.dataset.year, 10); mode = 'month'; render(); }
+          else if (act === 'cancel') { close(); }
+          else if (act === 'ok') { if (sel) { onConfirm(sel); close(); } }
+        });
+      });
+
+      if (mode === 'year') {
+        var container = overlay.querySelector('#m3-year-scroll');
+        var target = overlay.querySelector('[data-selected="1"]');
+        if (container && target) container.scrollTop = target.offsetTop - container.clientHeight / 2 + target.clientHeight / 2;
+      }
+    }
+
+    render();
+  }
+
+  function openTimePicker(initial, onConfirm) {
+    var hourRaw = initial ? pad2(initial.h) : '';
+    var minRaw = initial ? pad2(initial.m) : '';
+
+    var overlay = document.createElement('div');
+    overlay.className = 'm3-modal-overlay';
+    overlay.innerHTML =
+      '<div class="m3-modal-panel">' +
+      '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p class="m3-time-hint" style="padding:0; margin-top:4px;">Въведете часа директно (24-часов формат)</p></div>' +
+      '<div class="m3-time-row">' +
+      '<div class="m3-time-box" id="m3-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="m3-hour-input" placeholder="ЧЧ" value="' + hourRaw + '"><span class="m3-time-sub" id="m3-hour-sub">Час</span></div>' +
+      '<span class="m3-time-colon">:</span>' +
+      '<div class="m3-time-box" id="m3-min-box"><input type="text" inputmode="numeric" maxlength="2" id="m3-min-input" placeholder="ММ" value="' + minRaw + '"><span class="m3-time-sub" id="m3-min-sub">Минути</span></div>' +
+      '</div>' +
+      '<div class="m3-modal-divider"></div>' +
+      '<div class="m3-modal-actions">' +
+      '<button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button>' +
+      '<button type="button" class="m3-modal-btn filled" id="m3-time-ok" disabled>OK</button>' +
+      '</div></div>';
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    var hInput = overlay.querySelector('#m3-hour-input'), mInput = overlay.querySelector('#m3-min-input');
+    var hBox = overlay.querySelector('#m3-hour-box'), mBox = overlay.querySelector('#m3-min-box');
+    var hSub = overlay.querySelector('#m3-hour-sub'), mSub = overlay.querySelector('#m3-min-sub');
+    var okBtn = overlay.querySelector('#m3-time-ok');
+    var hourErr = false, minErr = false;
+
+    function refreshOk() { okBtn.disabled = !(hourRaw !== '' && minRaw !== '' && !hourErr && !minErr); }
+
+    hInput.addEventListener('input', function () {
+      var raw = hInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      hInput.value = raw; hourRaw = raw;
+      var n = parseInt(raw, 10);
+      hourErr = raw !== '' && (isNaN(n) || n < 0 || n > 23);
+      hBox.classList.toggle('err', hourErr);
+      hSub.textContent = hourErr ? '0–23' : 'Час';
+      refreshOk();
+    });
+    mInput.addEventListener('input', function () {
+      var raw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      mInput.value = raw; minRaw = raw;
+      var n = parseInt(raw, 10);
+      minErr = raw !== '' && (isNaN(n) || n < 0 || n > 59);
+      mBox.classList.toggle('err', minErr);
+      mSub.textContent = minErr ? '0–59' : 'Минути';
+      refreshOk();
+    });
+    hInput.addEventListener('focus', function () { hBox.classList.add('focus'); });
+    hInput.addEventListener('blur', function () { hBox.classList.remove('focus'); if (hourRaw && !hourErr) { hourRaw = pad2(parseInt(hourRaw, 10)); hInput.value = hourRaw; } });
+    mInput.addEventListener('focus', function () { mBox.classList.add('focus'); });
+    mInput.addEventListener('blur', function () { mBox.classList.remove('focus'); if (minRaw && !minErr) { minRaw = pad2(parseInt(minRaw, 10)); mInput.value = minRaw; } });
+
+    overlay.querySelector('[data-act="cancel"]').addEventListener('click', close);
+    okBtn.addEventListener('click', function () {
+      if (okBtn.disabled) return;
+      onConfirm({ h: parseInt(hourRaw, 10), m: parseInt(minRaw, 10) });
+      close();
+    });
+
+    refreshOk();
+    hInput.focus();
+  }
+
+  /* ───────────────────────── Натална форма ───────────────────────── */
+
+  var selectedBirthDate = null; // Date (само ден/месец/година)
+  var selectedBirthTime = null; // {h, m}
+
+  function updateDateField() {
+    var label = $('date-field-label'), value = $('date-field-value');
+    if (selectedBirthDate) {
+      value.textContent = selectedBirthDate.getDate() + ' ' + BG_MONTHS_GEN[selectedBirthDate.getMonth()] + ' ' + selectedBirthDate.getFullYear();
+      value.classList.add('filled'); label.classList.add('filled');
+    } else {
+      value.textContent = ''; value.classList.remove('filled'); label.classList.remove('filled');
+    }
+  }
+  function updateTimeField() {
+    var label = $('time-field-label'), value = $('time-field-value');
+    if (selectedBirthTime) {
+      value.textContent = pad2(selectedBirthTime.h) + ':' + pad2(selectedBirthTime.m);
+      value.classList.add('filled'); label.classList.add('filled');
+    } else {
+      value.textContent = ''; value.classList.remove('filled'); label.classList.remove('filled');
+    }
+  }
+
   function initNatalForm() {
     initCityAutocomplete();
+    updateDateField();
+    updateTimeField();
+
+    $('date-field-btn').addEventListener('click', function () {
+      openDatePicker(selectedBirthDate, function (d) { selectedBirthDate = d; updateDateField(); });
+    });
+    $('time-field-btn').addEventListener('click', function () {
+      openTimePicker(selectedBirthTime, function (t) { selectedBirthTime = t; updateTimeField(); });
+    });
 
     $('natal-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      var dateVal = $('birth-date').value;
-      var timeVal = $('birth-time').value || '12:00';
-      if (!dateVal) return;
+      if (!selectedBirthDate) { openDatePicker(null, function (d) { selectedBirthDate = d; updateDateField(); }); return; }
 
+      var time = selectedBirthTime || { h: 12, m: 0 };
       var city = resolveCity();
       var btn = $('calc-btn'), label = $('calc-btn-label');
       btn.disabled = true;
@@ -531,12 +734,10 @@
       $('calc-btn').querySelector('svg').style.display = 'none';
 
       setTimeout(function () {
-        var parts = dateVal.split('-').map(Number);
-        var tparts = timeVal.split(':').map(Number);
         var opts = {
-          year: parts[0], month: parts[1], day: parts[2],
-          hour: tparts[0], minute: tparts[1], second: 0,
-          utcOffset: guessBulgariaOffset(parts[1]),
+          year: selectedBirthDate.getFullYear(), month: selectedBirthDate.getMonth() + 1, day: selectedBirthDate.getDate(),
+          hour: time.h, minute: time.m, second: 0,
+          utcOffset: guessBulgariaOffset(selectedBirthDate.getMonth() + 1),
           lat: city.lat, lon: city.lon
         };
         var chart = AstroCore.computeChart(opts);
