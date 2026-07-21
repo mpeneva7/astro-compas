@@ -311,8 +311,14 @@ section { padding: 96px 20px; }
 .sign-tag.muted { background: rgba(74,63,84,0.35); color: var(--muted-foreground); }
 
 @media (min-width: 540px) { .horoscope-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 840px) { .horoscope-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1120px) { .horoscope-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 840px) {
+  .horoscope-grid { grid-template-columns: repeat(3, 1fr); }
+  .sign-card.open { grid-column: 1 / -1; }
+}
+@media (min-width: 1120px) {
+  .horoscope-grid { grid-template-columns: repeat(4, 1fr); }
+  .sign-card.open { grid-column: 1 / -1; }
+}
 
 /* ── Natal form ───────────────────────────────────────────────────── */
 .natal-form-card { padding: 32px; margin-bottom: 40px; }
