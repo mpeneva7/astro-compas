@@ -264,19 +264,12 @@
   }
 
   function buildDayText(hits, signIndex, dayNum) {
-    var top = hits.slice(0, 2);
+    var top = hits.slice(0, 1);
     if (!top.length) return pickFrom(DAILY_TEXTS.fallbacks.day, signIndex, dayNum, 0);
 
-    var sentences = top.map(function (h, i) {
-      var tpl = pickAspectTemplate(h.type, signIndex, dayNum, i); // offset по позиция, за да се различават двете изречения
-      return fillTemplate(tpl, h.planet, DAY_THEME);
-    });
-
-    var score = top.reduce(function (s, h) { return s + (ASPECT_SCORE[h.type] || 0); }, 0);
-    var closingPool = score > 0 ? DAILY_TEXTS.closings.positive : score < 0 ? DAILY_TEXTS.closings.negative : DAILY_TEXTS.closings.neutral;
-    var closing = pickFrom(closingPool, signIndex, dayNum, 5);
-
-    return sentences.join(' ') + ' ' + closing;
+    var h = top[0];
+    var tpl = pickAspectTemplate(h.type, signIndex, dayNum, 0);
+    return fillTemplate(tpl, h.planet, DAY_THEME);
   }
 
   function buildReading(chart, signIndex, refDate) {
