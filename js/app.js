@@ -415,42 +415,250 @@
     $('natal-results').classList.add('show');
   }
 
-  function buildICS(chart, cityName) {
-    var utcMillis = Date.UTC(chart.opts.year, chart.opts.month - 1, chart.opts.day, chart.opts.hour, chart.opts.minute) - chart.opts.utcOffset * 3600000;
-    var d = new Date(utcMillis);
-    var dt = d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate()) + 'T' + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + '00Z';
-    var now = new Date();
-    var stamp = now.getUTCFullYear() + pad2(now.getUTCMonth() + 1) + pad2(now.getUTCDate()) + 'T' + pad2(now.getUTCHours()) + pad2(now.getUTCMinutes()) + pad2(now.getUTCSeconds()) + 'Z';
+  /* ───────────────────────── PDF експорт ───────────────────────── */
 
-    var lines = [];
+  // Официална българска транслитерация кирилица -> латиница (за име на файл)
+  var TRANSLIT = {
+    'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ж':'zh','з':'z','и':'i','й':'y',
+    'к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u',
+    'ф':'f','х':'h','ц':'ts','ч':'ch','ш':'sh','щ':'sht','ъ':'a','ь':'y','ю':'yu','я':'ya'
+  };
+  function translitToLatin(s) {
+    return (s || '').split('').map(function (ch) {
+      var low = ch.toLowerCase();
+      var mapped = TRANSLIT[low];
+      if (mapped === undefined) return (/[a-zA-Z0-9]/.test(ch) ? ch : (/\s/.test(ch) ? ' ' : ''));
+      return (ch !== low) ? (mapped.charAt(0).toUpperCase() + mapped.slice(1)) : mapped;
+    }).join('');
+  }
+  function slugify(s) {
+    return translitToLatin(s).replace(/\s+/g, '-').replace(/[^A-Za-z0-9\-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  // Светла (за печат) версия на колелото — бял фон, тъмни линии, без филтри/
+  // градиенти (svg2pdf не ги поддържа), шрифт AstroSans за глифите.
+  function buildPrintWheelSVG(chart) {
+    var cx = 250, cy = 250;
+    var R = { zo: 226, zi: 188, ho: 152, pl: 126, as: 66 };
+    function toA(deg) { return (deg - 90) * Math.PI / 180; }
+    function pt(r, deg) { return { x: cx + r * Math.cos(toA(deg)), y: cy + r * Math.sin(toA(deg)) }; }
+    function arc(s, e, ro, ri) {
+      var a = pt(ro, s), b = pt(ro, e), c2 = pt(ri, e), d = pt(ri, s);
+      return 'M ' + a.x + ' ' + a.y + ' A ' + ro + ' ' + ro + ' 0 0 1 ' + b.x + ' ' + b.y +
+        ' L ' + c2.x + ' ' + c2.y + ' A ' + ri + ' ' + ri + ' 0 0 0 ' + d.x + ' ' + d.y + ' Z';
+    }
+    function txt(x, y, size, color, s, weight) {
+      return '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-family="AstroSans" font-size="' + size + '"' +
+        (weight ? ' font-weight="' + weight + '"' : '') + ' fill="' + color + '">' + s + '</text>';
+    }
+
+    var INK = '#2A2440', MUTED = '#8A7E9A', GOLD = '#B8860B', GRID = '#C9BFD6';
+
+    var zHTML = '';
+    SIGN_INFO.forEach(function (z, i) {
+      var s = i * 30, e = s + 30, mid = s + 15;
+      var mp = pt((R.zo + R.zi) / 2, mid);
+      zHTML += '<path d="' + arc(s, e, R.zo, R.zi) + '" fill="' + z.c + '" fill-opacity="0.14" stroke="' + z.c + '" stroke-opacity="0.55" stroke-width="0.6"/>';
+      zHTML += txt(mp.x, mp.y, 14, z.c, z.g);
+    });
+
+    var houseHTML = '';
+    for (var h = 1; h <= 12; h++) {
+      var angular = (h === 1 || h === 4 || h === 7 || h === 10);
+      var a1 = pt(R.as, chart.houses[h]), b1 = pt(R.zi, chart.houses[h]);
+      houseHTML += '<line x1="' + a1.x + '" y1="' + a1.y + '" x2="' + b1.x + '" y2="' + b1.y + '" stroke="' +
+        (angular ? GOLD : GRID) + '" stroke-width="' + (angular ? 1 : 0.5) + '" stroke-opacity="' + (angular ? 0.8 : 0.7) + '"/>';
+    }
+
+    var aspects = AstroCore.computeAspects(chart.planets, chart.order);
+    var aspHTML = '';
+    aspects.forEach(function (a) {
+      var p1 = pt(R.as - 3, chart.planets[a.p1].lon), p2 = pt(R.as - 3, chart.planets[a.p2].lon);
+      var color = ASPECT_COLOR[a.type] || GOLD;
+      aspHTML += '<line x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '" stroke="' + color + '" stroke-width="0.8" stroke-opacity="0.7"/>';
+    });
+
+    var plHTML = '';
     chart.order.forEach(function (name) {
       var p = chart.planets[name];
-      lines.push(p.nameBg + ': ' + p.sign + ' ' + fmtDeg(p));
+      var pos = pt(R.pl, p.lon);
+      var color = PLANET_META[name].c;
+      var dark = shadeForPrint(color);
+      plHTML += '<circle cx="' + pos.x + '" cy="' + pos.y + '" r="11" fill="#FFFFFF" stroke="' + dark + '" stroke-width="1.2"/>' +
+        txt(pos.x, pos.y, 11, dark, AstroCore.PLANET_SYMBOLS[name]);
     });
-    lines.push('Асцендент: ' + chart.asc.sign + ' ' + fmtDeg(chart.asc));
-    lines.push('MC: ' + chart.mc.sign + ' ' + fmtDeg(chart.mc));
 
-    function esc(s) { return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); }
+    var ascPt = pt(R.ho + 11, chart.asc.longitude), mcPt = pt(R.ho + 11, chart.mc.longitude);
 
-    var ics = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//АстроКомпас//Натална карта//BG',
-      'BEGIN:VEVENT',
-      'UID:' + dt + '-astrokompas@local',
-      'DTSTAMP:' + stamp,
-      'DTSTART:' + dt,
-      'SUMMARY:' + esc('Натална карта — ' + cityName),
-      'DESCRIPTION:' + esc(lines.join('\n')),
-      'END:VEVENT', 'END:VCALENDAR'
-    ].join('\r\n');
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R.zo + 14) + '" fill="#FFFFFF"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + (R.zo + 13) + '" fill="none" stroke="' + GRID + '" stroke-width="0.6"/>' +
+      zHTML +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + R.zi + '" fill="none" stroke="' + GRID + '" stroke-width="0.6"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + R.ho + '" fill="none" stroke="' + GRID + '" stroke-width="0.6"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="' + R.as + '" fill="#FBF9F4" stroke="' + GOLD + '" stroke-width="0.9"/>' +
+      houseHTML + aspHTML + plHTML +
+      txt(cx, cy, 20, GOLD, '✦') +
+      txt(ascPt.x, ascPt.y, 9, GOLD, 'ASC', 'bold') +
+      txt(mcPt.x, mcPt.y, 9, GOLD, 'MC', 'bold') +
+      '</svg>';
+  }
 
-    var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'natalna-karta.ics';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
+  // Затъмнява ярък цвят, за да се чете върху бял фон (за печат)
+  function shadeForPrint(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return '#333333';
+    var n = parseInt(m[1], 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    var f = 0.62; // към по-тъмно
+    r = Math.round(r * f); g = Math.round(g * f); b = Math.round(b * f);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  function buildPDF(chart) {
+    if (!window.jspdf || !window.jspdf.jsPDF) { alert('PDF модулът не е зареден.'); return; }
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    doc.setFont('AstroSans', 'normal');
+
+    var PW = 210, PH = 297, M = 14;
+    var GOLD = [184, 134, 11], INK = [42, 36, 64], MUTED = [120, 112, 140], LINE = [222, 216, 228];
+    var o = chart.opts;
+
+    // ── Заглавие ──
+    doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+    doc.setFont('AstroSans', 'bold');
+    doc.setFontSize(24);
+    doc.text('Астро Компас', PW / 2, 22, { align: 'center' });
+
+    // ── Данни за раждане ──
+    var months = ['януари','февруари','март','април','май','юни','юли','август','септември','октомври','ноември','декември'];
+    var info = [];
+    if (o.name) info.push(o.name);
+    info.push(o.day + ' ' + months[o.month - 1] + ' ' + o.year);
+    info.push(pad2(o.hour) + ':' + pad2(o.minute) + ' ч.');
+    if (o.placeName) info.push(o.placeName);
+    doc.setFont('AstroSans', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(INK[0], INK[1], INK[2]);
+    doc.text(info.join('  ·  '), PW / 2, 30, { align: 'center' });
+
+    doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]);
+    doc.setLineWidth(0.4);
+    doc.line(M + 40, 34, PW - M - 40, 34);
+
+    // ── Колело (векторно чрез svg2pdf) ──
+    var wheelSize = 92; // mm
+    var wheelX = (PW - wheelSize) / 2, wheelY = 38;
+    var holder = document.createElement('div');
+    holder.style.position = 'fixed'; holder.style.left = '-9999px'; holder.style.top = '0';
+    holder.innerHTML = buildPrintWheelSVG(chart);
+    document.body.appendChild(holder);
+    var svgEl = holder.querySelector('svg');
+
+    return doc.svg(svgEl, { x: wheelX, y: wheelY, width: wheelSize, height: wheelSize })
+      .then(function () {
+        holder.remove();
+        var y = wheelY + wheelSize + 8;
+
+        // ── Голямата тройка ──
+        var big3 = [
+          { l: '☉ Слънце', p: chart.planets.sun },
+          { l: '☽ Луна', p: chart.planets.moon },
+          { l: 'AC Асцендент', p: chart.asc }
+        ];
+        var bw = (PW - 2 * M - 2 * 6) / 3, bh = 20;
+        big3.forEach(function (b, i) {
+          var x = M + i * (bw + 6);
+          doc.setFillColor(251, 249, 244);
+          doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(x, y, bw, bh, 2, 2, 'FD');
+          doc.setFontSize(8);
+          doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+          doc.setFont('AstroSans', 'normal');
+          doc.text(b.l, x + bw / 2, y + 6, { align: 'center' });
+          doc.setFontSize(12);
+          doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+          doc.setFont('AstroSans', 'bold');
+          doc.text(b.p.sign, x + bw / 2, y + 12.5, { align: 'center' });
+          doc.setFontSize(9);
+          doc.setTextColor(INK[0], INK[1], INK[2]);
+          doc.setFont('AstroSans', 'normal');
+          doc.text(fmtDeg(b.p), x + bw / 2, y + 17.5, { align: 'center' });
+        });
+        y += bh + 8;
+
+        // ── Таблица с позиции ──
+        doc.setFont('AstroSans', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+        doc.text('Планети и позиции', M, y);
+        y += 4;
+
+        var cols = [
+          { t: 'Планета', x: M + 2, w: 60 },
+          { t: 'Знак', x: M + 62, w: 55 },
+          { t: 'Градус', x: M + 117, w: 35 },
+          { t: 'Дом', x: M + 152, w: 28 }
+        ];
+        doc.setFontSize(7.5);
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        doc.setFont('AstroSans', 'normal');
+        cols.forEach(function (c) { doc.text(c.t.toUpperCase(), c.x, y); });
+        y += 1.5;
+        doc.setDrawColor(LINE[0], LINE[1], LINE[2]);
+        doc.setLineWidth(0.2);
+        doc.line(M, y, PW - M, y);
+        y += 4;
+
+        var rows = [];
+        chart.order.forEach(function (name) {
+          var p = chart.planets[name];
+          var house = AstroCore.houseOfLongitude(p.lon, chart.houses);
+          var retro = AstroCore.isRetrograde(name, chart.T);
+          rows.push([AstroCore.PLANET_SYMBOLS[name] + '  ' + p.nameBg + (retro ? '  ℞' : ''), p.symbol + '  ' + p.sign, fmtDeg(p), 'Дом ' + ROMAN[house]]);
+        });
+        rows.push(['AC  Асцендент', chart.asc.symbol + '  ' + chart.asc.sign, fmtDeg(chart.asc), 'Дом I']);
+        rows.push(['MC  Средно небе', chart.mc.symbol + '  ' + chart.mc.sign, fmtDeg(chart.mc), 'Дом X']);
+
+        doc.setFontSize(9.5);
+        rows.forEach(function (r, i) {
+          if (i % 2 === 1) {
+            doc.setFillColor(248, 246, 251);
+            doc.rect(M, y - 3.4, PW - 2 * M, 6.4, 'F');
+          }
+          doc.setTextColor(INK[0], INK[1], INK[2]);
+          doc.setFont('AstroSans', 'normal');
+          doc.text(r[0], cols[0].x, y);
+          doc.text(r[1], cols[1].x, y);
+          doc.text(r[2], cols[2].x, y);
+          doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+          doc.text(r[3], cols[3].x, y);
+          y += 6.4;
+        });
+
+        // ── Долен ред ──
+        doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]);
+        doc.setLineWidth(0.3);
+        doc.line(M, PH - 16, PW - M, PH - 16);
+        doc.setFontSize(8);
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        doc.setFont('AstroSans', 'normal');
+        doc.text('Изчислено по VSOP87 / Placidus', M, PH - 11);
+        doc.text('astrology-compass.com', PW - M, PH - 11, { align: 'right' });
+
+        // ── Име на файла ──
+        var namePart = o.name ? (slugify(o.name) || '') : '';
+        var datePart = o.year + '-' + pad2(o.month) + '-' + pad2(o.day);
+        var fname = 'natalna-karta' + (namePart ? '-' + namePart : '') + '-' + datePart + '.pdf';
+        doc.save(fname);
+      })
+      .catch(function (err) {
+        holder.remove();
+        console.error('PDF грешка:', err);
+        alert('Възникна грешка при създаването на PDF: ' + err.message);
+      });
   }
 
   /* ───────────────────────── M3 дата/час пикери ───────────────────────── */
@@ -674,7 +882,9 @@
           year: selectedBirthDate.getFullYear(), month: selectedBirthDate.getMonth() + 1, day: selectedBirthDate.getDate(),
           hour: time.h, minute: time.m, second: 0,
           utcOffset: guessBulgariaOffset(selectedBirthDate.getMonth() + 1),
-          lat: city.lat, lon: city.lon
+          lat: city.lat, lon: city.lon,
+          name: ($('birth-name').value || '').trim(),
+          placeName: city.name
         };
         var chart = AstroCore.computeChart(opts);
         chart.opts = opts;
@@ -689,9 +899,17 @@
       }, 500);
     });
 
-    $('download-ics-btn').addEventListener('click', function () {
+    $('download-pdf-btn').addEventListener('click', function () {
       if (!lastChart) return;
-      buildICS(lastChart, resolveCity().name);
+      var btn = $('download-pdf-btn'), label = $('download-pdf-label');
+      var prev = label.textContent;
+      btn.disabled = true;
+      label.textContent = 'Създава се PDF…';
+      Promise.resolve(buildPDF(lastChart)).then(function () {
+        btn.disabled = false; label.textContent = prev;
+      }, function () {
+        btn.disabled = false; label.textContent = prev;
+      });
     });
   }
 
