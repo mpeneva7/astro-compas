@@ -1,0 +1,412 @@
+/* Астро Компас — общи стилове */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-panel: #12172a;
+  --bg-panel-2: #171e38;
+  --border: #2a3155;
+  --gold: #d4af37;
+  --gold-light: #f1d78c;
+  --text: #e9e6f2;
+  --text-dim: #a3a8c3;
+  --danger: #e0674f;
+  --success: #6fbf8b;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #131a33 0%, var(--bg-deep) 55%, #050710 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Звезден фон */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 60% 12%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 85% 55%, #fff, transparent),
+    radial-gradient(1px 1px at 10% 70%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 45% 85%, #fff, transparent),
+    radial-gradient(1px 1px at 75% 25%, #fff, transparent),
+    radial-gradient(1px 1px at 95% 90%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 30% 60%, #fff, transparent);
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  opacity: 0.5;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--gold-light);
+  margin: 0 0 0.5em;
+  letter-spacing: 0.01em;
+}
+
+a { color: var(--gold); }
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Навигация */
+.site-header {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10, 14, 26, 0.6);
+  backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.brand .glyph {
+  font-size: 1.6rem;
+  color: var(--gold);
+}
+
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.site-nav {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.15s ease;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+  color: var(--gold-light);
+}
+
+main { padding: 2.5rem 0 4rem; }
+
+.hero {
+  text-align: center;
+  padding: 3rem 0 2rem;
+}
+
+.hero .glyph-big {
+  font-size: 3rem;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  margin-bottom: 0.4em;
+}
+
+.hero p.lead {
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  max-width: 42rem;
+  margin: 0 auto 2rem;
+}
+
+.btn-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: #1a1408;
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 26px rgba(212, 175, 55, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--gold-light);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+/* Карти / панели */
+.card {
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+}
+
+.card h2, .card h3 { margin-top: 0; }
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+
+.feature {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+
+.feature .glyph {
+  font-size: 2rem;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.feature h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.4em;
+}
+
+.feature p {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+/* Форми */
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+input, select {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0d1226;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-field { margin-bottom: 0.5rem; }
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.hint {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-top: 0.4rem;
+}
+
+/* Таблици */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  color: var(--gold-light);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tr:last-child td { border-bottom: none; }
+
+.table-wrap { overflow-x: auto; }
+
+.sym { color: var(--gold); font-size: 1.1rem; }
+
+.pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.pill.retro {
+  background: rgba(224, 103, 79, 0.15);
+  color: var(--danger);
+}
+
+/* Резултат панел на верификация */
+.verify-ok { color: var(--success); }
+.verify-warn { color: var(--danger); }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 800px) {
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+}
+
+/* Зодиакален избор за дневния хороскоп */
+.sign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.6rem;
+  margin: 1.25rem 0;
+}
+
+.sign-btn {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem 0.4rem;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text);
+  transition: border-color 0.15s ease, background 0.15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.sign-btn .glyph { display: block; font-size: 1.4rem; color: var(--gold); margin-bottom: 0.25rem; }
+.sign-btn span.label { font-size: 0.78rem; }
+
+.sign-btn:hover { border-color: var(--gold); }
+.sign-btn.active {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.14);
+}
+
+.sign-detail {
+  display: none;
+}
+.sign-detail.active { display: block; }
+
+.moon-phase-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.moon-phase-box .glyph-big {
+  font-size: 2.6rem;
+  color: var(--gold-light);
+}
+
+footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--border);
+}
+
+footer a { color: var(--text-dim); }
+
+.loading { color: var(--text-dim); font-style: italic; }
+
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0;
+}
+
+@media (max-width: 600px) {
+  .card { padding: 1.1rem; }
+  .hero { padding: 2rem 0 1rem; }
+}
