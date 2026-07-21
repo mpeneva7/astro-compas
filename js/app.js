@@ -90,33 +90,6 @@
   };
   var BG_CITIES = Object.keys(CITY_COORDS);
 
-  var ARTICLES = [
-    { id: 1, title: 'Ретрограден Меркурий: Какво означава за вас', cat: 'Ретрограден Меркурий', readTime: '5 мин',
-      excerpt: 'Когато Меркурий върви назад, комуникацията и технологиите изпитват смущения. Научете как да навигирате тези периоди с изящество.',
-      more: 'Технически, Меркурий не се движи назад — това е оптична илюзия, причинена от разликата в орбиталните скорости на Земята и Меркурий. Тези периоди се случват около 3–4 пъти годишно и траят около три седмици.',
-      grad: 'linear-gradient(135deg, #1a1040 0%, #2d1b5e 100%)', kw: ['меркурий', 'ретрограден', 'комуникация'] },
-    { id: 2, title: 'Пълнолунието в Козирог: Трансформация на амбициите', cat: 'Луна', readTime: '4 мин',
-      excerpt: 'Предстоящото пълнолуние активира сектора на кариерата. Разберете кои знаци ще усетят най-силно тази лунна енергия.',
-      more: 'Пълнолунията винаги активират оста на знака и неговия противоположен знак — в случая Козирог и Рак, засягайки баланса между кариера и дом.',
-      grad: 'linear-gradient(135deg, #0d1b3e 0%, #1a3464 100%)', kw: ['луна', 'пълнолуние', 'козирог'] },
-    { id: 3, title: 'Юпитер в Близнаци: Година на разширението', cat: 'Планети', readTime: '6 мин',
-      excerpt: 'Голямата планета на щастието преминава през знака на комуникацията, носейки потенциал за учене и пътувания.',
-      more: 'Юпитер обикаля Слънцето за около 12 години, като прекарва приблизително по една година във всеки зодиакален знак.',
-      grad: 'linear-gradient(135deg, #3a2000 0%, #6b3a00 100%)', kw: ['юпитер', 'близнаци', 'планети'] },
-    { id: 4, title: 'Вашият Асцендент: Маската, която носим', cat: 'Зодии', readTime: '7 мин',
-      excerpt: 'Асцендентът определя как светът ни вижда. Разберете дълбокото влияние на изгряващия знак върху личността.',
-      more: 'За разлика от слънчевия знак, асцендентът се променя на всеки около два часа, затова точният час на раждане е ключов за неговото изчисляване.',
-      grad: 'linear-gradient(135deg, #2d1030 0%, #5a1f5e 100%)', kw: ['асцендент', 'натална карта', 'зодии'] },
-    { id: 5, title: 'Луната в Скорпион: Дълбока емоционална трансформация', cat: 'Луна', readTime: '4 мин',
-      excerpt: 'Когато Луната транзитира Скорпион, емоциите се задълбочават и интензивността нараства значително.',
-      more: 'Луната преминава през целия зодиак за около 27.3 дни, задържайки се средно по 2–3 дни във всеки знак.',
-      grad: 'linear-gradient(135deg, #3a0808 0%, #6b1515 100%)', kw: ['луна', 'скорпион', 'емоции', 'трансформация'] },
-    { id: 6, title: 'Сатурн: Учителят на Зодиака', cat: 'Планети', readTime: '8 мин',
-      excerpt: 'Сатурн, планетата на дисциплината и кармата, ни учи чрез предизвикателства. Как неговата позиция формира характера ни?',
-      more: 'Сатурн обикаля Слънцето за около 29.5 години — период, известен като „завръщането на Сатурн", което много астролози свързват със значими житейски преходи около 29-годишна възраст.',
-      grad: 'linear-gradient(135deg, #1a1a2e 0%, #2e2e4a 100%)', kw: ['сатурн', 'планети', 'карма', 'дисциплина'] }
-  ];
-
   /* ───────────────────────── Помощни ───────────────────────── */
 
   function guessBulgariaOffset(month) { return (month >= 4 && month <= 10) ? 3 : 2; }
@@ -759,96 +732,6 @@
     });
   }
 
-  /* ───────────────────────── Верификация ───────────────────────── */
-
-  var REFERENCE = {
-    year: 1990, month: 6, day: 7, hour: 2, minute: 20, utcOffset: 3, lat: 42.6977, lon: 23.3219,
-    expected: {
-      sun: ['Близнаци', 15, 59], moon: ['Скорпион', 29, 40], mercury: ['Телец', 22, 46], venus: ['Телец', 8, 47],
-      mars: ['Овен', 4, 53], jupiter: ['Рак', 14, 4], saturn: ['Козирог', 24, 29], uranus: ['Козирог', 8, 29],
-      neptune: ['Козирог', 13, 56], pluto: ['Скорпион', 15, 36]
-    },
-    asc: ['Риби', 27, 9], mc: ['Стрелец', 28, 34]
-  };
-
-  function diffFromExpected(actualLon, exp) {
-    var expLon = AstroCore.SIGNS.indexOf(exp[0]) * 30 + exp[1] + exp[2] / 60;
-    return AstroCore.angleDiff(actualLon, expLon);
-  }
-
-  function initVerify() {
-    $('verify-btn').addEventListener('click', function () {
-      var chart = AstroCore.computeChart(REFERENCE);
-      var rows = [];
-      var allOk = true;
-
-      Object.keys(REFERENCE.expected).forEach(function (name) {
-        var exp = REFERENCE.expected[name];
-        var p = chart.planets[name];
-        var diff = diffFromExpected(p.lon, exp);
-        var ok = diff <= 1.0;
-        if (!ok) allOk = false;
-        rows.push({ label: p.nameBg, expected: exp[0] + ' ' + exp[1] + '°' + exp[2], got: p.sign + ' ' + p.degree + '°' + p.minute, diff: diff, ok: ok });
-      });
-      var ascDiff = diffFromExpected(chart.asc.longitude, REFERENCE.asc);
-      var mcDiff = diffFromExpected(chart.mc.longitude, REFERENCE.mc);
-      if (ascDiff > 1) allOk = false;
-      if (mcDiff > 1) allOk = false;
-      rows.push({ label: 'Асцендент', expected: REFERENCE.asc.join(' ').replace(' ', ' ') , got: chart.asc.sign + ' ' + chart.asc.degree + '°' + chart.asc.minute, diff: ascDiff, ok: ascDiff <= 1 });
-      rows.push({ label: 'MC', expected: REFERENCE.mc[0] + ' ' + REFERENCE.mc[1] + '°' + REFERENCE.mc[2], got: chart.mc.sign + ' ' + chart.mc.degree + '°' + chart.mc.minute, diff: mcDiff, ok: mcDiff <= 1 });
-
-      $('verify-tbody').innerHTML = rows.map(function (r) {
-        return '<tr><td>' + r.label + '</td><td>' + r.expected + '</td><td>' + r.got + '</td>' +
-          '<td class="' + (r.ok ? 'verify-ok' : 'verify-warn') + '">' + r.diff.toFixed(2) + '° ' + (r.ok ? '✓' : '✗') + '</td></tr>';
-      }).join('');
-      $('verify-summary').textContent = allOk ? '✓ Всички стойности са в рамките на толеранс от 1°.' : '✗ Има стойности извън толеранса.';
-      $('verify-summary').className = 'verify-summary ' + (allOk ? 'verify-ok' : 'verify-warn');
-      $('verify-result').style.display = '';
-    });
-  }
-
-  /* ───────────────────────── Статии ───────────────────────── */
-
-  function renderArticles(filterQ) {
-    var q = (filterQ || '').trim().toLowerCase();
-    var list = q.length > 1
-      ? ARTICLES.filter(function (a) {
-          return a.title.toLowerCase().indexOf(q) !== -1 ||
-            a.kw.some(function (k) { return k.indexOf(q) !== -1; }) ||
-            a.cat.toLowerCase().indexOf(q) !== -1;
-        })
-      : ARTICLES;
-
-    var grid = $('articles-grid');
-    grid.innerHTML = list.map(function (a) {
-      return '<div class="article-card">' +
-        '<div class="article-cover" style="background:' + a.grad + ';"><span class="article-cat">' + a.cat + '</span></div>' +
-        '<div class="article-body">' +
-        '<h3>' + a.title + '</h3>' +
-        '<p class="article-excerpt">' + a.excerpt + '</p>' +
-        '<p class="article-more" id="more-' + a.id + '">' + a.more + '</p>' +
-        '<div class="article-footer-row"><span class="article-readtime">' + a.readTime + ' четене</span>' +
-        '<button class="article-readmore" data-id="' + a.id + '">Прочети →</button></div>' +
-        '</div></div>';
-    }).join('');
-
-    grid.querySelectorAll('.article-readmore').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var more = $('more-' + btn.dataset.id);
-        var showing = more.classList.toggle('show');
-        btn.textContent = showing ? 'Скрий ↑' : 'Прочети →';
-      });
-    });
-
-    $('no-articles').style.display = list.length ? 'none' : '';
-    if (!list.length) $('no-articles').textContent = 'Няма намерени статии за „' + filterQ + '"';
-  }
-
-  function initArticles() {
-    renderArticles('');
-    $('article-search-input').addEventListener('input', function (e) { renderArticles(e.target.value); });
-  }
-
   /* ───────────────────────── Инициализация ───────────────────────── */
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -857,7 +740,5 @@
     renderMoon(nowChart);
     renderHoroscope(nowChart);
     initNatalForm();
-    initVerify();
-    initArticles();
   });
 })();
