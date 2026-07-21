@@ -161,7 +161,14 @@
 
   function shortenText(text) {
     var sentences = text.split(/(?<=[.!?])\s+/);
-    return sentences[0] || text;
+    var result = sentences[0] || text;
+    if (sentences.length > 1) {
+      result += ' ' + sentences[1];
+    }
+    if (result.length > 200) {
+      return result.substring(0, 197) + '…';
+    }
+    return result;
   }
 
   function signCardHTML(chart, i) {

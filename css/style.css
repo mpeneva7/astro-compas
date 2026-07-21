@@ -292,7 +292,7 @@ section { padding: 96px 20px; }
 }
 .sign-card.open { background: var(--card-2); grid-column: span 1; box-shadow: 0 8px 36px rgba(0,0,0,0.25); }
 .sign-card:hover:not(.open) { border-color: rgba(182,157,232,0.35); }
-.sign-card-inner { padding: 16px; }
+.sign-card-inner { position: relative; padding: 16px; }
 .sign-glyph-circle {
   width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-size: 1.15rem; margin-bottom: 8px;
@@ -300,7 +300,7 @@ section { padding: 96px 20px; }
 .sign-card h3 { font-size: 0.85rem; font-weight: 600; color: var(--foreground); }
 .sign-dates { font-size: 0.75rem; margin: 2px 0 12px; color: #ADA0BB; }
 .sign-day-text { font-size: 0.9rem; line-height: 1.6; color: var(--muted-foreground); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.sign-expand-row { display: flex; justify-content: flex-end; margin-top: 12px; }
+.sign-expand-row { position: absolute; bottom: 12px; right: 12px; display: flex; justify-content: flex-end; align-items: center; }
 .sign-expand-row svg { color: var(--outline); transition: transform 0.3s ease; }
 .sign-card.open .sign-expand-row svg { transform: rotate(180deg); }
 .sign-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 12px; }
@@ -311,8 +311,14 @@ section { padding: 96px 20px; }
 .sign-tag.muted { background: rgba(74,63,84,0.35); color: var(--muted-foreground); }
 
 @media (min-width: 540px) { .horoscope-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 840px) { .horoscope-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1120px) { .horoscope-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 840px) {
+  .horoscope-grid { grid-template-columns: repeat(3, 1fr); }
+  .sign-card.open { grid-column: 1 / -1; }
+}
+@media (min-width: 1120px) {
+  .horoscope-grid { grid-template-columns: repeat(4, 1fr); }
+  .sign-card.open { grid-column: 1 / -1; }
+}
 
 /* ── Natal form ───────────────────────────────────────────────────── */
 .natal-form-card { padding: 32px; margin-bottom: 40px; }
