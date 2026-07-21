@@ -159,6 +159,11 @@
 
   var openSignIndex = null;
 
+  function shortenText(text) {
+    var sentences = text.split(/(?<=[.!?])\s+/);
+    return sentences[0] || text;
+  }
+
   function signCardHTML(chart, i) {
     var sign = SIGN_INFO[i];
     var reading = DailyHoroscope.buildReading(chart, i, chart.now);
@@ -168,7 +173,7 @@
       '<div class="sign-glyph-circle" style="background:' + sign.c + '18; border:1px solid ' + sign.c + '40; color:' + sign.c + ';">' + sign.g + '</div>' +
       '<h3>' + sign.name + '</h3>' +
       '<p class="sign-dates">' + sign.dates + '</p>' +
-      '<p class="sign-day-text">' + reading.day + '</p>';
+      '<p class="sign-day-text">' + shortenText(reading.day) + '</p>';
     if (isOpen) {
       html += '<div class="sign-detail">' +
         '<div class="sign-detail-item"><p class="label" style="color:#EF9A9A;">♥ Любов</p><p>' + reading.love + '</p></div>' +
