@@ -819,6 +819,7 @@
       hBox.classList.toggle('err', hourErr);
       hSub.textContent = hourErr ? '0–23' : 'Час';
       refreshOk();
+      if (raw.length === 2 && !hourErr) { mInput.focus(); }
     });
     mInput.addEventListener('input', function () {
       var raw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
