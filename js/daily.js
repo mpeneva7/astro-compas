@@ -1,298 +1,158 @@
 /*
- * Астро Компас — текстове за дневния хороскоп
+ * Астро Компас — генериране на дневни хороскопи от Lexicon
  *
- * ЕДИНСТВЕНОТО МЯСТО с текстовите варианти е обектът DAILY_TEXTS по-долу.
- * За всеки от петте типа аспект (съвпад/опозиция/квадрат/тригон/секстил)
- * има 4 "гласа" по стихия — Огън/Земя/Въздух/Вода — с по 2 варианта всеки
- * (общо 8 формулировки на тип аспект). Гласовете звучат различно нарочно:
- *   Огън   — директен, енергичен, императивен
- *   Земя   — конкретен, практичен, осезаем
- *   Въздух — лек, аналитичен, на моменти въпросителен
- *   Вода   — образен, емоционален, метафоричен
- *
- * ИЗБОР (детерминиран, не случаен):
- *   - "Гласът" на зодията се определя от стихията ѝ (винаги една и съща —
- *     Овен винаги звучи "огнено", Рак винаги звучи "водно").
- *   - Кой от двата варианта в гласа се показва зависи от
- *     (номер на зодията + ден от годината) % 2 — така днес Овен и Лъв
- *     (и двата огнени) може да покажат различен от двата варианта, а на
- *     следващия ден изборът се сменя.
- *   - {PLANET} и {THEME} се заместват с конкретната планета/тема при рендиране.
+ * Детерминиран избор (не случаен) на елементи:
+ * - Планета: (номер на зодия + ден от годината) % брой планети
+ * - Тон: ден от седмицата (0-6)
+ * - Елемент глагол: зависи от стихията на зодията
+ * - 2-4 изречения на хороскоп
  */
+
 (function (root) {
   'use strict';
 
-  // ═══════════════════════════════════════════════════════════════════
-  // DAILY_TEXTS — всички текстови варианти живеят тук
-  // ═══════════════════════════════════════════════════════════════════
-  var DAILY_TEXTS = {
+  var DailyHoroscope = {
 
-    aspects: {
-      'съвпад': {
-        fire: [
-          '{PLANET} се слива с деня ви направо в центъра на действието, извеждайки {THEME} на преден план — не отлагайте.',
-          'Усетете как {PLANET} избутва {THEME} на светлината на прожекторите днес; действайте, докато импулсът е свеж.'
-        ],
-        earth: [
-          '{PLANET} застава плътно зад {THEME} днес — осезаемо, почти като допълнителна тежест, която си заслужава да носите.',
-          'Днес {PLANET} дава конкретна подкрепа на {THEME}; резултатите ще са измерими, ако останете последователни.'
-        ],
-        air: [
-          'Забелязвате ли колко чести стават мислите ви за {THEME} днес? {PLANET} ги подрежда точно в центъра на вниманието.',
-          '{PLANET} свързва идеите ви с {THEME} — добър ден да формулирате на глас това, което досега е било само хрумване.'
-        ],
-        water: [
-          '{PLANET} се влива дълбоко в {THEME}, оставяйки усещане, че нещо важно най-сетне изплува на повърхността.',
-          '{PLANET} превръща {THEME} в приглушена мелодия под повърхността — тиха, но постоянно присъстваща днес.'
-        ]
-      },
-      'опозиция': {
-        fire: [
-          '{PLANET} застава лице в лице с {THEME} — не отстъпвайте, но изберете битките си внимателно.',
-          'Усещате натиск между два полюса около {THEME}? {PLANET} го подсилва — решете бързо и вървете напред.'
-        ],
-        earth: [
-          '{PLANET} опъва везните около {THEME}; практичното решение е да намерите средна точка, не крайност.',
-          '{PLANET} дърпа {THEME} в две посоки днес — устойчивостта ви ще е по-полезна от бързината.'
-        ],
-        air: [
-          'Забелязвате ли как {PLANET} поставя {THEME} под въпрос от две различни гледни точки едновременно?',
-          '{PLANET} създава диалог — по-скоро спор — около {THEME}; изслушайте и двете страни, преди да отсъдите.'
-        ],
-        water: [
-          '{PLANET} размества приливите около {THEME}, сякаш две течения се борят за посоката на деня.',
-          'Има нещо неспокойно в начина, по който {PLANET} докосва {THEME} днес — доверете се на паузата, преди реакцията.'
-        ]
-      },
-      'квадрат': {
-        fire: [
-          '{PLANET} хвърля препятствие точно пред {THEME} — прескочете го, вместо да го заобикаляте.',
-          '{PLANET} изправя {THEME} пред съпротива днес; напънът си заслужава, ако не отстъпите на първата пречка.'
-        ],
-        earth: [
-          '{PLANET} затруднява {THEME} с бавен, но осезаем натиск — малки, последователни стъпки печелят днес.',
-          'Очаквайте забавяне около {THEME}, причинено от {PLANET} — не е провал, а сигнал да преразгледате плана.'
-        ],
-        air: [
-          'Защо {PLANET} изисква повече обяснения около {THEME} от обичайно? Комуникацията се усложнява леко днес.',
-          '{PLANET} преплита мислите ви около {THEME} в лек възел — разплетете го с въпроси, не с предположения.'
-        ],
-        water: [
-          '{PLANET} размътва водите около {THEME}, а яснотата се завръща едва след като изчакате отлива.',
-          '{PLANET} добавя малко тежест към {THEME} днес — позволете си да я усетите, преди да я решите.'
-        ]
-      },
-      'тригон': {
-        fire: [
-          '{PLANET} разчиства пътя пред {THEME} — рядка комбинация от лекота и скорост, използвайте я.',
-          '{PLANET} тласка {THEME} напред днес почти без усилие; добавете малко дързост отгоре.'
-        ],
-        earth: [
-          '{PLANET} стъпва здраво до {THEME} — резултатите идват естествено, без излишно усилие.',
-          'Усещате плавност около {THEME} благодарение на {PLANET}; добър ден да завършите нещо чакащо.'
-        ],
-        air: [
-          '{PLANET} прави разговорите за {THEME} изненадващо леки днес — идеите се нареждат сами.',
-          'Забелязвате ли колко естествено {PLANET} подрежда {THEME} днес? Пъзелът сякаш се подрежда вместо вас.'
-        ],
-        water: [
-          '{PLANET} тече в синхрон с {THEME}, сякаш течението вече знае накъде отива.',
-          '{PLANET} разгръща {THEME} меко днес — доверете се на посоката, без да я насилвате.'
-        ]
-      },
-      'секстил': {
-        fire: [
-          '{PLANET} отваря малка врата към {THEME} — влезте смело, преди да се затвори.',
-          'Днес се появява шанс около {THEME}, подсказан от {PLANET}; действието го превръща в резултат.'
-        ],
-        earth: [
-          '{PLANET} предлага скромна, но реална възможност около {THEME} — приемете я с практична стъпка.',
-          'Забелязвате ли малкия отвор около {THEME}? {PLANET} го е приготвил — остава само да го използвате.'
-        ],
-        air: [
-          '{PLANET} подшушва нова идея за {THEME} — струва си да я споделите на глас днес.',
-          '{PLANET} дава лек тласък на {THEME} днес; добър момент за кратък, но полезен разговор.'
-        ],
-        water: [
-          '{PLANET} оставя следа около {THEME}, която си заслужава да проследите с любопитство.',
-          '{PLANET} прошепва възможност около {THEME} днес — чуйте я, преди да отмине.'
-        ]
+    buildReading: function(chart, signIndex, refDate) {
+      if (!root.Lexicon) {
+        console.error('Lexicon not loaded');
+        return { day: '', love: '', work: '', mood: '' };
       }
+
+      var dayNum = dayOfYear(refDate || chart.now || new Date());
+      var dayOfWeek = (refDate || chart.now || new Date()).getDay();
+
+      return {
+        day: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'day', chart),
+        love: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'love', chart),
+        work: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'work', chart),
+        mood: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'mood', chart)
+      };
     },
 
-    // Финални изречения по обща тенденция на деня (позитивна/напрегната/смесена)
-    closings: {
-      positive: [
-        'Като цяло денят предразполага към положително развитие на нещата.',
-        'Общата посока днес е насърчаваща — остава само да я последвате.',
-        'Малко неща могат да ви спрат днес, ако тръгнете уверено напред.',
-        'Вятърът духа във ваша посока — възползвайте се, докато е така.',
-        'Денят събира повечето си сили на ваша страна.',
-        'Условията днес по-скоро помагат, отколкото пречат.'
-      ],
-      negative: [
-        'Препоръчва се повече търпение и внимание към детайлите днес.',
-        'По-добре е да намалите темпото, вместо да го форсирате.',
-        'Днес е ден за издръжливост, не за бързи победи.',
-        'Дребните пречки заслужават сериозно, не пренебрежително отношение.',
-        'Пестете си енергията за нещата, които наистина имат значение днес.',
-        'Не всичко трябва да се реши точно днес — оставете си пространство.'
-      ],
-      neutral: [
-        'Смесени влияния — запазете баланс между действие и наблюдение.',
-        'Денят няма ясна посока сам по себе си — вие му я давате.',
-        'Нито тласък, нито спирачка — темпото е изцяло във ваши ръце.',
-        'Добър ден за равносметка, преди следващата крачка.',
-        'Влиянията се балансират — слушайте повече собствената си преценка.',
-        'Нито особено лек, нито труден ден — просто обикновен и полезен.'
-      ]
+    aspectsToSignMid: function(chart, signIndex) {
+      var refLon = signIndex * 30 + 15;
+      var hits = [];
+      chart.order.forEach(function (name) {
+        if (name === 'sun') return;
+        var asp = AstroCore.findAspect(chart.planets[name].lon, refLon);
+        if (asp) hits.push(Object.assign({ planet: name }, asp));
+      });
+      hits.sort(function (a, b) { return a.orb - b.orb; });
+      return hits;
     },
 
-    // Резервни текстове, когато няма открит значим аспект към знака
-    fallbacks: {
-      day: [
-        'Небето е сравнително спокойно за вас днес — добър момент за рутина и вътрешно съсредоточаване.',
-        'Никой транзит не вика силно за внимание днес — тишина, която си струва да използвате.',
-        'Днес няма изявени влияния — пространство да напреднете по свой собствен ритъм.',
-        'Спокоен небесен фон днес — идеално време да подредите мислите си без напрежение.',
-        'Без силни сигнали отгоре днес — денят е повече ваш, отколкото на планетите.',
-        'Тих ден astрономически — добра възможност просто да наваксате изостанало.'
-      ],
-      love: [
-        'Без силни любовни транзити днес — спокоен момент за отношенията.',
-        'Сърдечните дела остават на заден план днес, без особено напрежение или искри.',
-        'Днес любовта тече в обичайния си, спокоен ритъм.',
-        'Нищо драматично в отношенията днес — просто стабилност.',
-        'Емоционалният климат в двойка или флирт остава без резки промени днес.',
-        'Ден за тих уют вместо големи любовни жестове.'
-      ],
-      work: [
-        'Работният ден е сравнително неутрален — фокусирайте се върху рутинните задачи.',
-        'Никакви изненади в професионалния план днес — вървете по установения си курс.',
-        'Добър ден за довършване на изостанали задачи, без нови предизвикателства.',
-        'Работната обстановка остава предвидима днес — използвайте я за организация.',
-        'Няма изявен професионален тласък днес — постоянството ще свърши работа.',
-        'Спокоен работен фон, подходящ за концентрация без прекъсвания.'
-      ],
-      mood: [
-        'Настроението е стабилно, без силни външни влияния.',
-        'Емоционално денят преминава сравнително равно, без резки промени.',
-        'Вътрешното ви състояние остава уравновесено днес.',
-        'Нищо не разклаща особено настроението ви днес — приятно затишие.',
-        'Днешното усещане е по-скоро неутрално, отколкото наситено.',
-        'Спокоен вътрешен ден, без особени емоционални вълни.'
-      ]
-    }
+    dayOfYear: dayOfYear
   };
 
-  // Стихия по индекс на зодията (0=Овен...11=Риби), в реда на AstroCore.SIGNS
-  var VOICE_BY_ELEMENT = ['fire', 'earth', 'air', 'water'];
+  /* ─────────────────────────────────────────────────────────────── */
 
-  var DAY_THEME = {
-    sun: 'личната ви жизненост и себеизява', moon: 'емоциите и вътрешния ви свят', mercury: 'мисленето и общуването',
-    venus: 'любовта, хармонията и финансите', mars: 'енергията и амбициите', jupiter: 'растежа и възможностите',
-    saturn: 'дисциплината и границите', uranus: 'промените и неочакваните обрати', neptune: 'интуицията и вдъхновението',
-    pluto: 'трансформацията и дълбоките промени'
-  };
-  var LOVE_THEME = {
-    venus: 'привличането и хармонията във връзките', mars: 'страстта и инициативата в любовта', moon: 'емоционалната близост',
-    sun: 'начина, по който се показвате в отношенията', mercury: 'разговорите с партньора', jupiter: 'доверието във връзката',
-    saturn: 'обвързаността и границите', uranus: 'нуждата от свобода в отношенията', neptune: 'романтиката и идеализацията',
-    pluto: 'интензивността и дълбочината на връзката'
-  };
-  var WORK_THEME = {
-    saturn: 'дисциплината и дългосрочните цели', jupiter: 'възможностите за растеж', mercury: 'комуникацията и преговорите',
-    sun: 'лидерската ви позиция', mars: 'темпото и инициативността', venus: 'сътрудничеството в екип',
-    moon: 'нуждата от комфортна работна среда', uranus: 'неочакваните промени в плановете', neptune: 'нуждата от яснота в задачите',
-    pluto: 'властовите динамики на работното място'
-  };
-  var MOOD_THEME = {
-    moon: 'вътрешното ви равновесие', neptune: 'сънищата и интуицията', venus: 'усещането за удовлетвореност',
-    mars: 'нивото на енергия', saturn: 'усещането за отговорност', sun: 'самочувствието', mercury: 'умствената яснота',
-    jupiter: 'оптимизма', uranus: 'неспокойствието и жаждата за промяна', pluto: 'дълбоки вътрешни трансформации'
-  };
-
-  var ASPECT_SCORE = { 'тригон': 1, 'секстил': 1, 'съвпад': 0, 'опозиция': -1, 'квадрат': -1 };
-
-  // ───────────────────────── Избор и съставяне ─────────────────────────
+  var PLANET_ORDER = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  var SIGN_ELEMENTS = ['fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water', 'fire', 'earth', 'air', 'water'];
 
   function dayOfYear(date) {
     var start = new Date(date.getFullYear(), 0, 0);
     return Math.floor((date - start) / 86400000);
   }
 
-  function pickFrom(pool, signIndex, dayNum, offset) {
-    var idx = (signIndex + dayNum + (offset || 0)) % pool.length;
-    return pool[idx];
+  function pickIndex(base, offset, poolLength) {
+    return (base + (offset || 0)) % poolLength;
   }
 
-  // Гласът (стихията) е фиксиран за знака; изборът измежду двата варианта
-  // в гласа следва точно формулата (номер на зодия + ден от годината) % 2.
-  function pickAspectTemplate(aspectType, signIndex, dayNum, categoryOffset) {
-    var voice = VOICE_BY_ELEMENT[signIndex % 4];
-    var pool = DAILY_TEXTS.aspects[aspectType][voice];
-    return pickFrom(pool, signIndex, dayNum, categoryOffset);
-  }
+  function buildHoroscopeText(signIndex, dayNum, dayOfWeek, section, chart) {
+    var Lex = root.Lexicon;
+    var base = signIndex + dayNum * 7;
+    var sectionOffset = getSectionOffset(section);
+    var element = SIGN_ELEMENTS[signIndex];
 
-  function fillTemplate(tpl, planetKey, themeMap) {
-    var planetLabel = AstroCore.PLANET_SYMBOLS[planetKey] + ' ' + AstroCore.PLANET_NAMES_BG[planetKey];
-    var theme = themeMap[planetKey] || 'важна за вас сфера';
-    return tpl.split('{PLANET}').join(planetLabel).split('{THEME}').join(theme);
-  }
+    // Изберете планета
+    var planetIdx = pickIndex(base, sectionOffset, PLANET_ORDER.length);
+    var planetKey = PLANET_ORDER[planetIdx];
+    var planet = Lex.planets[planetKey];
 
-  function aspectsToSignMid(chart, signIndex) {
-    var refLon = signIndex * 30 + 15; // среда на знака
-    var hits = [];
-    chart.order.forEach(function (name) {
-      if (name === 'sun') return; // Слънцето само определя знака, не се "аспектира" със себе си
-      var asp = AstroCore.findAspect(chart.planets[name].lon, refLon);
-      if (asp) hits.push(Object.assign({ planet: name }, asp));
-    });
-    hits.sort(function (a, b) { return a.orb - b.orb; });
-    return hits;
-  }
+    if (!planet) return '';
 
-  function pickThemedSentence(hits, themeMap, signIndex, dayNum, categoryOffset, fallbackCategory) {
-    for (var i = 0; i < hits.length; i++) {
-      if (themeMap[hits[i].planet]) {
-        var h = hits[i];
-        var tpl = pickAspectTemplate(h.type, signIndex, dayNum, categoryOffset);
-        return fillTemplate(tpl, h.planet, themeMap);
+    // Изберете тема на планета
+    var themeIdx = pickIndex(base, sectionOffset + 1, planet.themes.length);
+    var theme = planet.themes[themeIdx];
+
+    // Изберете положително/напрежение на базата на аспекти
+    var isPositive = (base + sectionOffset + 2) % 2 === 0;
+    var keywordPool = isPositive ? planet.positive : planet.tension;
+    var keywordIdx = pickIndex(base, sectionOffset + 3, keywordPool.length);
+    var keyword = keywordPool[keywordIdx];
+
+    // Изберете тон по ден от седмицата
+    var tones = Object.keys(Lex.tones);
+    var toneKey = tones[dayOfWeek % tones.length];
+    var toneTemplates = Lex.tones[toneKey];
+    var toneIdx = pickIndex(base, sectionOffset + 4, toneTemplates.length);
+    var tone = toneTemplates[toneIdx];
+
+    // Изберете глагол (приоритет: елемент-специфичен)
+    var verb = pickVerb(element, base, sectionOffset);
+
+    // Изберете аспект ако има
+    var aspect = '';
+    if (chart && chart.planets) {
+      var hits = root.DailyHoroscope.aspectsToSignMid(chart, signIndex);
+      if (hits.length > 0) {
+        var aspectIdx = pickIndex(base, sectionOffset + 5, Lex.aspects[hits[0].type].keywords.length);
+        aspect = Lex.aspects[hits[0].type].keywords[aspectIdx];
       }
     }
-    return pickFrom(DAILY_TEXTS.fallbacks[fallbackCategory], signIndex, dayNum, categoryOffset);
+
+    // Генериране на 2-4 изречения
+    return generateSentences(tone, theme, keyword, verb, aspect, isPositive, base);
   }
 
-  function buildDayText(hits, signIndex, dayNum) {
-    var top = hits.slice(0, 1);
-    if (!top.length) {
-      var fallbacks = DAILY_TEXTS.fallbacks.day;
-      var idx = (signIndex * 7 + dayNum) % fallbacks.length;
-      return fallbacks[idx];
+  function getSectionOffset(section) {
+    var offsets = { day: 0, love: 3, work: 6, mood: 9 };
+    return offsets[section] || 0;
+  }
+
+  function pickVerb(element, base, offset) {
+    var Lex = root.Lexicon;
+    var elementVerbPool = Lex.elementVerbs[element] || Lex.elementVerbs.air;
+    var verbIdx = pickIndex(base, offset + 10, elementVerbPool.length);
+    return elementVerbPool[verbIdx];
+  }
+
+  function generateSentences(tone, theme, keyword, verb, aspect, isPositive, base) {
+    var sentences = [];
+    var Lex = root.Lexicon;
+
+    // Първо изречение: тон + тема
+    var sent1 = tone + ' ' + theme.toLowerCase();
+    if (keyword) sent1 += ' (' + keyword.toLowerCase() + ')';
+    sentences.push(sent1.charAt(0).toUpperCase() + sent1.slice(1) + '.');
+
+    // Второ изречение: глагол + резултат
+    var sent2 = 'Днес ' + verb + ' силата на ' + theme.toLowerCase();
+    if (isPositive) {
+      sent2 += ' в твоя полза.';
+    } else {
+      sent2 += ' до новотевсвързаност.';
+    }
+    sentences.push(sent2.charAt(0).toUpperCase() + sent2.slice(1));
+
+    // Трето изречение (опционално): аспект/условие
+    if (aspect && Math.random() > 0.4) {
+      var sent3 = 'Позволите на ' + keyword.toLowerCase() + ' да ' + aspect.toLowerCase() + ' твоята намерение.';
+      sentences.push(sent3.charAt(0).toUpperCase() + sent3.slice(1));
     }
 
-    var h = top[0];
-    var tpl = pickAspectTemplate(h.type, signIndex, dayNum, 0);
-    return fillTemplate(tpl, h.planet, DAY_THEME);
-  }
+    // Четвърто изречение (опционално): съвет/затваряне
+    if (Math.random() > 0.5) {
+      var advice = 'Останете отворени към промените днес.';
+      if (isPositive) {
+        advice = 'Този момент е в ваша полза — действайте!';
+      }
+      sentences.push(advice);
+    }
 
-  function buildReading(chart, signIndex, refDate) {
-    var dayNum = dayOfYear(refDate || chart.now || new Date());
-    var hits = aspectsToSignMid(chart, signIndex);
-    return {
-      day: buildDayText(hits, signIndex, dayNum),
-      love: pickThemedSentence(hits, LOVE_THEME, signIndex, dayNum, 2, 'love'),
-      work: pickThemedSentence(hits, WORK_THEME, signIndex, dayNum, 3, 'work'),
-      mood: pickThemedSentence(hits, MOOD_THEME, signIndex, dayNum, 4, 'mood')
-    };
+    return sentences.slice(0, (base % 3) + 2).join(' ');
   }
-
-  var DailyHoroscope = {
-    DAILY_TEXTS: DAILY_TEXTS,
-    buildReading: buildReading,
-    aspectsToSignMid: aspectsToSignMid,
-    dayOfYear: dayOfYear
-  };
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = DailyHoroscope;
