@@ -132,18 +132,18 @@
     if (isPositive) {
       sent2 += ' в твоя полза.';
     } else {
-      sent2 += ' до новотевсвързаност.';
+      sent2 += ' до вътрешен баланс.';
     }
     sentences.push(sent2.charAt(0).toUpperCase() + sent2.slice(1));
 
     // Трето изречение (опционално): аспект/условие
-    if (aspect && Math.random() > 0.4) {
+    if (aspect && (base % 5) >= 2) {
       var sent3 = 'Позволите на ' + keyword.toLowerCase() + ' да ' + aspect.toLowerCase() + ' твоята намерение.';
       sentences.push(sent3.charAt(0).toUpperCase() + sent3.slice(1));
     }
 
     // Четвърто изречение (опционално): съвет/затваряне
-    if (Math.random() > 0.5) {
+    if ((base % 7) >= 3) {
       var advice = 'Останете отворени към промените днес.';
       if (isPositive) {
         advice = 'Този момент е в ваша полза — действайте!';
