@@ -209,16 +209,27 @@
       card.innerHTML = signCardHTML(chart, i);
     }
 
+    function refreshAll() { Array.prototype.forEach.call(grid.children, refreshCard); }
+
     SIGN_INFO.forEach(function (sign, i) {
       var card = document.createElement('div');
       card.className = 'sign-card';
       card.dataset.index = i;
-      card.addEventListener('click', function () {
+      card.addEventListener('click', function (e) {
+        e.stopPropagation(); // да не се задейства "клик извън картата"
         openSignIndex = (openSignIndex === i) ? null : i;
-        Array.prototype.forEach.call(grid.children, refreshCard);
+        refreshAll();
       });
       refreshCard(card);
       grid.appendChild(card);
+    });
+
+    // Затваряне на отворена карта при клик извън мрежата или клавиш Esc
+    document.addEventListener('click', function () {
+      if (openSignIndex !== null) { openSignIndex = null; refreshAll(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && openSignIndex !== null) { openSignIndex = null; refreshAll(); }
     });
   }
 
