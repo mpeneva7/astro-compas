@@ -28,36 +28,7 @@
     neptune: { c: '#9FA8DA' }, pluto: { c: '#CE93D8' }, asc: { c: '#B69DE8' }, mc: { c: '#E8C36A' }
   };
 
-  var ASPECT_TONE = {
-    'съвпад': 'поставя силен акцент върху', 'опозиция': 'създава напрежение около',
-    'квадрат': 'изпитва търпението ви около', 'тригон': 'носи лекота и подкрепа на',
-    'секстил': 'отваря благоприятна възможност за'
-  };
   var ASPECT_COLOR = { 'тригон': '#4CAF50', 'секстил': '#4CAF50', 'квадрат': '#EF5350', 'опозиция': '#EF5350', 'съвпад': '#E8C36A' };
-
-  var DAY_THEME = {
-    sun: 'личната ви жизненост и себеизява', moon: 'емоциите и вътрешния ви свят', mercury: 'мисленето и общуването',
-    venus: 'любовта, хармонията и финансите', mars: 'енергията и амбициите', jupiter: 'растежа и възможностите',
-    saturn: 'дисциплината и границите', uranus: 'промените и неочакваните обрати', neptune: 'интуицията и вдъхновението',
-    pluto: 'трансформацията и дълбоките промени'
-  };
-  var LOVE_THEME = {
-    venus: 'привличането и хармонията във връзките', mars: 'страстта и инициативата в любовта', moon: 'емоционалната близост',
-    sun: 'начина, по който се показвате в отношенията', mercury: 'разговорите с партньора', jupiter: 'доверието във връзката',
-    saturn: 'обвързаността и границите', uranus: 'нуждата от свобода в отношенията', neptune: 'романтиката и идеализацията',
-    pluto: 'интензивността и дълбочината на връзката'
-  };
-  var WORK_THEME = {
-    saturn: 'дисциплината и дългосрочните цели', jupiter: 'възможностите за растеж', mercury: 'комуникацията и преговорите',
-    sun: 'лидерската ви позиция', mars: 'темпото и инициативността', venus: 'сътрудничеството в екип',
-    moon: 'нуждата от комфортна работна среда', uranus: 'неочакваните промени в плановете', neptune: 'нуждата от яснота в задачите',
-    pluto: 'властовите динамики на работното място'
-  };
-  var MOOD_THEME = {
-    moon: 'вътрешното ви равновесие', neptune: 'сънищата и интуицията', venus: 'усещането за удовлетвореност',
-    mars: 'нивото на енергия', saturn: 'усещането за отговорност', sun: 'самочувствието', mercury: 'умствената яснота',
-    jupiter: 'оптимизма', uranus: 'неспокойствието и жаждата за промяна', pluto: 'дълбоки вътрешни трансформации'
-  };
 
   var PHASE_TEXT = {
     'Новолуние': { d: 'Идеален момент за нови начала и заявяване на намерения.', a: 'Избягвайте прибързани решения — енергията тепърва набира сила.' },
@@ -190,55 +161,15 @@
     $('moon-meta').textContent = now.getDate() + ' ' + BG_MONTHS_GEN[now.getMonth()] + ' ' + now.getFullYear() + ' г.';
   }
 
-  /* ───────────────────────── Дневен хороскоп ───────────────────────── */
-
-  function aspectsToSignMid(chart, signIndex) {
-    var refLon = signIndex * 30 + 15;
-    var hits = [];
-    chart.order.forEach(function (name) {
-      if (name === 'sun') return;
-      var asp = AstroCore.findAspect(chart.planets[name].lon, refLon);
-      if (asp) hits.push(Object.assign({ planet: name }, asp));
-    });
-    hits.sort(function (a, b) { return a.orb - b.orb; });
-    return hits;
-  }
-
-  function pickThemed(hits, themeMap, fallback) {
-    for (var i = 0; i < hits.length; i++) {
-      if (themeMap[hits[i].planet]) {
-        var h = hits[i];
-        return AstroCore.PLANET_SYMBOLS[h.planet] + ' ' + AstroCore.PLANET_NAMES_BG[h.planet] + ' ' +
-          (ASPECT_TONE[h.type] || 'влияе върху') + ' ' + themeMap[h.planet] + '.';
-      }
-    }
-    return fallback;
-  }
-
-  function buildSignReading(chart, idx) {
-    var name = AstroCore.SIGNS[idx];
-    var hits = aspectsToSignMid(chart, idx);
-    var top = hits.slice(0, 2);
-
-    var day = top.length
-      ? top.map(function (h) {
-          return AstroCore.PLANET_SYMBOLS[h.planet] + ' ' + AstroCore.PLANET_NAMES_BG[h.planet] + ' ' +
-            (ASPECT_TONE[h.type] || 'влияе върху') + ' ' + (DAY_THEME[h.planet] || 'важна за вас сфера') + '.';
-        }).join(' ')
-      : 'Небето е сравнително спокойно за ' + name + ' днес — добър момент за рутина и вътрешно съсредоточаване.';
-
-    var love = pickThemed(hits, LOVE_THEME, 'Без силни любовни транзити днес — спокоен момент за отношенията.');
-    var work = pickThemed(hits, WORK_THEME, 'Работният ден е сравнително неутрален — фокусирайте се върху рутинните задачи.');
-    var mood = pickThemed(hits, MOOD_THEME, 'Настроението е стабилно, без силни външни влияния.');
-
-    return { day: day, love: love, work: work, mood: mood };
-  }
+  /* ───────────────────────── Дневен хороскоп ─────────────────────────
+     Текстовите варианти живеят в js/daily.js (DailyHoroscope модул).
+  ───────────────────────────────────────────────────────────────────── */
 
   var openSignIndex = null;
 
   function signCardHTML(chart, i) {
     var sign = SIGN_INFO[i];
-    var reading = buildSignReading(chart, i);
+    var reading = DailyHoroscope.buildReading(chart, i, chart.now);
     var isOpen = openSignIndex === i;
     var html =
       '<div class="sign-card-inner">' +
