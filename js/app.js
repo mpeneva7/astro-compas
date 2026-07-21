@@ -263,6 +263,7 @@
         btn.addEventListener('mousedown', function () {
           input.value = p[0];
           selectedCity = p;
+          clearCityError();
           dropdown.classList.remove('open');
         });
         dropdown.appendChild(btn);
@@ -270,13 +271,15 @@
       dropdown.classList.add('open');
     }
 
-    input.addEventListener('input', function () { selectedCity = null; showMatches(); });
+    input.addEventListener('input', function () { selectedCity = null; clearCityError(); showMatches(); });
     input.addEventListener('focus', showMatches);
     input.addEventListener('blur', function () { setTimeout(function () { dropdown.classList.remove('open'); }, 160); });
   }
 
+  // Връща { name, lat, lon } за въведения град или null, ако не е в списъка.
   function resolveCity() {
     var typed = $('city-input').value.trim();
+    if (!typed) return null;
     // избраното от списъка има приоритет (важно при еднакви имена)
     if (selectedCity && selectedCity[0].toLowerCase() === typed.toLowerCase()) {
       return { name: placeLabel(selectedCity), lat: selectedCity[2], lon: selectedCity[3] };
@@ -288,11 +291,19 @@
         return { name: placeLabel(CITY_DB[i]), lat: CITY_DB[i][2], lon: CITY_DB[i][3] };
       }
     }
-    // резервно: София
-    for (var j = 0; j < CITY_DB.length; j++) {
-      if (CITY_DB[j][0] === 'София') return { name: 'София (по подразбиране)', lat: CITY_DB[j][2], lon: CITY_DB[j][3] };
-    }
-    return { name: 'София (по подразбиране)', lat: 42.6977, lon: 23.3219 };
+    return null; // няма такъв град в списъка
+  }
+
+  function showCityError(msg) {
+    var err = $('city-error'), box = $('city-field-box');
+    err.textContent = msg;
+    err.classList.add('show');
+    box.classList.add('error');
+    $('city-input').focus();
+  }
+  function clearCityError() {
+    $('city-error').classList.remove('show');
+    $('city-field-box').classList.remove('error');
   }
 
   /* ───────────────────────── Натална карта — колело (SVG) ───────────────────────── */
@@ -871,6 +882,13 @@
 
       var time = selectedBirthTime || { h: 12, m: 0 };
       var city = resolveCity();
+      if (!city) {
+        var typed = $('city-input').value.trim();
+        showCityError(typed
+          ? 'Няма населено място „' + typed + '" в списъка. Изберете от предложенията.'
+          : 'Моля, изберете място на раждане от списъка.');
+        return;
+      }
       var btn = $('calc-btn'), label = $('calc-btn-label');
       btn.disabled = true;
       label.textContent = 'Изчислява се...';
