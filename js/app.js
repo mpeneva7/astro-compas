@@ -165,9 +165,6 @@
     if (sentences.length > 1) {
       result += ' ' + sentences[1];
     }
-    if (result.length > 200) {
-      return result.substring(0, 197) + '…';
-    }
     return result;
   }
 
