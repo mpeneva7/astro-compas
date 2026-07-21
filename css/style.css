@@ -446,10 +446,13 @@ section { padding: 96px 20px; }
 }
 .city-dropdown.open { display: block; }
 .city-dropdown button {
-  display: block; width: 100%; text-align: left; padding: 10px 16px; font-size: 0.9rem;
-  background: none; border: none; color: var(--foreground); cursor: pointer; font-family: var(--font-body);
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; padding: 9px 16px;
+  background: none; border: none; cursor: pointer; font-family: var(--font-body);
 }
 .city-dropdown button:hover { background: rgba(182,157,232,0.1); }
+.city-dropdown .city-name { color: var(--foreground); font-size: 0.9rem; }
+.city-dropdown .city-oblast { color: var(--outline); font-size: 0.74rem; white-space: nowrap; flex-shrink: 0; }
 
 .natal-submit-row { display: flex; justify-content: center; margin-top: 34px; }
 

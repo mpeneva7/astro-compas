@@ -48,18 +48,10 @@
   var BG_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']; // за седмичния хедър (започва в понеделник)
   var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
-  var CITY_COORDS = {
-    'София': [42.6977, 23.3219], 'Пловдив': [42.1354, 24.7453], 'Варна': [43.2141, 27.9147],
-    'Бургас': [42.5048, 27.4626], 'Русе': [43.8564, 25.9704], 'Стара Загора': [42.4258, 25.6345],
-    'Плевен': [43.4170, 24.6067], 'Сливен': [42.6816, 26.3181], 'Добрич': [43.5726, 27.8273],
-    'Шумен': [43.2712, 26.9223], 'Перник': [42.6053, 23.0375], 'Хасково': [41.9344, 25.5551],
-    'Ямбол': [42.4839, 26.5106], 'Пазарджик': [42.1924, 24.3338], 'Благоевград': [42.0195, 23.0943],
-    'Враца': [43.2109, 23.5578], 'Габрово': [42.8747, 25.3277], 'Асеновград': [42.0106, 24.8753],
-    'Видин': [43.9910, 22.8672], 'Казанлък': [42.6186, 25.3980], 'Кюстендил': [42.2833, 22.6900],
-    'Монтана': [43.4125, 23.2249], 'Смолян': [41.5767, 24.7128], 'Петрич': [41.4047, 23.2058],
-    'Карлово': [42.6386, 24.8064], 'Велико Търново': [43.0757, 25.6172], 'Ловеч': [43.1349, 24.7140]
-  };
-  var BG_CITIES = Object.keys(CITY_COORDS);
+  // Изчерпателен списък от js/cities.js (window.BG_CITIES: { oblasti, places }).
+  // places = [име, индекс_на_област, ширина, дължина], сортирани по население.
+  var CITY_DB = (window.BG_CITIES && window.BG_CITIES.places) || [];
+  var CITY_OBLASTI = (window.BG_CITIES && window.BG_CITIES.oblasti) || [];
 
   /* ───────────────────────── Помощни ───────────────────────── */
 
@@ -235,25 +227,42 @@
 
   /* ───────────────────────── Натална карта — град автодовършване ───────────────────────── */
 
-  var selectedCity = { name: '', lat: null, lon: null };
+  var selectedCity = null; // избраното място: place-масив [име, областИдкс, lat, lon]
+
+  function placeLabel(p) {
+    return p[0] + ' · обл. ' + (CITY_OBLASTI[p[1]] || '');
+  }
+
+  // Търси по представка на името; CITY_DB е сортиран по население, така че
+  // по-големите места излизат първи при еднакво съвпадение.
+  function matchCities(q, limit) {
+    q = q.trim().toLowerCase();
+    if (!q) return [];
+    var starts = [], contains = [];
+    for (var i = 0; i < CITY_DB.length; i++) {
+      var nm = CITY_DB[i][0].toLowerCase();
+      var pos = nm.indexOf(q);
+      if (pos === 0) { starts.push(CITY_DB[i]); if (starts.length >= limit) break; }
+      else if (pos > 0 && contains.length < limit) contains.push(CITY_DB[i]);
+    }
+    return starts.concat(contains).slice(0, limit);
+  }
 
   function initCityAutocomplete() {
     var input = $('city-input');
     var dropdown = $('city-dropdown');
 
     function showMatches() {
-      var q = input.value.trim().toLowerCase();
-      if (!q) { dropdown.classList.remove('open'); return; }
-      var matches = BG_CITIES.filter(function (c) { return c.toLowerCase().indexOf(q) === 0; }).slice(0, 6);
-      if (!matches.length) { dropdown.classList.remove('open'); return; }
+      var matches = matchCities(input.value, 8);
+      if (!matches.length) { dropdown.classList.remove('open'); dropdown.innerHTML = ''; return; }
       dropdown.innerHTML = '';
-      matches.forEach(function (c) {
+      matches.forEach(function (p) {
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.textContent = c;
+        btn.innerHTML = '<span class="city-name">' + p[0] + '</span><span class="city-oblast">обл. ' + (CITY_OBLASTI[p[1]] || '') + '</span>';
         btn.addEventListener('mousedown', function () {
-          input.value = c;
-          selectedCity = { name: c, lat: CITY_COORDS[c][0], lon: CITY_COORDS[c][1] };
+          input.value = p[0];
+          selectedCity = p;
           dropdown.classList.remove('open');
         });
         dropdown.appendChild(btn);
@@ -261,17 +270,29 @@
       dropdown.classList.add('open');
     }
 
-    input.addEventListener('input', showMatches);
+    input.addEventListener('input', function () { selectedCity = null; showMatches(); });
     input.addEventListener('focus', showMatches);
     input.addEventListener('blur', function () { setTimeout(function () { dropdown.classList.remove('open'); }, 160); });
   }
 
   function resolveCity() {
     var typed = $('city-input').value.trim();
-    if (selectedCity.name && selectedCity.name.toLowerCase() === typed.toLowerCase()) return selectedCity;
-    var exact = BG_CITIES.filter(function (c) { return c.toLowerCase() === typed.toLowerCase(); })[0];
-    if (exact) return { name: exact, lat: CITY_COORDS[exact][0], lon: CITY_COORDS[exact][1] };
-    return { name: 'София (по подразбиране)', lat: CITY_COORDS['София'][0], lon: CITY_COORDS['София'][1] };
+    // избраното от списъка има приоритет (важно при еднакви имена)
+    if (selectedCity && selectedCity[0].toLowerCase() === typed.toLowerCase()) {
+      return { name: placeLabel(selectedCity), lat: selectedCity[2], lon: selectedCity[3] };
+    }
+    // иначе точно съвпадение по име (първото = най-голямото по население)
+    var lc = typed.toLowerCase();
+    for (var i = 0; i < CITY_DB.length; i++) {
+      if (CITY_DB[i][0].toLowerCase() === lc) {
+        return { name: placeLabel(CITY_DB[i]), lat: CITY_DB[i][2], lon: CITY_DB[i][3] };
+      }
+    }
+    // резервно: София
+    for (var j = 0; j < CITY_DB.length; j++) {
+      if (CITY_DB[j][0] === 'София') return { name: 'София (по подразбиране)', lat: CITY_DB[j][2], lon: CITY_DB[j][3] };
+    }
+    return { name: 'София (по подразбиране)', lat: 42.6977, lon: 23.3219 };
   }
 
   /* ───────────────────────── Натална карта — колело (SVG) ───────────────────────── */
