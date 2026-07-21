@@ -468,7 +468,7 @@ section { padding: 96px 20px; }
 #natal-results.show { display: flex; }
 
 .wheel-bigthree { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
-@media (min-width: 860px) { .wheel-bigthree { grid-template-columns: 1fr 1fr; align-items: start; } }
+@media (min-width: 768px) { .wheel-bigthree { grid-template-columns: 1fr 1fr; align-items: start; } }
 .wheel-card { padding: 12px; display: flex; align-items: center; justify-content: center; min-height: 0; }
 .wheel-card svg { width: 100%; max-width: 300px; margin: 0 auto; display: block; }
 
