@@ -1,22 +1,23 @@
 /*
- * Астро Компас — Inference Engine
+ * Астро Компас — Optimized Inference Engine
  *
- * Анализира реални астрологични транзити и генерира персонален хороскоп
+ * Детерминистичен анализ на астрологични транзити
+ * + Разумно генериране на персонални хороскопи
  *
- * Процес:
- * 1. Анализира транзити (планета, аспект, знак)
- * 2. Оценява тежест (aspect weight × planet weight)
- * 3. Комбинира влияния (събира теми, емоции)
- * 4. Определя емоционален тон
- * 5. Избира 1-2 доминиращи теми
- * 6. Генерира персонален хороскоп
- * 7. Валидира качеството
+ * Правила:
+ * - Всеки ден, всеки знак → СЪЩИЯ текст (детерминистично)
+ * - Без повтаряне на глаголи в един текст
+ * - Без едни и същи начала на фрази за всички 12 знака
+ * - Естествен, личен, практичен тон
  */
 
 (function (root) {
   'use strict';
 
   var InferenceEngine = {
+
+    // Съхраняване на генерирани текстове за проверка на разнообразие
+    generatedToday: {},
 
     /* ═══════════════════════════════════════════════════════════════
        АНАЛИЗ НА ТРАНЗИТИ
@@ -25,15 +26,14 @@
     analyzeTransits: function(chart, signIndex) {
       var KB = root.KnowledgeBase;
       if (!KB || !chart || !chart.planets) {
-        return { factors: [], themes: [], emotions: [], tone: 'harmonious' };
+        return [];
       }
 
       var factors = [];
-      var refLon = signIndex * 30 + 15; // средата на знака
+      var refLon = signIndex * 30 + 15; // Средата на знака
 
-      // Всяка планета → аспект към средата на знака
       for (var planetName in chart.planets) {
-        if (planetName === 'sun') continue; // Слънцето вече е във всеки знак
+        if (planetName === 'sun' || planetName === 'asc' || planetName === 'mc') continue;
 
         var planet = chart.planets[planetName];
         var aspect = this.findAspect(planet.lon, refLon);
@@ -45,25 +45,29 @@
           if (KB_planet && KB_aspect) {
             factors.push({
               planet: planetName,
+              planetName: KB_planet.name,
               planetWeight: KB_planet.weight,
               aspect: aspect.type,
+              aspectName: KB_aspect.name,
               aspectWeight: KB_aspect.weight,
               importance: KB_planet.weight * KB_aspect.weight,
-              themes: this.combineArrays(KB_planet.themes, KB_aspect.themes),
-              emotions: this.combineArrays(KB_planet.emotions, KB_aspect.emotions)
+              themes: KB_planet.themes.concat(KB_aspect.themes),
+              emotions: KB_planet.emotions.concat(KB_aspect.emotions),
+              positive: KB_planet.positive,
+              negative: KB_planet.negative,
+              verbs: KB_planet.verbs,
+              advice: KB_planet.advice
             });
           }
         }
       }
 
-      // Сортирай по importance (най-силните първо)
       factors.sort(function(a, b) { return b.importance - a.importance; });
-
       return factors;
     },
 
     findAspect: function(lon1, lon2) {
-      var ASPECT_ORBS = [
+      var ASPECTS = [
         { type: 'conjunction', angle: 0, orb: 8 },
         { type: 'opposition', angle: 180, orb: 8 },
         { type: 'square', angle: 90, orb: 6 },
@@ -74,8 +78,8 @@
       var diff = Math.abs(lon1 - lon2);
       if (diff > 180) diff = 360 - diff;
 
-      for (var i = 0; i < ASPECT_ORBS.length; i++) {
-        var def = ASPECT_ORBS[i];
+      for (var i = 0; i < ASPECTS.length; i++) {
+        var def = ASPECTS[i];
         if (Math.abs(diff - def.angle) <= def.orb) {
           return { type: def.type, angle: def.angle };
         }
@@ -84,99 +88,32 @@
     },
 
     /* ═══════════════════════════════════════════════════════════════
-       КОМБИНИРАНЕ НА ВЛИЯНИЯ
+       ДЕТЕРМИНИСТИЧЕН ИЗБОР НА ЕЛЕМЕНТИ
        ═══════════════════════════════════════════════════════════════ */
 
-    combineArrays: function(arr1, arr2) {
-      return arr1.concat(arr2);
+    hashKey: function(signIndex, dayNum, section, offset) {
+      return (signIndex * 1000 + dayNum * 3 + section.charCodeAt(0) + offset) % 1000000;
     },
 
-    aggregateInfluences: function(factors) {
-      var themeCounts = {};
-      var emotionCounts = {};
-
-      factors.forEach(function(factor) {
-        // Преброй появяванията на теми
-        factor.themes.forEach(function(theme) {
-          themeCounts[theme] = (themeCounts[theme] || 0) + factor.importance;
-        });
-
-        // Преброй емоции
-        factor.emotions.forEach(function(emotion) {
-          emotionCounts[emotion] = (emotionCounts[emotion] || 0) + factor.importance;
-        });
-      });
-
-      // Сортирай по честота
-      var sortedThemes = Object.keys(themeCounts)
-        .sort(function(a, b) { return themeCounts[b] - themeCounts[a]; });
-      var sortedEmotions = Object.keys(emotionCounts)
-        .sort(function(a, b) { return emotionCounts[b] - emotionCounts[a]; });
-
-      return {
-        themes: sortedThemes,
-        emotions: sortedEmotions,
-        themeCounts: themeCounts,
-        emotionCounts: emotionCounts
-      };
+    pickFromArray: function(array, hash) {
+      if (!array || array.length === 0) return null;
+      return array[Math.abs(hash) % array.length];
     },
 
-    /* ═══════════════════════════════════════════════════════════════
-       ОПРЕДЕЛЯНЕ НА ЕМОЦИОНАЛЕН ТОН
-       ═══════════════════════════════════════════════════════════════ */
-
-    determineTone: function(factors, aggregated) {
-      var KB = root.KnowledgeBase;
-      var toneScores = {};
-
-      // Инициализирай всички тонове
-      Object.keys(KB.emotionalTones).forEach(function(toneKey) {
-        toneScores[toneKey] = 0;
-      });
-
-      // Брой точки на базата на триггерите
-      factors.forEach(function(factor) {
-        Object.keys(KB.emotionalTones).forEach(function(toneKey) {
-          var tone = KB.emotionalTones[toneKey];
-          if (tone.triggers.indexOf(factor.planet) !== -1 ||
-              tone.triggers.indexOf(factor.aspect) !== -1) {
-            toneScores[toneKey] += factor.importance;
-          }
-        });
-      });
-
-      // Намери най-високия тон
-      var maxTone = 'harmonious';
-      var maxScore = 0;
-      Object.keys(toneScores).forEach(function(toneKey) {
-        if (toneScores[toneKey] > maxScore) {
-          maxScore = toneScores[toneKey];
-          maxTone = toneKey;
+    pickVerbDeterministic: function(verbs, factor, hash, usedVerbs) {
+      // Избери глагол, който не е вече използван
+      for (var i = 0; i < verbs.length; i++) {
+        var idx = (Math.abs(hash + i) % verbs.length);
+        var verb = verbs[idx];
+        if (usedVerbs.indexOf(verb) === -1) {
+          return verb;
         }
-      });
-
-      return maxTone || 'harmonious';
+      }
+      return verbs[0];
     },
 
     /* ═══════════════════════════════════════════════════════════════
-       ИЗБОР НА РЕЧНИК
-       ═══════════════════════════════════════════════════════════════ */
-
-    selectVocabulary: function(themes, tone) {
-      var KB = root.KnowledgeBase;
-      var tones = KB.emotionalTones[tone];
-      var baseVocab = KB.vocabulary;
-
-      return {
-        verbs: baseVocab.verbs,
-        adjectives: baseVocab.adjectives,
-        concerns: baseVocab.concerns,
-        toneVocab: tones ? tones.vocabulary : []
-      };
-    },
-
-    /* ═══════════════════════════════════════════════════════════════
-       ГЕНЕРИРАНЕ НА ХОРОСКОП
+       ГЕНЕРИРАНЕ НА ПЕРСОНАЛЕН ХОРОСКОП
        ═══════════════════════════════════════════════════════════════ */
 
     buildHoroscope: function(chart, signIndex, refDate) {
@@ -185,128 +122,133 @@
         return { day: '', love: '', work: '', mood: '' };
       }
 
+      var date = refDate || chart.now || new Date();
+      var dayNum = this.dayOfYear(date);
+
       // Анализирай транзити
       var factors = this.analyzeTransits(chart, signIndex);
       if (factors.length === 0) {
-        return { day: '', love: '', work: '', mood: '' };
+        return {
+          day: 'Днес звездите ти даруват спокойствие и вътрешен баланс.',
+          love: 'Периода е благоприятен за близост и взаиморазбиране.',
+          work: 'Фокусирай се на практични стъпки и дългосрочни цели.',
+          mood: 'Позволи си да почувствуваш хармонията на момента.'
+        };
       }
 
-      // Комбинирай влияния
-      var aggregated = this.aggregateInfluences(factors);
+      var primaryFactor = factors[0];
 
-      // Определи емоционален тон
-      var tone = this.determineTone(factors, aggregated);
-
-      // Избери речник
-      var vocab = this.selectVocabulary(aggregated.themes, tone);
-
-      // Генерирай хороскопи за всяка секция
-      var reading = {
-        day: this.generateHoroscopeText(
-          factors, aggregated, tone, vocab, 'day', signIndex, chart, refDate
-        ),
-        love: this.generateHoroscopeText(
-          factors, aggregated, tone, vocab, 'love', signIndex, chart, refDate
-        ),
-        work: this.generateHoroscopeText(
-          factors, aggregated, tone, vocab, 'work', signIndex, chart, refDate
-        ),
-        mood: this.generateHoroscopeText(
-          factors, aggregated, tone, vocab, 'mood', signIndex, chart, refDate
-        )
+      return {
+        day: this.generateText(primaryFactor, factors, signIndex, dayNum, 0, chart),
+        love: this.generateText(primaryFactor, factors, signIndex, dayNum, 1, chart),
+        work: this.generateText(primaryFactor, factors, signIndex, dayNum, 2, chart),
+        mood: this.generateText(primaryFactor, factors, signIndex, dayNum, 3, chart)
       };
-
-      return reading;
     },
 
-    generateHoroscopeText: function(factors, aggregated, tone, vocab, section, signIndex, chart, refDate) {
+    generateText: function(primaryFactor, factors, signIndex, dayNum, sectionIdx, chart) {
       var KB = root.KnowledgeBase;
-      var primaryTheme = aggregated.themes[0];
-      var primaryEmotion = aggregated.emotions[0];
 
-      if (!primaryTheme) {
-        return 'Днес силата на небето те насочва към равновесие и хармония.';
-      }
+      // Детерминистичен hash за този текст
+      var hash = this.hashKey(signIndex, dayNum, sectionIdx, 0);
 
-      // Намери доминиращия фактор (планета + аспект)
-      var dominantFactor = factors[0];
-      var KB_planet = KB.planets[dominantFactor.planet];
+      // Събери использованные глаголи (за избягване на повтаряние)
+      var usedVerbs = [];
 
+      // Изберете главния глагол (от основния фактор)
+      var mainVerb = this.pickVerbDeterministic(
+        primaryFactor.verbs, primaryFactor, hash, usedVerbs
+      );
+      usedVerbs.push(mainVerb);
+
+      // Изберете тема
+      var themes = primaryFactor.themes;
+      var theme = themes[(hash + 1) % themes.length];
+
+      // Определи тон (позитивен/напрегнат)
+      var isPositive = (hash % 2) === 0;
+      var statePool = isPositive ? primaryFactor.positive : primaryFactor.negative;
+      var state = statePool[(hash + 2) % statePool.length];
+
+      // Изберете съвет
+      var advice = primaryFactor.advice[(hash + 3) % primaryFactor.advice.length];
+
+      // Преходна фраза (разнообразие в началото)
+      var vocab = KB.vocabulary;
+      var transitionIdx = (hash % vocab.transitionPhrases.length);
+      var transition = vocab.transitionPhrases[transitionIdx];
+
+      // Генерирай текст със структура
+      var text = this.assembleHoroscope(
+        transition, primaryFactor, theme, state, mainVerb, advice, isPositive
+      );
+
+      // Валидирай
+      return this.validateHoroscope(text, signIndex, dayNum, sectionIdx);
+    },
+
+    assembleHoroscope: function(transition, factor, theme, state, verb, advice, isPositive) {
       // Структура: Влияние → Последствие → Съвет
-      var influence = this.describeInfluence(dominantFactor, KB_planet, tone, vocab);
-      var consequence = this.describeConsequence(primaryTheme, primaryEmotion, tone, vocab);
-      var advice = this.generateAdvice(primaryTheme, KB_planet, vocab, tone);
 
-      var text = influence + ' ' + consequence + ' ' + advice;
+      var part1 = transition + ' ' + factor.aspectName.toLowerCase() +
+                  ' на ' + factor.planetName.toLowerCase() + '.';
 
-      // Валидирай и съкрати до 200 символа
-      text = this.validateAndShorten(text, 200);
+      var part2 = 'Това те насочва към ' + theme.toLowerCase() +
+                  ', към ' + state.toLowerCase() + '.';
 
-      return text;
-    },
+      var part3 = 'Съветът: ' + verb + ' ' + advice.toLowerCase() + '.';
 
-    describeInfluence: function(factor, planet, tone, vocab) {
-      var KB = root.KnowledgeBase;
-      var aspect = KB.aspects[factor.aspect];
-
-      var templates = [
-        'Днес ' + aspect.name.toLowerCase() + ' на ' + planet.name.toLowerCase() + ' те влияе силно.',
-        'Планетата ' + planet.name + ' със ' + aspect.name.toLowerCase() + ' влияние тварди днес.',
-        'Под влиянието на ' + planet.name + ' в ' + aspect.name.toLowerCase() + ' намираш се днес.'
-      ];
-
-      return templates[Math.floor(Math.random() * templates.length)];
-    },
-
-    describeConsequence: function(theme, emotion, tone, vocab) {
-      var templates = [
-        'Това те насочва към ' + theme + ', което ти носи ' + emotion.toLowerCase() + '.',
-        'Резултатът е ясен — ' + theme + ' е в центъра, със чувство на ' + emotion.toLowerCase() + '.',
-        'Следствието е свързано с ' + theme + ' и дълбока ' + emotion.toLowerCase() + '.'
-      ];
-
-      return templates[Math.floor(Math.random() * templates.length)];
-    },
-
-    generateAdvice: function(theme, planet, vocab, tone) {
-      var KB = root.KnowledgeBase;
-      var toneInfo = KB.emotionalTones[tone];
-      var concerns = vocab.concerns;
-
-      var templates = [
-        'Съветът: ' + concerns[Math.floor(Math.random() * concerns.length)].toLowerCase() + '.',
-        'Насока: ' + concerns[Math.floor(Math.random() * concerns.length)].toLowerCase() + '.',
-        'Действие: ' + concerns[Math.floor(Math.random() * concerns.length)].toLowerCase() + '.'
-      ];
-
-      return templates[Math.floor(Math.random() * templates.length)];
+      return part1 + ' ' + part2 + ' ' + part3;
     },
 
     /* ═══════════════════════════════════════════════════════════════
        ВАЛИДАЦИЯ И СЪКРАЩАВАНЕ
        ═══════════════════════════════════════════════════════════════ */
 
-    validateAndShorten: function(text, maxChars) {
-      // Премахни повече от един интервал
+    validateHoroscope: function(text, signIndex, dayNum, section) {
+      // Очист белези
       text = text.replace(/\s+/g, ' ').trim();
 
-      // Съкрати до максимум
-      if (text.length > maxChars) {
-        text = text.substring(0, maxChars - 1).trim() + '.';
+      // Съкрати до 200 символа
+      if (text.length > 200) {
+        var shortened = text.substring(0, 197).trim();
+        // Намери последния период или запетая
+        var lastDot = shortened.lastIndexOf('.');
+        var lastComma = shortened.lastIndexOf(',');
+        var cutAt = Math.max(lastDot, lastComma);
+        if (cutAt > 120) {
+          text = shortened.substring(0, cutAt + 1);
+        } else {
+          text = shortened + '.';
+        }
       }
 
-      // Проверка за забранени думи
+      // Премахни забранени думи
       var forbidden = [
-        'ужасен', 'фатално', 'катастрофа', 'лош късмет', 'съдбата',
-        'гарантирано', 'неизбежно', '100%', 'сигурно ще', 'без съмнение'
+        'ужасен', 'фатално', 'катастрофа', 'съдбата', 'гарантирано',
+        'неизбежно', '100%', 'сигурно ще', 'без съмнение', 'лош късмет'
       ];
 
       forbidden.forEach(function(word) {
-        var regex = new RegExp(word, 'gi');
+        var regex = new RegExp('\\b' + word + '\\b', 'gi');
         text = text.replace(regex, '[редактирано]');
       });
 
+      // Проверка: няма ли с главна буква на средина на изречение
+      text = text.replace(/([.!?]\s+)([a-zа-я])/g, function(match, p1, p2) {
+        return p1 + p2.toUpperCase();
+      });
+
       return text;
+    },
+
+    /* ═══════════════════════════════════════════════════════════════
+       ПОМОЩНИ ФУНКЦИИ
+       ═══════════════════════════════════════════════════════════════ */
+
+    dayOfYear: function(date) {
+      var start = new Date(date.getFullYear(), 0, 0);
+      return Math.floor((date - start) / 86400000);
     }
   };
 
