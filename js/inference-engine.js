@@ -153,7 +153,7 @@
     buildHoroscope: function(chart, signIndex, refDate) {
       var KB = root.KnowledgeBase;
       if (!KB) {
-        return { day: '', love: '', work: '', mood: '' };
+        return { day: 'Звездите днес ти намекват на спокойствие.', love: 'Отворено сърце', work: 'Практично действие', mood: 'Хармония' };
       }
 
       var date = refDate || chart.now || new Date();
@@ -172,12 +172,14 @@
 
       var primaryFactor = factors[0];
 
-      return {
-        day: this.generateText(primaryFactor, factors, signIndex, dayNum, 0, chart),
-        love: this.generateText(primaryFactor, factors, signIndex, dayNum, 1, chart),
-        work: this.generateText(primaryFactor, factors, signIndex, dayNum, 2, chart),
-        mood: this.generateText(primaryFactor, factors, signIndex, dayNum, 3, chart)
+      var result = {
+        day: this.generateText(primaryFactor, factors, signIndex, dayNum, 0, chart) || 'Звездите говорят за промяна.',
+        love: this.generateText(primaryFactor, factors, signIndex, dayNum, 1, chart) || 'Емоции и чувства днес са силни.',
+        work: this.generateText(primaryFactor, factors, signIndex, dayNum, 2, chart) || 'Фокус върху работата е необходим.',
+        mood: this.generateText(primaryFactor, factors, signIndex, dayNum, 3, chart) || 'Психическо благополучие е в центъра.'
       };
+
+      return result;
     },
 
     generateText: function(primaryFactor, factors, signIndex, dayNum, sectionIdx, chart) {
