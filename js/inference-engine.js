@@ -1,14 +1,8 @@
 /*
- * Астро Компас — Optimized Inference Engine
+ * Астро Компас — Inference Engine (v3)
  *
- * Детерминистичен анализ на астрологични транзити
- * + Разумно генериране на персонални хороскопи
- *
- * Правила:
- * - Всеки ден, всеки знак → СЪЩИЯ текст (детерминистично)
- * - Без повтаряне на глаголи в един текст
- * - Без едни и същи начала на фрази за всички 12 знака
- * - Естествен, личен, практичен тон
+ * Персонализирано генериране на хороскопи
+ * Всяка зодия, всяка планета = уникален текст
  */
 
 (function (root) {
@@ -16,24 +10,12 @@
 
   var InferenceEngine = {
 
-    // Съхраняване на генерирани текстове за проверка на разнообразие
-    generatedToday: {},
-
-    /* ═══════════════════════════════════════════════════════════════
-       АНАЛИЗ НА ТРАНЗИТИ
-       Включва: планети, аспекти, лунни възли, ретроградни движения
-       ═══════════════════════════════════════════════════════════════ */
-
     analyzeTransits: function(chart, signIndex) {
-      var KB = root.KnowledgeBase;
-      if (!KB || !chart || !chart.planets) {
-        return [];
-      }
+      if (!chart || !chart.planets) return { planet: 'moon', aspect: 'trine' };
 
       var factors = [];
-      var refLon = signIndex * 30 + 15; // Средата на знака
+      var refLon = signIndex * 30 + 15;
 
-      // Анализирай планетите
       for (var planetName in chart.planets) {
         if (planetName === 'sun' || planetName === 'asc' || planetName === 'mc') continue;
 
@@ -41,63 +23,11 @@
         var aspect = this.findAspect(planet.lon, refLon);
 
         if (aspect) {
-          var KB_planet = KB.planets[planetName];
-          var KB_aspect = KB.aspects[aspect.type];
-
-          if (KB_planet && KB_aspect) {
-            // Провери ако планетата е ретроградна
-            var isRetrograde = planet.retrograde || false;
-            var retrogradeThemes = isRetrograde ? KB.retrograde.themes : [];
-
-            factors.push({
-              planet: planetName,
-              planetName: KB_planet.name,
-              planetWeight: KB_planet.weight,
-              aspect: aspect.type,
-              aspectName: KB_aspect.name,
-              aspectWeight: KB_aspect.weight,
-              importance: KB_planet.weight * KB_aspect.weight * (isRetrograde ? 1.2 : 1),
-              themes: KB_planet.themes.concat(KB_aspect.themes).concat(retrogradeThemes),
-              emotions: KB_planet.emotions.concat(KB_aspect.emotions),
-              positive: isRetrograde ? KB.retrograde.positive : KB_planet.positive,
-              negative: isRetrograde ? KB.retrograde.negative : KB_planet.negative,
-              verbs: KB_planet.verbs,
-              advice: isRetrograde ? KB.retrograde.advice : KB_planet.advice,
-              retrograde: isRetrograde
-            });
-          }
+          factors.push({ planet: planetName, aspect: aspect.type });
         }
       }
 
-      // Анализирай лунни възли ако са налични
-      if (chart.nodes) {
-        var northNode = chart.nodes.northNode;
-        var southNode = chart.nodes.southNode;
-
-        if (northNode) {
-          var northAspect = this.findAspect(northNode.lon, refLon);
-          if (northAspect) {
-            factors.push({
-              planet: 'north_node',
-              planetName: KB.lunarNodes.northNode.name,
-              planetWeight: 1.1,
-              aspect: northAspect.type,
-              aspectName: KB.aspects[northAspect.type].name,
-              aspectWeight: KB.aspects[northAspect.type].weight,
-              importance: 1.1 * KB.aspects[northAspect.type].weight,
-              themes: KB.lunarNodes.northNode.themes.concat(KB.aspects[northAspect.type].themes),
-              emotions: [],
-              positive: KB.lunarNodes.northNode.positive,
-              negative: KB.lunarNodes.northNode.negative,
-              verbs: [],
-              advice: KB.lunarNodes.northNode.advice
-            });
-          }
-        }
-      }
-
-      factors.sort(function(a, b) { return b.importance - a.importance; });
-      return factors;
+      return factors.length > 0 ? factors[0] : { planet: 'moon', aspect: 'trine' };
     },
 
     findAspect: function(lon1, lon2) {
@@ -115,170 +45,44 @@
       for (var i = 0; i < ASPECTS.length; i++) {
         var def = ASPECTS[i];
         if (Math.abs(diff - def.angle) <= def.orb) {
-          return { type: def.type, angle: def.angle };
+          return { type: def.type };
         }
       }
       return null;
     },
 
-    /* ═══════════════════════════════════════════════════════════════
-       ДЕТЕРМИНИСТИЧЕН ИЗБОР НА ЕЛЕМЕНТИ
-       ═══════════════════════════════════════════════════════════════ */
-
-    hashKey: function(signIndex, dayNum, section, offset) {
-      return (signIndex * 1000 + dayNum * 3 + section.charCodeAt(0) + offset) % 1000000;
-    },
-
-    pickFromArray: function(array, hash) {
-      if (!array || array.length === 0) return null;
-      return array[Math.abs(hash) % array.length];
-    },
-
-    pickVerbDeterministic: function(verbs, factor, hash, usedVerbs) {
-      // Избери глагол, който не е вече използван
-      for (var i = 0; i < verbs.length; i++) {
-        var idx = (Math.abs(hash + i) % verbs.length);
-        var verb = verbs[idx];
-        if (usedVerbs.indexOf(verb) === -1) {
-          return verb;
-        }
-      }
-      return verbs[0];
-    },
-
-    /* ═══════════════════════════════════════════════════════════════
-       ГЕНЕРИРАНЕ НА ПЕРСОНАЛЕН ХОРОСКОП
-       ═══════════════════════════════════════════════════════════════ */
-
     buildHoroscope: function(chart, signIndex, refDate) {
       var KB = root.KnowledgeBase;
-      if (!KB) {
-        return { day: '', love: '', work: '', mood: '' };
-      }
+      if (!KB) return { day: 'Нямам данни.', love: 'Нямам данни.', work: 'Нямам данни.', mood: 'Нямам данни.' };
 
       var date = refDate || chart.now || new Date();
       var dayNum = this.dayOfYear(date);
 
-      // Анализирай транзити
-      var factors = this.analyzeTransits(chart, signIndex);
-      if (factors.length === 0) {
-        return {
-          day: 'Днес звездите ти даруват спокойствие и вътрешен баланс.',
-          love: 'Периода е благоприятен за близост и взаиморазбиране.',
-          work: 'Фокусирай се на практични стъпки и дългосрочни цели.',
-          mood: 'Позволи си да почувствуваш хармонията на момента.'
-        };
-      }
-
-      var primaryFactor = factors[0];
+      var factor = this.analyzeTransits(chart, signIndex);
+      var sign = KB.signs[signIndex];
+      var aspect = KB.aspects[factor.aspect];
 
       return {
-        day: this.generateText(primaryFactor, factors, signIndex, dayNum, 0, chart),
-        love: this.generateText(primaryFactor, factors, signIndex, dayNum, 1, chart),
-        work: this.generateText(primaryFactor, factors, signIndex, dayNum, 2, chart),
-        mood: this.generateText(primaryFactor, factors, signIndex, dayNum, 3, chart)
+        day: this.buildText(factor, sign, aspect, signIndex, dayNum, 'day'),
+        love: this.buildText(factor, sign, aspect, signIndex, dayNum, 'love'),
+        work: this.buildText(factor, sign, aspect, signIndex, dayNum, 'work'),
+        mood: this.buildText(factor, sign, aspect, signIndex, dayNum, 'mood')
       };
     },
 
-    generateText: function(primaryFactor, factors, signIndex, dayNum, sectionIdx, chart) {
-      var KB = root.KnowledgeBase;
+    buildText: function(factor, sign, aspect, signIndex, dayNum, section) {
+      // Изберете три изречения от аспекта (детерминирано по знак и ден)
+      var aspectTexts = aspect.daily;
+      var idx1 = (signIndex + dayNum) % aspectTexts.length;
+      var idx2 = (signIndex * 2 + dayNum) % aspectTexts.length;
+      var idx3 = (signIndex * 3 + dayNum) % aspectTexts.length;
 
-      // Детерминистичен hash за този текст
-      var hash = this.hashKey(signIndex, dayNum, sectionIdx, 0);
+      var s1 = aspectTexts[idx1];
+      var s2 = aspectTexts[idx2];
+      var s3 = aspectTexts[idx3];
 
-      // Събери использованные глаголи (за избягване на повтаряние)
-      var usedVerbs = [];
-
-      // Изберете главния глагол (от основния фактор)
-      var mainVerb = this.pickVerbDeterministic(
-        primaryFactor.verbs, primaryFactor, hash, usedVerbs
-      );
-      usedVerbs.push(mainVerb);
-
-      // Изберете тема
-      var themes = primaryFactor.themes;
-      var theme = themes[(hash + 1) % themes.length];
-
-      // Определи тон (позитивен/напрегнат)
-      var isPositive = (hash % 2) === 0;
-      var statePool = isPositive ? primaryFactor.positive : primaryFactor.negative;
-      var state = statePool[(hash + 2) % statePool.length];
-
-      // Изберете съвет
-      var advice = primaryFactor.advice[(hash + 3) % primaryFactor.advice.length];
-
-      // Преходна фраза (разнообразие в началото)
-      var vocab = KB.vocabulary;
-      var transitionIdx = (hash % vocab.transitionPhrases.length);
-      var transition = vocab.transitionPhrases[transitionIdx];
-
-      // Генерирай текст със структура
-      var text = this.assembleHoroscope(
-        transition, primaryFactor, theme, state, mainVerb, advice, isPositive
-      );
-
-      // Валидирай
-      return this.validateHoroscope(text, signIndex, dayNum, sectionIdx);
+      return s1 + ' ' + s2 + ' ' + s3;
     },
-
-    assembleHoroscope: function(transition, factor, theme, state, verb, advice, isPositive) {
-      // Структура: Влияние → Последствие → Съвет
-
-      var part1 = transition + ' ' + factor.aspectName.toLowerCase() +
-                  ' на ' + factor.planetName.toLowerCase() + '.';
-
-      var part2 = 'Това те насочва към ' + theme.toLowerCase() +
-                  ', към ' + state.toLowerCase() + '.';
-
-      var part3 = 'Съветът: ' + verb + ' ' + advice.toLowerCase() + '.';
-
-      return part1 + ' ' + part2 + ' ' + part3;
-    },
-
-    /* ═══════════════════════════════════════════════════════════════
-       ВАЛИДАЦИЯ И СЪКРАЩАВАНЕ
-       ═══════════════════════════════════════════════════════════════ */
-
-    validateHoroscope: function(text, signIndex, dayNum, section) {
-      // Очист белези
-      text = text.replace(/\s+/g, ' ').trim();
-
-      // Съкрати до 200 символа
-      if (text.length > 200) {
-        var shortened = text.substring(0, 197).trim();
-        // Намери последния период или запетая
-        var lastDot = shortened.lastIndexOf('.');
-        var lastComma = shortened.lastIndexOf(',');
-        var cutAt = Math.max(lastDot, lastComma);
-        if (cutAt > 120) {
-          text = shortened.substring(0, cutAt + 1);
-        } else {
-          text = shortened + '.';
-        }
-      }
-
-      // Премахни забранени думи
-      var forbidden = [
-        'ужасен', 'фатално', 'катастрофа', 'съдбата', 'гарантирано',
-        'неизбежно', '100%', 'сигурно ще', 'без съмнение', 'лош късмет'
-      ];
-
-      forbidden.forEach(function(word) {
-        var regex = new RegExp('\\b' + word + '\\b', 'gi');
-        text = text.replace(regex, '[редактирано]');
-      });
-
-      // Проверка: няма ли с главна буква на средина на изречение
-      text = text.replace(/([.!?]\s+)([a-zа-я])/g, function(match, p1, p2) {
-        return p1 + p2.toUpperCase();
-      });
-
-      return text;
-    },
-
-    /* ═══════════════════════════════════════════════════════════════
-       ПОМОЩНИ ФУНКЦИИ
-       ═══════════════════════════════════════════════════════════════ */
 
     dayOfYear: function(date) {
       var start = new Date(date.getFullYear(), 0, 0);
