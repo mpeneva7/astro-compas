@@ -1,8 +1,11 @@
 /*
- * Астро Компас — Inference Engine (v3)
+ * Астро Компас — Inference Engine (v4)
  *
- * Персонализирано генериране на хороскопи
- * Всяка зодия, всяка планета = уникален текст
+ * Избира по едно ЦЯЛО изречение за всяка секция от Knowledge Base.
+ * Никакво съшиване на фрагменти.
+ *
+ * Детерминизъм: един и същ ден + една и съща зодия => същият текст.
+ * Различните секции ползват различни отмествания, за да не съвпадат.
  */
 
 (function (root) {
@@ -10,24 +13,20 @@
 
   var InferenceEngine = {
 
+    /* Транзитен анализ — оставен за наталната част и бъдещо ползване */
     analyzeTransits: function(chart, signIndex) {
       if (!chart || !chart.planets) return { planet: 'moon', aspect: 'trine' };
 
-      var factors = [];
       var refLon = signIndex * 30 + 15;
-
       for (var planetName in chart.planets) {
         if (planetName === 'sun' || planetName === 'asc' || planetName === 'mc') continue;
-
         var planet = chart.planets[planetName];
         var aspect = this.findAspect(planet.lon, refLon);
-
         if (aspect) {
-          factors.push({ planet: planetName, aspect: aspect.type });
+          return { planet: planetName, aspect: aspect.type };
         }
       }
-
-      return factors.length > 0 ? factors[0] : { planet: 'moon', aspect: 'trine' };
+      return { planet: 'moon', aspect: 'trine' };
     },
 
     findAspect: function(lon1, lon2) {
@@ -53,38 +52,28 @@
 
     buildHoroscope: function(chart, signIndex, refDate) {
       var KB = root.KnowledgeBase;
-      if (!KB) return { day: 'Нямам данни.', love: 'Нямам данни.', work: 'Нямам данни.', mood: 'Нямам данни.' };
+      if (!KB || !KB.horoscopes || !KB.horoscopes[signIndex]) {
+        return { day: '', love: '', work: '', mood: '' };
+      }
 
-      var date = refDate || chart.now || new Date();
+      var date = refDate || (chart && chart.now) || new Date();
       var dayNum = this.dayOfYear(date);
+      var blocks = KB.horoscopes[signIndex];
 
-      var factor = this.analyzeTransits(chart, signIndex);
-      var sign = KB.signs[signIndex];
-      var aspect = KB.aspects[factor.aspect];
-
+      // Различно отместване на секция, за да не се падне една и съща позиция
       return {
-        day: this.buildText(factor, sign, aspect, signIndex, dayNum, 'day'),
-        love: this.buildText(factor, sign, aspect, signIndex, dayNum, 'love'),
-        work: this.buildText(factor, sign, aspect, signIndex, dayNum, 'work'),
-        mood: this.buildText(factor, sign, aspect, signIndex, dayNum, 'mood')
+        day:  this.pick(blocks.day,  signIndex, dayNum, 0),
+        love: this.pick(blocks.love, signIndex, dayNum, 1),
+        work: this.pick(blocks.work, signIndex, dayNum, 2),
+        mood: this.pick(blocks.mood, signIndex, dayNum, 3)
       };
     },
 
-    buildText: function(factor, sign, aspect, signIndex, dayNum, section) {
-      // Изберете три изречения от аспекта (детерминирано по знак и ден)
-      var aspectTexts = aspect.daily;
-      var n = aspectTexts.length;
-
-      // Use signIndex to vary base, multiply by prime to avoid divisibility issues
-      var idx1 = (signIndex * 13 + dayNum * 7) % n;
-      var idx2 = (signIndex * 17 + dayNum * 11 + 1) % n;
-      var idx3 = (signIndex * 19 + dayNum * 13 + 2) % n;
-
-      var s1 = aspectTexts[idx1];
-      var s2 = aspectTexts[idx2];
-      var s3 = aspectTexts[idx3];
-
-      return s1 + ' ' + s2 + ' ' + s3;
+    // Детерминистичен избор на едно цяло изречение от масива
+    pick: function(arr, signIndex, dayNum, sectionOffset) {
+      if (!arr || arr.length === 0) return '';
+      var idx = (dayNum + signIndex + sectionOffset * 2) % arr.length;
+      return arr[idx];
     },
 
     dayOfYear: function(date) {
