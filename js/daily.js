@@ -14,20 +14,13 @@
   var DailyHoroscope = {
 
     buildReading: function(chart, signIndex, refDate) {
-      if (!root.Lexicon) {
-        console.error('Lexicon not loaded');
+      if (!root.InferenceEngine) {
+        console.error('InferenceEngine not loaded');
         return { day: '', love: '', work: '', mood: '' };
       }
 
-      var dayNum = dayOfYear(refDate || chart.now || new Date());
-      var dayOfWeek = (refDate || chart.now || new Date()).getDay();
-
-      return {
-        day: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'day', chart),
-        love: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'love', chart),
-        work: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'work', chart),
-        mood: buildHoroscopeText(signIndex, dayNum, dayOfWeek, 'mood', chart)
-      };
+      // Използва новия Inference Engine
+      return root.InferenceEngine.buildHoroscope(chart, signIndex, refDate);
     },
 
     aspectsToSignMid: function(chart, signIndex) {
