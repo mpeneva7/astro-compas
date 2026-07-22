@@ -201,8 +201,8 @@
       html += '</div>';
       return html;
     } catch (e) {
-      console.error('Error in signCardHTML for sign ' + i + ':', e);
-      return '<div class="sign-card-inner"><h3>Грешка</h3><p>Не е възможно да се генерира хороскоп</p></div>';
+      console.error('Error in signCardHTML for sign ' + i + ':', e.message, e.stack);
+      return '<div class="sign-card-inner"><h3>Грешка</h3><p>' + e.message + '</p></div>';
     }
   }
 
