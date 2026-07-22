@@ -203,12 +203,16 @@
         }
       };
 
-      var hash = (signIndex * 1000 + dayNum * 7 + (section.charCodeAt ? section.charCodeAt(0) : 0)) % 100;
       var sectionData = SECTIONS[section];
 
-      var s1 = sectionData.influence[hash % sectionData.influence.length];
-      var s2 = sectionData.practice[(hash + 1) % sectionData.practice.length];
-      var s3 = sectionData.direction[(hash + 2) % sectionData.direction.length];
+      // Различен текст за всяка зодия и ден
+      var idx1 = (signIndex + dayNum) % sectionData.influence.length;
+      var idx2 = (signIndex * 2 + dayNum) % sectionData.practice.length;
+      var idx3 = (signIndex * 3 + dayNum) % sectionData.direction.length;
+
+      var s1 = sectionData.influence[idx1];
+      var s2 = sectionData.practice[idx2];
+      var s3 = sectionData.direction[idx3];
 
       return s1 + ' ' + s2 + ' ' + s3;
     },
