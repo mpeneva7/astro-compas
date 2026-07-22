@@ -86,10 +86,10 @@
               aspectWeight: KB.aspects[northAspect.type].weight,
               importance: 1.1 * KB.aspects[northAspect.type].weight,
               themes: KB.lunarNodes.northNode.themes.concat(KB.aspects[northAspect.type].themes),
-              emotions: [],
+              emotions: KB.lunarNodes.northNode.emotions,
               positive: KB.lunarNodes.northNode.positive,
               negative: KB.lunarNodes.northNode.negative,
-              verbs: [],
+              verbs: KB.lunarNodes.northNode.verbs,
               advice: KB.lunarNodes.northNode.advice
             });
           }
