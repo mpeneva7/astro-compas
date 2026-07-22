@@ -21,6 +21,7 @@
 
     /* ═══════════════════════════════════════════════════════════════
        АНАЛИЗ НА ТРАНЗИТИ
+       Включва: планети, аспекти, лунни възли, ретроградни движения
        ═══════════════════════════════════════════════════════════════ */
 
     analyzeTransits: function(chart, signIndex) {
@@ -32,6 +33,7 @@
       var factors = [];
       var refLon = signIndex * 30 + 15; // Средата на знака
 
+      // Анализирай планетите
       for (var planetName in chart.planets) {
         if (planetName === 'sun' || planetName === 'asc' || planetName === 'mc') continue;
 
@@ -43,6 +45,10 @@
           var KB_aspect = KB.aspects[aspect.type];
 
           if (KB_planet && KB_aspect) {
+            // Провери ако планетата е ретроградна
+            var isRetrograde = planet.retrograde || false;
+            var retrogradeThemes = isRetrograde ? KB.retrograde.themes : [];
+
             factors.push({
               planet: planetName,
               planetName: KB_planet.name,
@@ -50,13 +56,41 @@
               aspect: aspect.type,
               aspectName: KB_aspect.name,
               aspectWeight: KB_aspect.weight,
-              importance: KB_planet.weight * KB_aspect.weight,
-              themes: KB_planet.themes.concat(KB_aspect.themes),
+              importance: KB_planet.weight * KB_aspect.weight * (isRetrograde ? 1.2 : 1),
+              themes: KB_planet.themes.concat(KB_aspect.themes).concat(retrogradeThemes),
               emotions: KB_planet.emotions.concat(KB_aspect.emotions),
-              positive: KB_planet.positive,
-              negative: KB_planet.negative,
+              positive: isRetrograde ? KB.retrograde.positive : KB_planet.positive,
+              negative: isRetrograde ? KB.retrograde.negative : KB_planet.negative,
               verbs: KB_planet.verbs,
-              advice: KB_planet.advice
+              advice: isRetrograde ? KB.retrograde.advice : KB_planet.advice,
+              retrograde: isRetrograde
+            });
+          }
+        }
+      }
+
+      // Анализирай лунни възли ако са налични
+      if (chart.nodes) {
+        var northNode = chart.nodes.northNode;
+        var southNode = chart.nodes.southNode;
+
+        if (northNode) {
+          var northAspect = this.findAspect(northNode.lon, refLon);
+          if (northAspect) {
+            factors.push({
+              planet: 'north_node',
+              planetName: KB.lunarNodes.northNode.name,
+              planetWeight: 1.1,
+              aspect: northAspect.type,
+              aspectName: KB.aspects[northAspect.type].name,
+              aspectWeight: KB.aspects[northAspect.type].weight,
+              importance: 1.1 * KB.aspects[northAspect.type].weight,
+              themes: KB.lunarNodes.northNode.themes.concat(KB.aspects[northAspect.type].themes),
+              emotions: [],
+              positive: KB.lunarNodes.northNode.positive,
+              negative: KB.lunarNodes.northNode.negative,
+              verbs: [],
+              advice: KB.lunarNodes.northNode.advice
             });
           }
         }
