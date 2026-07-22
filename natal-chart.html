@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Натална карта — АстроКомпас</title>
+<meta name="description" content="Калкулатор на наталната карта с астрономични изчисления по VSOP87">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  --background: #140A1E;
+  --foreground: #ECE0F0;
+  --card: #251A32;
+  --card-2: #30243E;
+  --popover: #1E1428;
+  --input-bg: #1E1428;
+  --primary: #B69DE8;
+  --on-primary: #2E1A54;
+  --primary-container: #4A2F7A;
+  --on-primary-container: #EADDFF;
+  --accent: #E8C36A;
+  --accent-hi: #F9C36A;
+  --on-accent: #3A2E05;
+  --tertiary: #9A86C0;
+  --muted: #30243E;
+  --muted-foreground: #CFC2D8;
+  --outline: #968A9F;
+  --outline-variant: #4A3F54;
+  --border: rgba(74, 63, 84, 0.7);
+  --border-soft: rgba(74, 63, 84, 0.45);
+  --destructive: #CF6679;
+  --success: #4CAF50;
+  --radius-lg: 28px;
+  --radius-md: 24px;
+  --radius-sm: 12px;
+  --radius-pill: 100px;
+  --font-display: 'Unbounded', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  padding: 20px;
+}
+
+img { max-width: 100%; display: block; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  text-wrap: balance;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container { max-width: 1152px; margin: 0 auto; }
+
+button { font-family: var(--font-body); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(74,63,84,0.6); border-radius: 3px; }
+
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 14px 34px; border-radius: var(--radius-pill);
+  font-family: var(--font-body); font-weight: 700; font-size: 1rem;
+  border: none; cursor: pointer; transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn:disabled { cursor: not-allowed; }
+.btn-filled {
+  background: var(--primary); color: var(--on-primary);
+  box-shadow: 0 4px 24px rgba(182,157,232,0.32);
+}
+.btn-filled:hover:not(:disabled) { background: #C9B4F2; transform: translateY(-1px); }
+.btn-filled:disabled { background: var(--card-2); color: var(--outline); box-shadow: none; }
+.btn-text {
+  background: rgba(74,47,122,0.45); color: var(--primary);
+  border: 1px solid rgba(182,157,232,0.28); font-weight: 600; padding: 12px 22px;
+}
+.btn-text:hover { background: rgba(74,47,122,0.7); }
+
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(46,26,84,0.4); border-top-color: var(--on-primary);
+  animation: spin 0.7s linear infinite;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.card-2 { background: var(--card-2); }
+
+.section-kicker {
+  text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--outline); margin-bottom: 12px;
+}
+.section-head { text-align: center; margin-bottom: 56px; }
+.section-head h2 { font-size: clamp(1.5rem, 3vw, 2.4rem); color: var(--foreground); }
+.section-head p { margin-top: 12px; color: var(--muted-foreground); max-width: 34rem; margin-left: auto; margin-right: auto; line-height: 1.75; }
+
+/* ── Natal form ───────────────────────────────────────────────────── */
+.natal-form-card { padding: 32px; margin-bottom: 40px; }
+@media (min-width: 640px) { .natal-form-card { padding: 40px; } }
+
+.natal-form-grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .natal-form-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.m3-field { position: relative; }
+.m3-field-label {
+  position: absolute; z-index: 2; top: 0; left: 46px; transform: translateY(-50%);
+  font-size: 0.72rem; font-weight: 500; color: var(--primary);
+  background: var(--input-bg); padding: 0 4px; white-space: nowrap;
+  pointer-events: none;
+}
+.m3-field-box {
+  display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 56px;
+  border-radius: var(--radius-sm); background: var(--input-bg);
+  border: 1px solid var(--border); transition: border-color 0.15s ease;
+}
+.m3-field-box:focus-within { border-color: var(--primary); }
+.m3-field-icon { color: var(--primary); flex-shrink: 0; display: flex; }
+.m3-field-box input, .m3-field-box select {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
+  min-width: 0; color-scheme: dark;
+}
+.m3-field-box input::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
+
+.m3-field-btn {
+  width: 100%; text-align: left; cursor: pointer; font-family: var(--font-body);
+}
+.m3-field-value {
+  flex: 1; font-size: 0.92rem; color: var(--outline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.m3-field-value.filled { color: var(--foreground); }
+.m3-field-caret { color: var(--outline); flex-shrink: 0; }
+.m3-field-label.filled {
+  font-size: 0.72rem; font-weight: 500; color: var(--primary);
+  top: 0; background: var(--input-bg); padding: 0 4px;
+}
+.m3-field-label { transition: all 0.15s ease; }
+
+/* ── M3 modal (date / time pickers) ─────────────────────────────────── */
+.m3-modal-overlay {
+  position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px);
+}
+.m3-modal-panel {
+  width: 100%; max-width: 360px; border-radius: 28px; overflow: hidden;
+  background: #3B2E4A; box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+  animation: fadeUp 0.22s ease both;
+}
+.m3-modal-header { padding: 24px 24px 20px; background: #30243E; }
+.m3-modal-eyebrow { margin: 0 0 4px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; color: var(--muted-foreground); }
+.m3-modal-title { margin: 0; font-family: var(--font-body); font-size: 1.4rem; font-weight: 700; color: var(--foreground); line-height: 1.3; }
+.m3-modal-title.placeholder { color: var(--outline); }
+
+.m3-nav-row { display: flex; align-items: center; gap: 4px; padding: 16px 12px 8px; }
+.m3-icon-btn {
+  width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: var(--muted-foreground); background: transparent; border: none; cursor: pointer; transition: background 0.15s ease; flex-shrink: 0;
+}
+.m3-icon-btn:hover { background: rgba(182,157,232,0.14); }
+.m3-nav-label {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 7px; border-radius: 999px; background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; color: var(--foreground); transition: background 0.15s ease;
+}
+.m3-nav-label:hover { background: rgba(182,157,232,0.1); }
+.m3-nav-label svg { color: var(--primary); }
+
+.m3-day-head { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 16px; margin-bottom: 4px; }
+.m3-day-head span { height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500; color: var(--outline); }
+.m3-day-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 16px 20px; }
+.m3-day-cell {
+  width: 36px; height: 36px; margin: 0 auto; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; font-size: 0.875rem;
+  background: transparent; border: none; cursor: pointer; color: var(--foreground); font-family: var(--font-body);
+  transition: background 0.15s ease;
+}
+.m3-day-cell:hover:not(.selected):not(.outside) { background: rgba(182,157,232,0.16); }
+.m3-day-cell.outside { color: var(--outline-variant); pointer-events: none; }
+.m3-day-cell.today:not(.selected) { color: var(--primary); border: 1px solid var(--primary); }
+.m3-day-cell.selected { background: var(--primary); color: var(--on-primary); font-weight: 700; }
+
+.m3-month-grid, .m3-year-grid-inner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.m3-month-grid { padding: 20px; }
+.m3-year-scroll { max-height: 264px; overflow-y: auto; padding: 4px 20px 16px; }
+.m3-chip {
+  padding: 10px 4px; text-align: center; border-radius: 999px; font-size: 0.85rem;
+  background: transparent; border: none; cursor: pointer; color: var(--foreground); font-family: var(--font-body); transition: background 0.15s ease;
+}
+.m3-chip:hover:not(.selected) { background: rgba(182,157,232,0.14); }
+.m3-chip.today:not(.selected) { color: var(--primary); border: 1px solid var(--primary); }
+.m3-chip.selected { background: var(--primary); color: var(--on-primary); font-weight: 700; }
+
+.m3-modal-divider { height: 1px; background: rgba(74,63,84,0.4); margin: 0 24px; }
+.m3-modal-actions { display: flex; justify-content: flex-end; gap: 4px; padding: 16px 24px; }
+.m3-modal-btn {
+  padding: 9px 20px; border-radius: 999px; font-size: 0.875rem; font-weight: 600; font-family: var(--font-body);
+  border: none; cursor: pointer; transition: background 0.15s ease; background: transparent; color: var(--primary);
+}
+.m3-modal-btn:hover { background: rgba(182,157,232,0.1); }
+.m3-modal-btn.filled { background: var(--primary); color: var(--on-primary); }
+.m3-modal-btn.filled:hover { background: #C9B4F2; }
+.m3-modal-btn:disabled { background: rgba(74,63,84,0.35); color: var(--outline); cursor: not-allowed; }
+
+.m3-time-row { display: flex; align-items: center; gap: 10px; justify-content: center; padding: 28px 24px 30px; }
+.m3-time-box {
+  width: 96px; height: 80px; border-radius: 12px; background: var(--input-bg);
+  border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative;
+  transition: border-color 0.15s ease;
+}
+.m3-time-box.focus { border-color: var(--primary); }
+.m3-time-box.err { border-color: var(--destructive); }
+.m3-time-box input {
+  width: 100%; text-align: center; background: transparent; border: none; outline: none;
+  font-family: var(--font-body); font-size: 2.25rem; font-weight: 700; color: var(--foreground); letter-spacing: 0.04em;
+}
+.m3-time-box .m3-time-sub {
+  position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 0.72rem; color: var(--outline);
+}
+.m3-time-box.err .m3-time-sub { color: var(--destructive); }
+.m3-time-colon { font-size: 2rem; font-weight: 700; color: var(--foreground); margin-bottom: 20px; }
+.m3-time-hint { padding: 0 24px; margin: 0; font-size: 0.75rem; color: var(--outline); }
+
+.city-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20;
+  background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.4); max-height: 220px; overflow-y: auto;
+  display: none;
+}
+.city-dropdown.open { display: block; }
+.city-dropdown button {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; padding: 9px 16px;
+  background: none; border: none; cursor: pointer; font-family: var(--font-body);
+}
+.city-dropdown button:hover { background: rgba(182,157,232,0.1); }
+.city-dropdown .city-name { color: var(--foreground); font-size: 0.9rem; }
+.city-dropdown .city-oblast { color: var(--outline); font-size: 0.74rem; white-space: nowrap; flex-shrink: 0; }
+
+.field-error { display: none; margin: 6px 2px 0; font-size: 0.78rem; color: var(--destructive); }
+.field-error.show { display: block; }
+.m3-field-box.error { border-color: var(--destructive); }
+.m3-field-box.error:focus-within { border-color: var(--destructive); }
+
+.natal-submit-row { display: flex; justify-content: center; margin-top: 34px; }
+
+.natal-hint { text-align: center; font-size: 0.8rem; color: var(--outline); margin-top: 16px; }
+
+/* ── Results ──────────────────────────────────────────────────────── */
+#natal-results { display: none; flex-direction: column; gap: 28px; animation: fadeUp 0.8s ease both; }
+#natal-results.show { display: flex; }
+
+.wheel-bigthree { display: grid; gap: 24px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 860px) { .wheel-bigthree { grid-template-columns: 1fr 1fr; } }
+.wheel-card { padding: 14px; display: flex; align-items: center; justify-content: center; }
+.wheel-card svg { width: 100%; max-width: 300px; margin: 0 auto; display: block; }
+
+.bigthree-col { display: flex; flex-direction: column; gap: 10px; }
+.bigthree-col h3 { font-size: 1.15rem; color: var(--foreground); margin-bottom: 0; }
+.bigthree-list { display: flex; flex-direction: column; gap: 10px; }
+.bigthree-item { display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-radius: 16px; }
+.bigthree-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+.bigthree-item .k { font-size: 0.72rem; color: var(--outline); margin: 0 0 1px; }
+.bigthree-item .v { font-family: var(--font-display); font-size: 1rem; font-weight: 600; line-height: 1.2; margin: 0; }
+.bigthree-item .v small { color: var(--outline); font-weight: 400; font-family: var(--font-body); font-size: 0.85rem; margin-left: 6px; }
+.bigthree-item .d { font-size: 0.76rem; color: var(--muted-foreground); margin: 2px 0 0; line-height: 1.3; }
+
+.table-card { overflow: hidden; }
+.table-card-head { padding: 20px 24px; border-bottom: 1px solid var(--border-soft); }
+.table-card-head h3 { font-size: 1rem; color: var(--foreground); }
+
+.planet-row { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid rgba(74,63,84,0.25); transition: background 0.15s ease; }
+.planet-row:last-child { border-bottom: none; }
+.planet-row:hover { background: rgba(182,157,232,0.04); }
+.planet-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+.planet-row .pname { flex: 1; font-size: 0.9rem; font-weight: 500; }
+.planet-row .psign { font-size: 0.9rem; color: var(--muted-foreground); min-width: 5.5rem; }
+.planet-row .pdeg { font-size: 0.85rem; color: var(--outline); min-width: 4.2rem; text-align: right; font-variant-numeric: tabular-nums; }
+.planet-row .phouse-chip { font-size: 0.75rem; padding: 3px 11px; border-radius: var(--radius-pill); background: rgba(74,63,84,0.35); color: var(--muted-foreground); white-space: nowrap; }
+.planet-row .pretro { font-size: 0.7rem; padding: 2px 8px; border-radius: var(--radius-pill); background: rgba(207,102,121,0.18); color: var(--destructive); font-weight: 700; }
+
+.aspect-row { display: flex; align-items: center; gap: 16px; padding: 15px 24px; border-bottom: 1px solid rgba(74,63,84,0.25); }
+.aspect-row:last-child { border-bottom: none; }
+.aspect-dot-ring { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.aspect-dot { width: 10px; height: 10px; border-radius: 50%; }
+.aspect-text { flex: 1; font-size: 0.9rem; }
+.aspect-text .asp-name { color: var(--accent); }
+.aspect-orb { font-size: 0.75rem; color: var(--outline); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.explainer-card { padding: 28px; background: rgba(74,47,122,0.14); border: 1px solid rgba(182,157,232,0.18); }
+.explainer-card h3 { font-size: 1rem; color: var(--primary); margin-bottom: 12px; }
+.explainer-card p { color: var(--muted-foreground); line-height: 1.82; font-size: 0.9rem; margin: 0; }
+
+.download-btn { width: 100%; margin-top: 4px; }
+
+.header-top {
+  max-width: 1152px; margin: 0 auto 40px;
+  display: flex; align-items: center; gap: 16px;
+}
+.back-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 16px; border-radius: 999px;
+  background: rgba(182,157,232,0.1); border: 1px solid rgba(182,157,232,0.2);
+  color: var(--foreground); font-weight: 600; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.back-btn:hover { background: rgba(182,157,232,0.15); }
+</style>
+</head>
+<body>
+
+<div class="header-top">
+  <a href="index.html" class="back-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Назад на начало
+  </a>
+</div>
+
+<main class="container">
+
+  <div class="section-head">
+    <p class="section-kicker">Персонализирано</p>
+    <h2>Натална карта</h2>
+    <p>Въведете рождените си данни и разкрийте уникалния космически отпечатък на личността ви</p>
+  </div>
+
+  <form class="card natal-form-card" id="natal-form" style="max-width:960px; margin:0 auto;">
+    <div class="m3-field" id="name-field-wrap" style="margin-bottom:20px;">
+      <span class="m3-field-label" id="name-field-label">Име (по избор)</span>
+      <div class="m3-field-box">
+        <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        <input type="text" id="birth-name" autocomplete="off" placeholder="напр. Мария Иванова">
+      </div>
+    </div>
+    <div class="natal-form-grid">
+      <div class="m3-field">
+        <span class="m3-field-label" id="date-field-label">Дата на раждане</span>
+        <button type="button" class="m3-field-box m3-field-btn" id="date-field-btn">
+          <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <span class="m3-field-value" id="date-field-value"></span>
+          <svg class="m3-field-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="m3-field">
+        <span class="m3-field-label" id="time-field-label">Час на раждане</span>
+        <button type="button" class="m3-field-box m3-field-btn" id="time-field-btn">
+          <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="m3-field-value" id="time-field-value"></span>
+          <svg class="m3-field-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+      <div class="m3-field" id="city-field-wrap">
+        <span class="m3-field-label">Място на раждане</span>
+        <div class="m3-field-box" id="city-field-box">
+          <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          <input type="text" id="city-input" autocomplete="off" placeholder="напр. София">
+        </div>
+        <div class="city-dropdown" id="city-dropdown"></div>
+        <p class="field-error" id="city-error"></p>
+      </div>
+    </div>
+    <div class="natal-submit-row">
+      <button type="submit" class="btn btn-filled" id="calc-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
+        <span id="calc-btn-label">Изчисли картата</span>
+      </button>
+    </div>
+  </form>
+
+  <div id="natal-results">
+    <div class="wheel-bigthree">
+      <div class="card wheel-card">
+        <div id="wheel-container"></div>
+      </div>
+      <div class="bigthree-col">
+        <h3>Голямата тройка</h3>
+        <div id="bigthree-container" class="bigthree-list"></div>
+        <button type="button" class="btn btn-text download-btn" id="download-pdf-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="download-pdf-label">Изтегли картата (PDF)</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-card-head"><h3>Планети и позиции</h3></div>
+      <div id="planets-table"></div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-card-head"><h3>Аспекти</h3></div>
+      <div id="aspects-list"></div>
+    </div>
+
+    <div class="card explainer-card">
+      <h3>Какво е натална карта?</h3>
+      <p>Наталната карта (или хороскоп на раждането) е астрологична карта на небето в момента на вашето раждане. Тя показва позициите на Слънцето, Луната и планетите в зодиакалните знаци и 12-те астрологични дома. Картата се изчислява по точно определено астрономично място и час на раждане. Всяка планета представлява различен аспект на личността — от его и емоции до начина на общуване и амбиции. Наталната карта не диктува съдбата, а разкрива вродените потенциали и предразположения, предоставяйки ценен инструмент за самопознание и вдъхновение.</p>
+    </div>
+  </div>
+
+</main>
+
+<script src="js/vendor/jspdf.umd.min.js"></script>
+<script src="js/vendor/svg2pdf.umd.min.js"></script>
+<script src="js/vendor/pdf-fonts.js"></script>
+<script src="js/astro-core.js"></script>
+<script src="js/cities.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
