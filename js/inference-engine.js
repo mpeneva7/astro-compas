@@ -73,9 +73,12 @@
     buildText: function(factor, sign, aspect, signIndex, dayNum, section) {
       // Изберете три изречения от аспекта (детерминирано по знак и ден)
       var aspectTexts = aspect.daily;
-      var idx1 = (signIndex + dayNum) % aspectTexts.length;
-      var idx2 = (signIndex * 2 + dayNum) % aspectTexts.length;
-      var idx3 = (signIndex * 3 + dayNum) % aspectTexts.length;
+      var n = aspectTexts.length;
+
+      // Use signIndex to vary base, multiply by prime to avoid divisibility issues
+      var idx1 = (signIndex * 13 + dayNum * 7) % n;
+      var idx2 = (signIndex * 17 + dayNum * 11 + 1) % n;
+      var idx3 = (signIndex * 19 + dayNum * 13 + 2) % n;
 
       var s1 = aspectTexts[idx1];
       var s2 = aspectTexts[idx2];
