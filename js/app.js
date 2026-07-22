@@ -177,9 +177,9 @@
 
   function signCardHTML(chart, i) {
     var sign = SIGN_INFO[i];
-    var reading = DailyHoroscope.buildReading(chart, i, chart.now);
+    var reading = DailyHoroscope.buildReading(chart, i, chart.now) || { day: '', love: '', work: '', mood: '' };
     var isOpen = openSignIndex === i;
-    var dayText = isOpen ? reading.day : shortenText(reading.day);
+    var dayText = isOpen ? (reading.day || '') : shortenText(reading.day || '');
     var html =
       '<div class="sign-card-inner">' +
       '<div class="sign-glyph-circle" style="background:' + sign.c + '18; border:1px solid ' + sign.c + '40; color:' + sign.c + ';">' + sign.g + '</div>' +
@@ -188,9 +188,9 @@
       '<p class="sign-day-text">' + dayText + '</p>';
     if (isOpen) {
       html += '<div class="sign-detail">' +
-        '<div class="sign-detail-item"><p class="label" style="color:#EF9A9A;">♥ Любов</p><p>' + reading.love + '</p></div>' +
-        '<div class="sign-detail-item"><p class="label" style="color:#E8C36A;">★ Работа</p><p>' + reading.work + '</p></div>' +
-        '<div class="sign-detail-item"><p class="label" style="color:#B69DE8;">☾ Настроение</p><p>' + reading.mood + '</p></div>' +
+        '<div class="sign-detail-item"><p class="label" style="color:#EF9A9A;">♥ Любов</p><p>' + (reading.love || '') + '</p></div>' +
+        '<div class="sign-detail-item"><p class="label" style="color:#E8C36A;">★ Работа</p><p>' + (reading.work || '') + '</p></div>' +
+        '<div class="sign-detail-item"><p class="label" style="color:#B69DE8;">☾ Настроение</p><p>' + (reading.mood || '') + '</p></div>' +
         '<div class="sign-tags">' +
         '<span class="sign-tag" style="background:' + sign.c + '18; color:' + sign.c + '; border:1px solid ' + sign.c + '38;">' + sign.el + '</span>' +
         '<span class="sign-tag muted">' + sign.ruler + '</span>' +
