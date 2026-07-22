@@ -126,7 +126,8 @@
        ═══════════════════════════════════════════════════════════════ */
 
     hashKey: function(signIndex, dayNum, section, offset) {
-      return (signIndex * 1000 + dayNum * 3 + section.charCodeAt(0) + offset) % 1000000;
+      var sectionValue = typeof section === 'string' ? section.charCodeAt(0) : section;
+      return (signIndex * 1000 + dayNum * 3 + sectionValue + offset) % 1000000;
     },
 
     pickFromArray: function(array, hash) {
