@@ -1,11 +1,11 @@
 /*
- * Астро Компас — Inference Engine (v2)
+ * Астро Компас — Inference Engine (v4)
  *
- * Генериране на дневни хороскопи:
- * - Три изречения: влияние, практика, насока
- * - Ясен, естествен език
- * - Без абстрактни концепции
- * - Фиксирана структура за всички знаци
+ * Избира по едно ЦЯЛО изречение за всяка секция от Knowledge Base.
+ * Никакво съшиване на фрагменти.
+ *
+ * Детерминизъм: един и същ ден + една и съща зодия => същият текст.
+ * Различните секции ползват различни отмествания, за да не съвпадат.
  */
 
 (function (root) {
@@ -13,31 +13,20 @@
 
   var InferenceEngine = {
 
-    /* ═══════════════════════════════════════════════════════════════
-       АНАЛИЗ НА ТРАНЗИТИ
-       ═══════════════════════════════════════════════════════════════ */
-
+    /* Транзитен анализ — оставен за наталната част и бъдещо ползване */
     analyzeTransits: function(chart, signIndex) {
-      if (!chart || !chart.planets) return [];
+      if (!chart || !chart.planets) return { planet: 'moon', aspect: 'trine' };
 
-      var factors = [];
       var refLon = signIndex * 30 + 15;
-
       for (var planetName in chart.planets) {
         if (planetName === 'sun' || planetName === 'asc' || planetName === 'mc') continue;
-
         var planet = chart.planets[planetName];
         var aspect = this.findAspect(planet.lon, refLon);
-
         if (aspect) {
-          factors.push({
-            planet: planetName,
-            aspect: aspect.type
-          });
+          return { planet: planetName, aspect: aspect.type };
         }
       }
-
-      return factors;
+      return { planet: 'moon', aspect: 'trine' };
     },
 
     findAspect: function(lon1, lon2) {
@@ -55,171 +44,37 @@
       for (var i = 0; i < ASPECTS.length; i++) {
         var def = ASPECTS[i];
         if (Math.abs(diff - def.angle) <= def.orb) {
-          return { type: def.type, angle: def.angle };
+          return { type: def.type };
         }
       }
       return null;
     },
 
-    /* ═══════════════════════════════════════════════════════════════
-       ГЕНЕРИРАНЕ НА ХОРОСКОП
-       ═══════════════════════════════════════════════════════════════ */
-
     buildHoroscope: function(chart, signIndex, refDate) {
-      var date = refDate || chart.now || new Date();
-      var dayNum = this.dayOfYear(date);
-
-      var factors = this.analyzeTransits(chart, signIndex);
-
-      // Ако няма фактори, използвай паден (луна винаги има влияние)
-      if (factors.length === 0) {
-        factors = [{ planet: 'moon', aspect: 'conjunction' }];
+      var KB = root.KnowledgeBase;
+      if (!KB || !KB.horoscopes || !KB.horoscopes[signIndex]) {
+        return { day: '', love: '', work: '', mood: '' };
       }
 
-      var primaryFactor = factors[0];
+      var date = refDate || (chart && chart.now) || new Date();
+      var dayNum = this.dayOfYear(date);
+      var blocks = KB.horoscopes[signIndex];
 
+      // Различно отместване на секция, за да не се падне една и съща позиция
       return {
-        day: this.generateHoroscope(primaryFactor, signIndex, dayNum, 'day', chart),
-        love: this.generateHoroscope(primaryFactor, signIndex, dayNum, 'love', chart),
-        work: this.generateHoroscope(primaryFactor, signIndex, dayNum, 'work', chart),
-        mood: this.generateHoroscope(primaryFactor, signIndex, dayNum, 'mood', chart)
+        day:  this.pick(blocks.day,  signIndex, dayNum, 0),
+        love: this.pick(blocks.love, signIndex, dayNum, 1),
+        work: this.pick(blocks.work, signIndex, dayNum, 2),
+        mood: this.pick(blocks.mood, signIndex, dayNum, 3)
       };
     },
 
-    generateHoroscope: function(factor, signIndex, dayNum, section, chart) {
-      var PLANETS = {
-        sun: 'слънцето е активно',
-        moon: 'луната влияе силно',
-        mercury: 'комуникацията ти е в центъра',
-        venus: 'чувствата и отношенията са важни',
-        mars: 'энергията ти е висока',
-        jupiter: 'удачата е на твоя страна',
-        saturn: 'нужна е дисциплина',
-        uranus: 'промените са неизбежни',
-        neptune: 'интуицията ти е силна',
-        pluto: 'трансформация се случва'
-      };
-
-      var ASPECTS = {
-        conjunction: 'пълна енергия',
-        opposition: 'противоречия трябва да се решат',
-        square: 'предизвикателство, но наученост е възможна',
-        trine: 'хармония и лекота',
-        sextile: 'добра възможност'
-      };
-
-      var SECTIONS = {
-        day: {
-          influence: [
-            'Днес си склонен да действаш по тумаџа си.',
-            'Днес си по рационален и преценяващ.',
-            'Днес чувствата ти водят.',
-            'Днес можеш да направиш голямо нещо.',
-            'Днес е добър ден за нови начинания.'
-          ],
-          practice: [
-            'Ако имаш идея, която чакаш да осъществиш, сега е време.',
-            'Действай смело, но внимателно.',
-            'Слушай себе си и следвай инстинкта си.',
-            'Възможностите днес са повече.',
-            'Не отлагай важните неща.'
-          ],
-          direction: [
-            'Прави движение към целта си.',
-            'Не оставай на място.',
-            'Действай с цел и ясност.',
-            'Отворе очи за възможностите.',
-            'Бъди активен и решително.'
-          ]
-        },
-        love: {
-          influence: [
-            'Днес чувствата ти са по искрени.',
-            'Днес си отворен за близост.',
-            'Днес любовта привлича.',
-            'Днес емоциите са видими.',
-            'Днес си по нежен.'
-          ],
-          practice: [
-            'Хубаво е да разговориш откровено с тези, които те интересуват.',
-            'Свои чувства не скривай.',
-            'Можеш да постигнеш разбиране с други хора.',
-            'Близостта днес е възможна.',
-            'Отношенията ти получават внимание.'
-          ],
-          direction: [
-            'Изяви се с искреност.',
-            'Не се бой да покажеш как се чувстваш.',
-            'Слушай другите.',
-            'Дай място на любовта.',
-            'Открой сърцето си.'
-          ]
-        },
-        work: {
-          influence: [
-            'Днес можеш да направиш продуктивна работа.',
-            'Днес си сконцентриран.',
-            'Днес плановете ти могат да се осъществят.',
-            'Днес си фокусиран.',
-            'Днес резултатите са видими.'
-          ],
-          practice: [
-            'Добър момент е да завършиш започнатите проекти.',
-            'Вложи енергия в важните задачи.',
-            'Планирай дългосрочно.',
-            'Работата ти получава импулс.',
-            'Прогресът е възможен.'
-          ],
-          direction: [
-            'Действай по план.',
-            'Завърши поне един важен проект.',
-            'Работи със смисъл.',
-            'Не пренебрегвай детайлите.',
-            'Остави следа в работата си.'
-          ]
-        },
-        mood: {
-          influence: [
-            'Днес си по оптимистичен.',
-            'Днес настроението ти е добро.',
-            'Днес си спокоен.',
-            'Днес си вътрешно хармоничен.',
-            'Днес си надежден.'
-          ],
-          practice: [
-            'Това настроение ти дава сила за трудния день.',
-            'Използвай го, за да помогнеш на други.',
-            'Наслади се на спокойствието.',
-            'Преживей момента пълноценно.',
-            'Вътрешния мир пазеше.'
-          ],
-          direction: [
-            'Распредели позитивната енергия.',
-            'Останал спокоен при предизвикателствата.',
-            'Дај път на радостта.',
-            'Пази уравновесеността си.',
-            'Благодари за добрия ден.'
-          ]
-        }
-      };
-
-      var sectionData = SECTIONS[section];
-
-      // Различен текст за всяка зодия и ден
-      var idx1 = (signIndex + dayNum) % sectionData.influence.length;
-      var idx2 = (signIndex * 2 + dayNum) % sectionData.practice.length;
-      var idx3 = (signIndex * 3 + dayNum) % sectionData.direction.length;
-
-      var s1 = sectionData.influence[idx1];
-      var s2 = sectionData.practice[idx2];
-      var s3 = sectionData.direction[idx3];
-
-      return s1 + ' ' + s2 + ' ' + s3;
+    // Детерминистичен избор на едно цяло изречение от масива
+    pick: function(arr, signIndex, dayNum, sectionOffset) {
+      if (!arr || arr.length === 0) return '';
+      var idx = (dayNum + signIndex + sectionOffset * 2) % arr.length;
+      return arr[idx];
     },
-
-    /* ═══════════════════════════════════════════════════════════════
-       ПОМОЩНИ ФУНКЦИИ
-       ═══════════════════════════════════════════════════════════════ */
 
     dayOfYear: function(date) {
       var start = new Date(date.getFullYear(), 0, 0);
