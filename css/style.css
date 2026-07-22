@@ -289,6 +289,7 @@ section { padding: 96px 20px; }
   border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease;
   background: var(--card); border: 1px solid var(--border-soft);
   grid-column: span 1;
+  min-height: 120px;
 }
 .sign-card.open { background: var(--card-2); grid-column: span 1; box-shadow: 0 8px 36px rgba(0,0,0,0.25); }
 .sign-card:hover:not(.open) { border-color: rgba(182,157,232,0.35); }
