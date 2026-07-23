@@ -477,12 +477,12 @@ section { padding: 96px 20px; }
 #natal-results { display: none; flex-direction: column; gap: 28px; animation: fadeUp 0.8s ease both; }
 #natal-results.show { display: flex; }
 
-.wheel-bigthree { display: grid !important; gap: 24px; grid-template-columns: 1fr !important; align-items: stretch; }
-@media (min-width: 800px) { .wheel-bigthree { grid-template-columns: 1fr 1fr !important; } }
-.wheel-card { padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 0; }
-.wheel-card svg { width: 100%; max-width: 340px; margin: 0 auto; display: block; }
+.wheel-bigthree { display: grid !important; gap: 32px; grid-template-columns: 1fr !important; align-items: start; }
+@media (min-width: 900px) { .wheel-bigthree { grid-template-columns: minmax(340px, auto) 1fr !important; } }
+.wheel-card { padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 0; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.wheel-card svg { width: 100%; max-width: 320px; margin: 0 auto; display: block; }
 
-.bigthree-col { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+.bigthree-col { display: flex; flex-direction: column; gap: 12px; }
 .bigthree-col h3 { font-size: 1.15rem; color: var(--foreground); margin: 0; }
 .bigthree-list { display: flex; flex-direction: column; gap: 12px; }
 .bigthree-item { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; }
