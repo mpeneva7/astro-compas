@@ -681,6 +681,84 @@
         doc.text('Изчислено по VSOP87 / Placidus', M, PH - 11);
         doc.text('astrology-compass.com', PW - M, PH - 11, { align: 'right' });
 
+        // ── Втора страница: Транзити ──
+        doc.addPage();
+        y = M;
+
+        // Заглавие
+        doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+        doc.setFont('AstroSans', 'bold');
+        doc.setFontSize(14);
+        doc.text('Текущи транзити', M, y);
+        y += 8;
+
+        // Дата на транзитите (днес)
+        var today = new Date();
+        doc.setFontSize(9);
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        doc.setFont('AstroSans', 'normal');
+        doc.text(today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear(), M, y);
+        y += 8;
+
+        // Получи текущите планети (транзити)
+        var nowJd = AstroCore.julianDay(today.getUTCFullYear(), today.getUTCMonth() + 1, today.getUTCDate(), today.getUTCHours(), today.getUTCMinutes(), today.getUTCSeconds());
+        var nowT = AstroCore.centuriesSinceJ2000(nowJd);
+        var transitPlanets = {};
+        chart.order.forEach(function (name) {
+          var pos = AstroCore.planetLongitude(name, nowT);
+          transitPlanets[name] = Object.assign({ name: name }, pos, AstroCore.longitudeToSign(pos.lon));
+        });
+
+        // Таблица с транзити
+        doc.setFont('AstroSans', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(INK[0], INK[1], INK[2]);
+        doc.text('Планета', M + 2, y);
+        doc.text('Текущ знак', M + 60, y);
+        doc.text('Градус', M + 115, y);
+        doc.text('Аспект до натален', M + 145, y);
+        y += 5;
+
+        doc.setDrawColor(LINE[0], LINE[1], LINE[2]);
+        doc.setLineWidth(0.2);
+        doc.line(M, y, PW - M, y);
+        y += 5;
+
+        doc.setFontSize(8.5);
+        chart.order.forEach(function (name, i) {
+          var natP = chart.planets[name];
+          var tranP = transitPlanets[name];
+          var diff = (tranP.lon - natP.lon + 360) % 360;
+          var aspect = '';
+          if (Math.abs(diff - 0) < 8) aspect = '☌ 0°';
+          else if (Math.abs(diff - 60) < 6) aspect = '✱ 60°';
+          else if (Math.abs(diff - 90) < 6) aspect = '□ 90°';
+          else if (Math.abs(diff - 120) < 6) aspect = '△ 120°';
+          else if (Math.abs(diff - 180) < 8) aspect = '☍ 180°';
+
+          if (i % 2 === 1) {
+            doc.setFillColor(248, 246, 251);
+            doc.rect(M, y - 3.2, PW - 2 * M, 5.2, 'F');
+          }
+          doc.setTextColor(INK[0], INK[1], INK[2]);
+          doc.setFont('AstroSans', 'normal');
+          doc.text(AstroCore.PLANET_SYMBOLS[name] + ' ' + tranP.nameBg, M + 2, y);
+          doc.text(tranP.symbol + ' ' + tranP.sign, M + 60, y);
+          doc.text(fmtDeg(tranP), M + 115, y);
+          doc.setTextColor(aspect ? GOLD[0] : MUTED[0], aspect ? GOLD[1] : MUTED[1], aspect ? GOLD[2] : MUTED[2]);
+          doc.text(aspect || '-', M + 145, y);
+          y += 5.2;
+        });
+
+        // Долен ред на втора страница
+        doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]);
+        doc.setLineWidth(0.3);
+        doc.line(M, PH - 16, PW - M, PH - 16);
+        doc.setFontSize(8);
+        doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+        doc.setFont('AstroSans', 'normal');
+        doc.text('Транзити — текущо положение на планетите спрямо наталната карта', M, PH - 11);
+
         // ── Име на файла ──
         var namePart = o.name ? (slugify(o.name) || '') : '';
         var datePart = o.year + '-' + pad2(o.month) + '-' + pad2(o.day);
