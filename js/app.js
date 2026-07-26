@@ -94,7 +94,28 @@
 
   function getNowChart() {
     var now = new Date();
-    var jd = AstroCore.julianDay(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+    var year = now.getUTCFullYear();
+    var month = now.getUTCMonth() + 1;
+    var day = now.getUTCDate();
+    var hours = now.getUTCHours();
+    var minutes = now.getUTCMinutes();
+    var seconds = now.getUTCSeconds();
+
+    // Преобразуване в България UTC+2/+3
+    var bgOffset = guessBulgariaOffset(month);
+    hours += bgOffset;
+    if (hours >= 24) {
+      hours -= 24;
+      day += 1;
+      var daysInMonth = new Date(year, month, 0).getDate();
+      if (day > daysInMonth) {
+        day = 1;
+        month += 1;
+        if (month > 12) { month = 1; year += 1; }
+      }
+    }
+
+    var jd = AstroCore.julianDay(year, month, day, hours, minutes, seconds);
     var T = AstroCore.centuriesSinceJ2000(jd);
     var order = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
     var planets = {};
