@@ -456,12 +456,12 @@
   ];
 
   function moonPhase(sunLon, moonLon) {
-    var angle = norm360(moonLon - sunLon);
+    var angle = norm360(sunLon - moonLon);
     var phaseInfo = null;
     for (var i = 0; i < MOON_PHASES_BG.length; i++) {
       if (angle <= MOON_PHASES_BG[i].max) { phaseInfo = MOON_PHASES_BG[i]; break; }
     }
-    var illumination = (1 - Math.cos(angle * DEG2RAD)) / 2;
+    var illumination = (1 + Math.cos(angle * DEG2RAD)) / 2;
     return { angle: angle, name: phaseInfo.name, symbol: phaseInfo.symbol, illumination: illumination };
   }
 
