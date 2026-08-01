@@ -1053,9 +1053,16 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initChrome();
-    var nowChart = getNowChart();
-    renderMoon(nowChart);
-    renderHoroscope(nowChart);
+
+    function updateMoonAndHoroscope() {
+      var nowChart = getNowChart();
+      renderMoon(nowChart);
+      renderHoroscope(nowChart);
+    }
+
+    updateMoonAndHoroscope();
+    setInterval(updateMoonAndHoroscope, 60000);
+
     initNatalForm();
   });
 })();
