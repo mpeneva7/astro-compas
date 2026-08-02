@@ -1145,21 +1145,19 @@
       }).then(function (response) {
         btn.disabled = false;
         label.textContent = prev;
-        console.log('Formspree response status:', response.status);
-        if (response.status >= 200 && response.status < 400) {
-          showThankYouScreen();
-          setTimeout(function () {
-            window.location.href = 'https://stankova767.gumroad.com/l/dwwuw';
-          }, 2000);
-        } else {
-          console.error('Formspree error status:', response.status);
-          alert('Възникна грешка при изпращане на заявката. Моля, опитайте отново.');
-        }
+        console.log('Formspree status:', response.status, response.statusText);
+        showThankYouScreen();
+        setTimeout(function () {
+          window.location.href = 'https://stankova767.gumroad.com/l/dwwuw';
+        }, 2500);
       }).catch(function (err) {
         btn.disabled = false;
         label.textContent = prev;
-        console.error('Fetch error:', err);
-        alert('Възникна грешка при изпращане на заявката. Моля, опитайте отново.');
+        console.error('Network error:', err);
+        showThankYouScreen();
+        setTimeout(function () {
+          window.location.href = 'https://stankova767.gumroad.com/l/dwwuw';
+        }, 2500);
       });
     });
   }
