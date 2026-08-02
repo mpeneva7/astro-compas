@@ -1163,15 +1163,29 @@
   }
 
   function showThankYouScreen() {
-    var modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;';
-    modal.innerHTML = '<div style="background:var(--card-1); border-radius:12px; padding:40px; max-width:400px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.3);">' +
-      '<h2 style="color:var(--foreground); margin-bottom:16px;">Благодаря за заявката!</h2>' +
-      '<p style="color:var(--secondary); font-size:0.95rem; line-height:1.6; margin-bottom:0;">' +
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:9998; backdrop-filter:blur(4px);';
+
+    var toast = document.createElement('div');
+    toast.style.cssText = 'background:#1E1428; border:1px solid rgba(182,157,232,0.2); border-radius:16px; padding:32px 28px; max-width:420px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:slideUp 0.4s cubic-bezier(0.22,1,0.36,1) both; z-index:9999;';
+
+    toast.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; margin-bottom:16px; width:48px; height:48px; background:rgba(76,175,80,0.15); border-radius:50%; margin-left:auto; margin-right:auto;">' +
+      '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<polyline points="20 6 9 17 4 12"></polyline>' +
+      '</svg></div>' +
+      '<h2 style="color:#E8E6ED; margin:0 0 12px; font-size:1.25rem; font-weight:600; letter-spacing:-0.5px;">Благодаря за заявката!</h2>' +
+      '<p style="color:#B0ACBA; font-size:0.95rem; line-height:1.7; margin:0;">' +
       'Получих твоите данни. До 12 часа ще работя лично по картата ти и ще я изпратя на посочения имейл. ' +
       'Провери и папка Спам, за всеки случай.' +
-      '</p></div>';
-    document.body.appendChild(modal);
+      '</p>';
+
+    overlay.appendChild(toast);
+
+    var style = document.createElement('style');
+    style.textContent = '@keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }';
+    document.head.appendChild(style);
+
+    document.body.appendChild(overlay);
   }
 
   /* ───────────────────────── Инициализация ───────────────────────── */
