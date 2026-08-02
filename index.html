@@ -146,11 +146,49 @@
             <p class="field-error" id="city-error"></p>
           </div>
         </div>
-        <div class="natal-submit-row">
-          <button type="submit" class="btn btn-filled" id="calc-btn">
+
+        <div class="natal-form-grid">
+          <div class="m3-field">
+            <span class="m3-field-label">Пол</span>
+            <div class="m3-field-box">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg></span>
+              <select id="gender-input" style="flex:1; border:none; background:transparent; outline:none; font-family:var(--font-body); font-size:0.92rem; color:var(--foreground); color-scheme:dark;">
+                <option value="">Избери пол</option>
+                <option value="female">Жена</option>
+                <option value="male">Мъж</option>
+              </select>
+            </div>
+            <p class="field-error" id="gender-error"></p>
+          </div>
+          <div class="m3-field">
+            <span class="m3-field-label">Имейл</span>
+            <div class="m3-field-box">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+              <input type="email" id="email-input" autocomplete="off" placeholder="твой.имейл@example.com">
+            </div>
+            <p class="field-error" id="email-error"></p>
+          </div>
+        </div>
+        <div class="natal-buttons-row">
+          <button type="button" class="btn btn-filled" id="view-quick-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
-            <span id="calc-btn-label">Изчисли картата</span>
+            <span>Виж асцендент, луна и зодия</span>
           </button>
+          <button type="button" class="btn btn-tonal" id="download-pdf-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Свали натална карта с транзити</span>
+          </button>
+        </div>
+
+        <div class="natal-service-box">
+          <div class="service-description">
+            <p>Заяви разчитане на наталната си карта и разбери какво ти вещае годината напред. Ще получиш подробен анализ на личността, отношенията, работата и финансите ти, заедно с прогноза за важните периоди в годината. Работя лично по всяка карта и до 12 часа след заплащане ще получиш готовото разчитане на посочения имейл. Приемам ограничен брой заявки на ден, за да работя внимателно по всяка.</p>
+          </div>
+          <button type="button" class="btn btn-filled" id="full-reading-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
+            <span>Заяви пълно разчитане</span>
+          </button>
+          <p class="service-price" id="price-note" style="display:none;">€30</p>
         </div>
       </form>
 
