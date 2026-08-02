@@ -131,7 +131,7 @@
   function moonIllustrationSVG(phaseAngleDeg) {
     var phase = (phaseAngleDeg % 360) / 360;
     var cx = 100, cy = 100, r = 74;
-    var illum = (1 + Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
+    var illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
     var clipX = cx - r + 2 * r * illum;
     var clipId = 'mclip' + Math.round(Math.random() * 10000);
