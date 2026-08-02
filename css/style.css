@@ -460,6 +460,15 @@ section { padding: 96px 20px; }
 .m3-field-box.error { border-color: var(--destructive); }
 .m3-field-box.error:focus-within { border-color: var(--destructive); }
 
+.natal-buttons-row { display: flex; flex-direction: column; gap: 12px; justify-content: center; margin-top: 34px; }
+@media (min-width: 640px) { .natal-buttons-row { flex-direction: row; gap: 12px; } }
+.natal-buttons-row .btn { flex: 1; }
+
+.natal-service-box { margin-top: 50px; padding: 28px; background: rgba(74,47,122,0.12); border: 1px solid rgba(182,157,232,0.18); border-radius: var(--radius-lg); text-align: center; }
+.service-description { margin-bottom: 24px; }
+.service-description p { color: var(--muted-foreground); line-height: 1.8; font-size: 0.95rem; margin: 0; }
+.service-price { color: var(--accent); font-size: 1.2rem; font-weight: 700; margin: 0; }
+
 .natal-submit-row { display: flex; justify-content: center; margin-top: 34px; }
 
 .natal-hint { text-align: center; font-size: 0.8rem; color: var(--outline); margin-top: 16px; }

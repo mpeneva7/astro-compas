@@ -869,6 +869,88 @@
     }
   }
 
+  function showGenderError(msg) {
+    var err = $('gender-error');
+    if (msg) { err.textContent = msg; err.classList.add('show'); }
+    else { err.classList.remove('show'); err.textContent = ''; }
+  }
+  function showEmailError(msg) {
+    var err = $('email-error');
+    if (msg) { err.textContent = msg; err.classList.add('show'); }
+    else { err.classList.remove('show'); err.textContent = ''; }
+  }
+
+  function validateEmail(email) {
+    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  function validateFormFields() {
+    var errors = {};
+    clearCityError();
+    showGenderError('');
+    showEmailError('');
+
+    if (!selectedBirthDate) {
+      errors.date = true;
+    }
+    var city = resolveCity();
+    if (!city) {
+      var typed = $('city-input').value.trim();
+      showCityError(typed
+        ? 'Няма населено място „' + typed + '" в списъка. Изберете от предложенията.'
+        : 'Моля, изберете място на раждане от списъка.');
+      errors.city = true;
+    }
+
+    var gender = ($('gender-input').value || '').trim();
+    if (!gender) {
+      showGenderError('Моля, изберете пол.');
+      errors.gender = true;
+    }
+
+    var email = ($('email-input').value || '').trim();
+    if (!email) {
+      showEmailError('Моля, въведете имейл адрес.');
+      errors.email = true;
+    } else if (!validateEmail(email)) {
+      showEmailError('Моля, въведете валидна имейл адрес.');
+      errors.email = true;
+    }
+
+    return errors;
+  }
+
+  function calculateChart(callback) {
+    if (!selectedBirthDate) { openDatePicker(null, function (d) { selectedBirthDate = d; updateDateField(); }); return; }
+
+    var time = selectedBirthTime || { h: 12, m: 0 };
+    var city = resolveCity();
+    if (!city) {
+      var typed = $('city-input').value.trim();
+      showCityError(typed
+        ? 'Няма населено място „' + typed + '" в списъка. Изберете от предложенията.'
+        : 'Моля, изберете място на раждане от списъка.');
+      return;
+    }
+
+    setTimeout(function () {
+      var opts = {
+        year: selectedBirthDate.getFullYear(), month: selectedBirthDate.getMonth() + 1, day: selectedBirthDate.getDate(),
+        hour: time.h, minute: time.m, second: 0,
+        utcOffset: guessBulgariaOffset(selectedBirthDate.getMonth() + 1),
+        lat: city.lat, lon: city.lon,
+        name: ($('birth-name').value || '').trim(),
+        placeName: city.name
+      };
+      var chart = AstroCore.computeChart(opts);
+      chart.opts = opts;
+      renderNatalResults(chart);
+      $('natal-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (callback) callback();
+    }, 500);
+  }
+
   function initNatalForm() {
     initCityAutocomplete();
     updateDateField();
@@ -881,59 +963,101 @@
       openTimePicker(selectedBirthTime, function (t) { selectedBirthTime = t; updateTimeField(); });
     });
 
-    $('natal-form').addEventListener('submit', function (e) {
+    // Button A: View quick (calculate and show results)
+    $('view-quick-btn').addEventListener('click', function (e) {
       e.preventDefault();
-      if (!selectedBirthDate) { openDatePicker(null, function (d) { selectedBirthDate = d; updateDateField(); }); return; }
-
-      var time = selectedBirthTime || { h: 12, m: 0 };
-      var city = resolveCity();
-      if (!city) {
-        var typed = $('city-input').value.trim();
-        showCityError(typed
-          ? 'Няма населено място „' + typed + '" в списъка. Изберете от предложенията.'
-          : 'Моля, изберете място на раждане от списъка.');
-        return;
-      }
-      var btn = $('calc-btn'), label = $('calc-btn-label');
-      btn.disabled = true;
-      label.textContent = 'Изчислява се...';
-      btn.insertAdjacentHTML('afterbegin', '<span class="spinner" id="calc-spinner"></span>');
-      $('calc-btn').querySelector('svg').style.display = 'none';
-
-      setTimeout(function () {
-        var opts = {
-          year: selectedBirthDate.getFullYear(), month: selectedBirthDate.getMonth() + 1, day: selectedBirthDate.getDate(),
-          hour: time.h, minute: time.m, second: 0,
-          utcOffset: guessBulgariaOffset(selectedBirthDate.getMonth() + 1),
-          lat: city.lat, lon: city.lon,
-          name: ($('birth-name').value || '').trim(),
-          placeName: city.name
-        };
-        var chart = AstroCore.computeChart(opts);
-        chart.opts = opts;
-        renderNatalResults(chart);
-
-        btn.disabled = false;
-        label.textContent = 'Изчисли картата';
-        var sp = $('calc-spinner'); if (sp) sp.remove();
-        btn.querySelector('svg').style.display = '';
-
-        $('natal-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 500);
+      calculateChart();
     });
 
-    $('download-pdf-btn').addEventListener('click', function () {
-      if (!lastChart) return;
-      var btn = $('download-pdf-btn'), label = $('download-pdf-label');
+    // Button B: Download PDF
+    $('download-pdf-btn').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!lastChart) {
+        calculateChart(function () {
+          if (lastChart) {
+            var btn = $('download-pdf-btn'), label = btn.querySelector('span');
+            var prev = label.textContent;
+            btn.disabled = true;
+            label.textContent = 'Създава се PDF…';
+            Promise.resolve(buildPDF(lastChart)).then(function () {
+              btn.disabled = false; label.textContent = prev;
+            }, function () {
+              btn.disabled = false; label.textContent = prev;
+            });
+          }
+        });
+      } else {
+        var btn = $('download-pdf-btn'), label = btn.querySelector('span');
+        var prev = label.textContent;
+        btn.disabled = true;
+        label.textContent = 'Създава се PDF…';
+        Promise.resolve(buildPDF(lastChart)).then(function () {
+          btn.disabled = false; label.textContent = prev;
+        }, function () {
+          btn.disabled = false; label.textContent = prev;
+        });
+      }
+    });
+
+    // Button C: Full reading (validate all + send to Formspree + redirect to Gumroad)
+    $('full-reading-btn').addEventListener('click', function (e) {
+      e.preventDefault();
+      var errors = validateFormFields();
+      if (Object.keys(errors).length > 0) return;
+
+      var name = ($('birth-name').value || '').trim();
+      var gender = ($('gender-input').value || '').trim();
+      var email = ($('email-input').value || '').trim();
+      var city = resolveCity();
+      var time = selectedBirthTime || { h: 12, m: 0 };
+
+      var btn = $('full-reading-btn'), label = btn.querySelector('span');
       var prev = label.textContent;
       btn.disabled = true;
-      label.textContent = 'Създава се PDF…';
-      Promise.resolve(buildPDF(lastChart)).then(function () {
-        btn.disabled = false; label.textContent = prev;
-      }, function () {
-        btn.disabled = false; label.textContent = prev;
+      label.textContent = 'Обработва се…';
+
+      var formData = new FormData();
+      formData.append('name', name);
+      formData.append('gender', gender);
+      formData.append('email', email);
+      formData.append('birthDate', selectedBirthDate.getDate() + ' ' + BG_MONTHS_GEN[selectedBirthDate.getMonth()] + ' ' + selectedBirthDate.getFullYear());
+      formData.append('birthTime', pad2(time.h) + ':' + pad2(time.m));
+      formData.append('birthPlace', city.name);
+      formData.append('birthLat', city.lat);
+      formData.append('birthLon', city.lon);
+
+      fetch('https://formspree.io/f/mojgoggo', {
+        method: 'POST',
+        body: formData
+      }).then(function (response) {
+        btn.disabled = false;
+        label.textContent = prev;
+        if (response.ok) {
+          showThankYouScreen();
+          setTimeout(function () {
+            window.location.href = 'https://stankova767.gumroad.com/l/dwwuw';
+          }, 2000);
+        } else {
+          alert('Възникна грешка при изпращане на заявката. Моля, опитайте отново.');
+        }
+      }).catch(function (err) {
+        btn.disabled = false;
+        label.textContent = prev;
+        alert('Възникна грешка при изпращане на заявката. Моля, опитайте отново.');
       });
     });
+  }
+
+  function showThankYouScreen() {
+    var modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;';
+    modal.innerHTML = '<div style="background:var(--card-1); border-radius:12px; padding:40px; max-width:400px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.3);">' +
+      '<h2 style="color:var(--foreground); margin-bottom:16px;">Благодаря за заявката!</h2>' +
+      '<p style="color:var(--secondary); font-size:0.95rem; line-height:1.6; margin-bottom:0;">' +
+      'Получих твоите данни. До 12 часа ще работя лично по картата ти и ще я изпратя на посочения имейл. ' +
+      'Провери и папка Спам, за всеки случай.' +
+      '</p></div>';
+    document.body.appendChild(modal);
   }
 
   /* ───────────────────────── Инициализация ───────────────────────── */
