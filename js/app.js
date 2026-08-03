@@ -162,8 +162,6 @@
 
     console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' rx=' + rx.toFixed(1) + ' path generated');
 
-    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' clipX=' + clipX.toFixed(1) + ' clipId=' + clipId);
-
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
       '<defs>' +
       '<radialGradient id="' + glowId + '" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B69DE8" stop-opacity="0.3"/><stop offset="65%" stop-color="#B69DE8" stop-opacity="0.08"/><stop offset="100%" stop-color="#B69DE8" stop-opacity="0"/></radialGradient>' +
