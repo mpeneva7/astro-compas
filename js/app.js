@@ -133,7 +133,7 @@
     var cx = 100, cy = 100, r = 74;
     var illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
-    var clipX = cx - r + 2 * r * illum;
+    var clipX = cx + r - 2 * r * illum;
     var clipId = 'mclip' + Math.round(Math.random() * 10000);
 
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
