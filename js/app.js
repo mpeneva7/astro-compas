@@ -136,6 +136,8 @@
     var clipX = cx + r - 2 * r * illum;
     var clipId = 'mclip' + Math.round(Math.random() * 10000);
 
+    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' clipX=' + clipX.toFixed(1) + ' clipId=' + clipId);
+
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
       '<defs>' +
       '<radialGradient id="mglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B69DE8" stop-opacity="0.3"/><stop offset="65%" stop-color="#B69DE8" stop-opacity="0.08"/><stop offset="100%" stop-color="#B69DE8" stop-opacity="0"/></radialGradient>' +
@@ -154,9 +156,21 @@
     var sun = chart.planets.sun, moon = chart.planets.moon;
     var phase = AstroCore.moonPhase(sun.lon, moon.lon);
 
-    $('moon-illustration').innerHTML = moonIllustrationSVG(phase.angle);
-    $('moon-illum-fill').style.width = Math.round(phase.illumination * 100) + '%';
-    $('moon-illum-label').textContent = Math.round(phase.illumination * 100) + '% осветена';
+    // Debug logging
+    var percentIllum = Math.round(phase.illumination * 100);
+    console.log('🌙 renderMoon called: angle=' + phase.angle.toFixed(1) + '° illum=' + percentIllum + '% (' + phase.name + ')');
+
+    // Force SVG re-render by clearing, updating data, and recreating
+    var moonEl = $('moon-illustration');
+    moonEl.innerHTML = '';
+    // Add a data attribute that changes to ensure re-render
+    moonEl.dataset.updateTime = Date.now();
+    moonEl.innerHTML = moonIllustrationSVG(phase.angle);
+    // Force browser repaint
+    moonEl.offsetHeight;
+
+    $('moon-illum-fill').style.width = percentIllum + '%';
+    $('moon-illum-label').textContent = percentIllum + '% осветена';
     $('moon-phase-name').textContent = phase.name;
     $('moon-sign-line').innerHTML = 'Луната в <strong>' + moon.sign + '</strong>';
 
@@ -1194,6 +1208,7 @@
     initChrome();
 
     function updateMoonAndHoroscope() {
+      console.log('⏲️ updateMoonAndHoroscope called at ' + new Date().toLocaleTimeString());
       var nowChart = getNowChart();
       renderMoon(nowChart);
       renderHoroscope(nowChart);
@@ -1201,6 +1216,7 @@
 
     updateMoonAndHoroscope();
     setInterval(updateMoonAndHoroscope, 60000);
+    console.log('✅ Moon auto-update enabled (every 60 seconds)');
 
     initNatalForm();
   });
