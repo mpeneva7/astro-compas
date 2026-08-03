@@ -134,19 +134,22 @@
     var illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
     var clipX = cx + r - 2 * r * illum;
-    var clipId = 'mclip' + Math.round(Math.random() * 10000);
+    var uid = Math.round(Math.random() * 100000);
+    var clipId = 'mclip' + uid;
+    var glowId = 'mglow' + uid;
+    var litId = 'mlit' + uid;
 
-    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' clipX=' + clipX.toFixed(1) + ' clipId=' + clipId);
+    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' clipX=' + clipX.toFixed(1) + ' uid=' + uid);
 
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
       '<defs>' +
-      '<radialGradient id="mglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B69DE8" stop-opacity="0.3"/><stop offset="65%" stop-color="#B69DE8" stop-opacity="0.08"/><stop offset="100%" stop-color="#B69DE8" stop-opacity="0"/></radialGradient>' +
-      '<radialGradient id="mlit" cx="65%" cy="35%" r="60%"><stop offset="0%" stop-color="#F5F0DC"/><stop offset="55%" stop-color="#C4C0A4"/><stop offset="100%" stop-color="#88846C"/></radialGradient>' +
+      '<radialGradient id="' + glowId + '" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B69DE8" stop-opacity="0.3"/><stop offset="65%" stop-color="#B69DE8" stop-opacity="0.08"/><stop offset="100%" stop-color="#B69DE8" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="' + litId + '" cx="65%" cy="35%" r="60%"><stop offset="0%" stop-color="#F5F0DC"/><stop offset="55%" stop-color="#C4C0A4"/><stop offset="100%" stop-color="#88846C"/></radialGradient>' +
       '<clipPath id="' + clipId + '"><circle cx="100" cy="100" r="74"/><rect x="' + clipX + '" y="0" width="200" height="200"/></clipPath>' +
       '</defs>' +
-      '<circle cx="100" cy="100" r="96" fill="url(#mglow)"/>' +
+      '<circle cx="100" cy="100" r="96" fill="url(#' + glowId + ')"/>' +
       '<circle cx="100" cy="100" r="74" fill="#241A30"/>' +
-      '<circle cx="100" cy="100" r="74" fill="url(#mlit)" clip-path="url(#' + clipId + ')"/>' +
+      '<circle cx="100" cy="100" r="74" fill="url(#' + litId + ')" clip-path="url(#' + clipId + ')"/>' +
       '<g opacity="0.18"><circle cx="128" cy="72" r="8" fill="#908A70"/><circle cx="140" cy="110" r="5" fill="#908A70"/><circle cx="118" cy="132" r="10" fill="#908A70"/><circle cx="133" cy="89" r="4" fill="#908A70"/></g>' +
       '<circle cx="100" cy="100" r="74" fill="none" stroke="rgba(182,157,232,0.25)" stroke-width="1"/>' +
       '</svg>';
