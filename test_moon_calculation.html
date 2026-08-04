@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Calculation Debug - АстроКомпас</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0f0e12;
+            color: #e8e6ed;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .box {
+            background: #1a1625;
+            border: 1px solid rgba(182,157,232,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h2 { color: #b69de8; }
+        pre {
+            background: #241a30;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .success { color: #4caf50; }
+        .error { color: #ef5350; }
+        .info { color: #b69de8; }
+    </style>
+</head>
+<body>
+    <h1>🌙 Moon Calculation Debug</h1>
+
+    <div class="box">
+        <h2>Current Moon Phase (UTC)</h2>
+        <pre id="currentMoon"></pre>
+    </div>
+
+    <div class="box">
+        <h2>SVG Generation Test</h2>
+        <pre id="svgTest"></pre>
+    </div>
+
+    <div class="box">
+        <h2>Visual Verification</h2>
+        <div id="visualization" style="text-align: center; margin: 20px 0;">
+            <!-- SVG will be rendered here -->
+        </div>
+    </div>
+
+    <div class="box">
+        <h2>Clip-Path Analysis</h2>
+        <pre id="clipAnalysis"></pre>
+    </div>
+
+    <script src="js/astro-core.js"></script>
+    <script>
+        function formatOutput(title, obj) {
+            let output = `<span class="info">${title}</span>\n`;
+            for (let key in obj) {
+                output += `${key}: ${obj[key]}\n`;
+            }
+            return output;
+        }
+
+        // Test current moon phase
+        const now = new Date();
+        const utcYear = now.getUTCFullYear();
+        const utcMonth = now.getUTCMonth() + 1;
+        const utcDay = now.getUTCDate();
+        const utcHours = now.getUTCHours();
+        const utcMinutes = now.getUTCMinutes();
+        const utcSeconds = now.getUTCSeconds();
+
+        const jd = AstroCore.julianDay(utcYear, utcMonth, utcDay, utcHours, utcMinutes, utcSeconds);
+        const T = AstroCore.centuriesSinceJ2000(jd);
+
+        const sun = AstroCore.planetLongitude('sun', T);
+        const moon = AstroCore.planetLongitude('moon', T);
+        const phase = AstroCore.moonPhase(sun.lon, moon.lon);
+
+        const moonData = {
+            'UTC Time': `${utcYear}-${utcMonth}-${utcDay} ${utcHours}:${utcMinutes}:${utcSeconds}`,
+            'Julian Day': jd.toFixed(6),
+            'Sun Longitude': sun.lon.toFixed(2) + '°',
+            'Moon Longitude': moon.lon.toFixed(2) + '°',
+            'Phase Angle': phase.angle.toFixed(2) + '°',
+            'Illumination': (phase.illumination * 100).toFixed(2) + '%',
+            'Phase Name': phase.name,
+            'Angle from Sun': ((moon.lon - sun.lon + 360) % 360).toFixed(2) + '°'
+        };
+
+        document.getElementById('currentMoon').innerHTML = formatOutput('Current Moon Phase (UTC)', moonData);
+
+        // Test SVG generation
+        const testAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+        let svgOutput = '<span class="info">Testing SVG generation for different angles:</span>\n\n';
+
+        testAngles.forEach(angle => {
+            const illum = (1 - Math.cos(angle * Math.PI / 180)) / 2;
+            const theta = angle * Math.PI / 180 * 2;
+            const rx = Math.abs(74 * Math.cos(theta));
+            svgOutput += `Angle ${angle.toString().padStart(3)}° → illum=${illum.toFixed(3)}, rx=${rx.toFixed(1)}\n`;
+        });
+
+        // Add current moon phase test
+        svgOutput += `\n<span class="success">Current Moon:</span>\n`;
+        svgOutput += `Angle ${phase.angle.toFixed(1)}° → illum=${phase.illumination.toFixed(3)}, `;
+        const theta = phase.angle * Math.PI / 180 * 2;
+        const rx = Math.abs(74 * Math.cos(theta));
+        svgOutput += `rx=${rx.toFixed(1)}\n`;
+
+        document.getElementById('svgTest').innerHTML = svgOutput;
+
+        // Generate and display current moon SVG
+        function moonIllustrationSVG(phaseAngleDeg) {
+            const phase = (phaseAngleDeg % 360) / 360;
+            const illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
+            const cx = 100, cy = 100, r = 74;
+            const theta = phase * 2 * Math.PI;
+            const rx = Math.abs(r * Math.cos(theta));
+            let sweepOuter, sweepInner;
+            if (phase < 0.5) { sweepOuter = 1; sweepInner = (phase < 0.25) ? 1 : 0; }
+            else { sweepOuter = 0; sweepInner = (phase < 0.75) ? 1 : 0; }
+            const top = cx + ',' + (cy - r);
+            const bottom = cx + ',' + (cy + r);
+            const litPath = 'M ' + top + ' A ' + r + ',' + r + ' 0 0 ' + sweepOuter + ' ' + bottom +
+              ' A ' + rx + ',' + r + ' 0 0 ' + sweepInner + ' ' + top + ' Z';
+
+            const uid = Math.round(Math.random() * 100000);
+            const glowId = 'mglow' + uid;
+            const litId = 'mlit' + uid;
+
+            return `<svg viewBox="0 0 200 200" width="200" height="200" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">
+              <defs>
+              <radialGradient id="${glowId}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B69DE8" stop-opacity="0.3"/><stop offset="65%" stop-color="#B69DE8" stop-opacity="0.08"/><stop offset="100%" stop-color="#B69DE8" stop-opacity="0"/></radialGradient>
+              <radialGradient id="${litId}" cx="65%" cy="35%" r="60%"><stop offset="0%" stop-color="#F5F0DC"/><stop offset="55%" stop-color="#C4C0A4"/><stop offset="100%" stop-color="#88846C"/></radialGradient>
+              </defs>
+              <circle cx="100" cy="100" r="96" fill="url(#${glowId})"/>
+              <circle cx="100" cy="100" r="74" fill="#241A30"/>
+              <path d="${litPath}" fill="url(#${litId})"/>
+              <g opacity="0.18"><circle cx="128" cy="72" r="8" fill="#908A70"/><circle cx="140" cy="110" r="5" fill="#908A70"/><circle cx="118" cy="132" r="10" fill="#908A70"/><circle cx="133" cy="89" r="4" fill="#908A70"/></g>
+              <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(182,157,232,0.25)" stroke-width="1"/>
+              </svg>`;
+        }
+
+        document.getElementById('visualization').innerHTML = moonIllustrationSVG(phase.angle);
+
+        // Clip-path analysis
+        const illum = phase.illumination;
+        const clipX = 100 + 74 - 2 * 74 * illum;
+        const circleLeft = 100 - 74;
+        const circleRight = 100 + 74;
+
+        let clipAnalysis = `<span class="info">Clip-Path Geometry Analysis:</span>\n\n`;
+        clipAnalysis += `Circle (r=74, center=100): x from ${circleLeft} to ${circleRight}\n`;
+        clipAnalysis += `ClipX value: ${clipX.toFixed(1)}\n`;
+        clipAnalysis += `Rect: from x=${clipX.toFixed(1)} to x=${(clipX + 200).toFixed(1)}\n\n`;
+
+        if (illum === 1.0) {
+            clipAnalysis += `<span class="success">✓ Full Moon: Rect covers entire circle</span>\n`;
+        } else if (illum === 0.0) {
+            clipAnalysis += `<span class="success">✓ New Moon: Rect barely overlaps circle</span>\n`;
+        } else if (illum === 0.5) {
+            clipAnalysis += `<span class="success">✓ Half Moon: Rect covers right half</span>\n`;
+        } else {
+            clipAnalysis += `<span class="info">Phase angle: ${phase.angle.toFixed(1)}°</span>\n`;
+            clipAnalysis += `<span class="info">Illumination: ${(illum * 100).toFixed(1)}%</span>\n`;
+            const overlapStart = Math.max(circleLeft, clipX);
+            const overlapEnd = Math.min(circleRight, clipX + 200);
+            const overlapPercent = ((overlapEnd - overlapStart) / (circleRight - circleLeft)) * 100;
+            clipAnalysis += `<span class="success">✓ Overlap: ${overlapPercent.toFixed(1)}% of circle width</span>\n`;
+        }
+
+        document.getElementById('clipAnalysis').innerHTML = clipAnalysis;
+
+        // Log to console for debugging
+        console.log('Current Moon Phase:', moonData);
+        console.log('Phase Details:', phase);
+        console.log('ClipX:', clipX);
+    </script>
+</body>
+</html>
