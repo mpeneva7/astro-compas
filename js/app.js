@@ -129,27 +129,47 @@
   /* ───────────────────────── Луна ───────────────────────── */
 
   function moonIllustrationSVG(phaseAngleDeg) {
+    // Normalize phase to 0-1 and calculate illumination
     var phase = (phaseAngleDeg % 360) / 360;
-    var cx = 100, cy = 100, r = 74;
     var illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
-    var clipX = cx + r - 2 * r * illum;
+    // Moon geometry
+    var cx = 100, cy = 100, r = 74;
+
+    // Calculate the width of the visible lit portion (ellipse axis)
+    var theta = phase * 2 * Math.PI;
+    var rx = Math.abs(r * Math.cos(theta));
+
+    // Determine sweep directions based on phase
+    var sweepOuter, sweepInner;
+    if (phase < 0.5) {
+      sweepOuter = 1;
+      sweepInner = (phase < 0.25) ? 1 : 0;
+    } else {
+      sweepOuter = 0;
+      sweepInner = (phase < 0.75) ? 1 : 0;
+    }
+
+    // Build the lit portion path using arc commands
+    var top = cx + ',' + (cy - r);
+    var bottom = cx + ',' + (cy + r);
+    var litPath = 'M ' + top + ' A ' + r + ',' + r + ' 0 0 ' + sweepOuter + ' ' + bottom +
+      ' A ' + rx + ',' + r + ' 0 0 ' + sweepInner + ' ' + top + ' Z';
+
     var uid = Math.round(Math.random() * 100000);
-    var clipId = 'mclip' + uid;
     var glowId = 'mglow' + uid;
     var litId = 'mlit' + uid;
 
-    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' clipX=' + clipX.toFixed(1) + ' uid=' + uid);
+    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' rx=' + rx.toFixed(1) + ' path generated');
 
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
       '<defs>' +
       '<radialGradient id="' + glowId + '" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#B69DE8" stop-opacity="0.3"/><stop offset="65%" stop-color="#B69DE8" stop-opacity="0.08"/><stop offset="100%" stop-color="#B69DE8" stop-opacity="0"/></radialGradient>' +
       '<radialGradient id="' + litId + '" cx="65%" cy="35%" r="60%"><stop offset="0%" stop-color="#F5F0DC"/><stop offset="55%" stop-color="#C4C0A4"/><stop offset="100%" stop-color="#88846C"/></radialGradient>' +
-      '<clipPath id="' + clipId + '"><circle cx="100" cy="100" r="74"/><rect x="' + clipX + '" y="0" width="200" height="200"/></clipPath>' +
       '</defs>' +
       '<circle cx="100" cy="100" r="96" fill="url(#' + glowId + ')"/>' +
       '<circle cx="100" cy="100" r="74" fill="#241A30"/>' +
-      '<circle cx="100" cy="100" r="74" fill="url(#' + litId + ')" clip-path="url(#' + clipId + ')"/>' +
+      '<path d="' + litPath + '" fill="url(#' + litId + ')"/>' +
       '<g opacity="0.18"><circle cx="128" cy="72" r="8" fill="#908A70"/><circle cx="140" cy="110" r="5" fill="#908A70"/><circle cx="118" cy="132" r="10" fill="#908A70"/><circle cx="133" cy="89" r="4" fill="#908A70"/></g>' +
       '<circle cx="100" cy="100" r="74" fill="none" stroke="rgba(182,157,232,0.25)" stroke-width="1"/>' +
       '</svg>';
