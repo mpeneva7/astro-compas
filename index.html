@@ -249,10 +249,50 @@
         <p><strong>История:</strong> Методът е създаден и популяризиран от астролога Джим Луис през 70-те години на 20 век, под името Astro*Carto*Graphy. <em>Важно: астрокартографията е астрологична техника без научна основа, предназначена за размисъл и забавление.</em></p>
       </div>
 
+      <!-- Форма за астрокартография -->
+      <form class="card natal-form-card" id="acg-form" style="max-width:720px; margin:32px auto;">
+        <div class="m3-field" style="margin-bottom:20px;">
+          <span class="m3-field-label">Име (по избор)</span>
+          <div class="m3-field-box">
+            <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" id="acg-name" autocomplete="off" placeholder="напр. Мария">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="m3-field">
+            <span class="m3-field-label">Дата</span>
+            <button type="button" class="m3-field-box m3-field-btn" id="acg-date-btn">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+              <span class="m3-field-value" id="acg-date-value"></span>
+              <svg class="m3-field-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+
+          <div class="m3-field">
+            <span class="m3-field-label">Час</span>
+            <button type="button" class="m3-field-box m3-field-btn" id="acg-time-btn">
+              <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+              <span class="m3-field-value" id="acg-time-value"></span>
+              <svg class="m3-field-caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="m3-field" style="margin-top:16px;">
+          <span class="m3-field-label">Място раждане</span>
+          <div class="m3-field-box" id="acg-city-field-box">
+            <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+            <input type="text" id="acg-city-input" autocomplete="off" placeholder="напр. София">
+          </div>
+          <div class="city-dropdown" id="acg-city-dropdown"></div>
+          <p class="field-error" id="acg-city-error"></p>
+        </div>
+      </form>
+
       <div class="astro-controls">
         <button id="acg-calc-btn" class="btn btn-filled">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ⟡ Изчисли астрокартографска карта
+          ⟡ Карта
         </button>
         <div id="acg-message" class="acg-message"></div>
       </div>

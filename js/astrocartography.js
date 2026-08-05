@@ -357,6 +357,11 @@ const AstroCarto = (function() {
     return html;
   }
 
+  // Данни за астрокартография форма
+  let acgBirthDate = null;
+  let acgBirthTime = { h: 12, m: 0 };
+  let acgSelectedCity = null;
+
   // Основен контролен интерфейс
   function init() {
     const btnCalc = document.getElementById('acg-calc-btn');
@@ -368,6 +373,9 @@ const AstroCarto = (function() {
     const legendEl = document.getElementById('acg-legend');
 
     if (!btnCalc) return;
+
+    // Инициализирай пикерите на астрокартография форма
+    initAcgForm();
 
     // Fullscreen функция
     if (btnFullscreen) {
@@ -391,34 +399,46 @@ const AstroCarto = (function() {
     }
 
     btnCalc.addEventListener('click', () => {
-      // Провери дали наталната форма е попълнена
-      const birthDate = document.getElementById('birth-date')?.value;
-      const birthTime = document.getElementById('birth-time')?.value;
-      const birthLat = document.getElementById('birthLat')?.value;
-      const birthLon = document.getElementById('birthLon')?.value;
-
-      console.log('ACG button clicked:', { birthDate, birthTime, birthLat, birthLon, hasLastChart: !!window.lastNatalChart });
-
-      if (!birthDate || !birthTime || !birthLat || !birthLon) {
+      // Провери дали астрокартография формата е попълнена
+      if (!acgBirthDate) {
         msgEl.className = 'acg-message error';
-        msgEl.textContent = '❌ Попълни наталните данни горе (дата, час, място) и щракни "Виж карта".';
+        msgEl.textContent = '❌ Избери дата на раждане.';
         return;
       }
+
+      if (!acgSelectedCity) {
+        msgEl.className = 'acg-message error';
+        msgEl.textContent = '❌ Избери място на раждане от списъка.';
+        return;
+      }
+
+      console.log('ACG calculation:', { date: acgBirthDate, time: acgBirthTime, city: acgSelectedCity });
 
       msgEl.textContent = 'Изчислява се…';
       msgEl.className = '';
 
-      // Получи наталната карта от съществуващия калкулатор
+      // Изчисли наталната карта за астрокартография
       try {
-        // Вземи вече изчислената карта ако е налична, или преизчисли
-        let chart = window.lastNatalChart;
-        if (!chart) {
-          console.log('lastNatalChart not found, recalculating...');
-          chart = recalculateChart();
-        } else {
-          console.log('Using existing lastNatalChart');
+        const opts = {
+          year: acgBirthDate.getFullYear(),
+          month: acgBirthDate.getMonth() + 1,
+          day: acgBirthDate.getDate(),
+          hour: acgBirthTime.h,
+          minute: acgBirthTime.m,
+          second: 0,
+          utcOffset: 2, // Попълни събираемо - за България е UTC+2 летен час
+          lat: acgSelectedCity.lat,
+          lon: acgSelectedCity.lon,
+          name: (document.getElementById('acg-name')?.value || '').trim(),
+          placeName: acgSelectedCity.name
+        };
+
+        // Проверка дали AstroCore е наличен
+        if (typeof AstroCore === 'undefined') {
+          throw new Error('AstroCore библиотека не е заредена.');
         }
 
+        let chart = AstroCore.computeChart ? AstroCore.computeChart(opts) : recalculateChartFromOpts(opts);
         if (!chart) {
           msgEl.className = 'acg-message error';
           msgEl.textContent = '❌ Грешка при изчисление на наталната карта. Опитай отново.';
@@ -426,7 +446,7 @@ const AstroCarto = (function() {
           return;
         }
 
-        console.log('Chart calculated successfully:', chart);
+        console.log('ACG Chart calculated successfully:', chart);
 
         // Изчисли ACG
         console.log('Calculating astrocartography...');
@@ -465,23 +485,10 @@ const AstroCarto = (function() {
     });
   }
 
-  // Функция за преизчисление на наталната карта (копира логика)
-  function recalculateChart() {
-    const birthDate = document.getElementById('birth-date')?.value;
-    const birthTime = document.getElementById('birth-time')?.value;
-    const birthLat = parseFloat(document.getElementById('birthLat')?.value || 0);
-    const birthLon = parseFloat(document.getElementById('birthLon')?.value || 0);
-
-    if (!birthDate || !birthTime) return null;
-
-    // Парсирай дата и час (формат може да варира)
-    // Това е опростение; наложа ще се хвърли в точната логика на наталния калкулатор
-
+  // Функция за преизчисление на наталната карта от опции
+  function recalculateChartFromOpts(opts) {
     try {
-      const [year, month, day] = birthDate.split('-').map(Number);
-      const [hours, minutes] = birthTime.split(':').map(Number);
-
-      const jd = AstroCore.julianDay(year, month, day, hours, minutes, 0);
+      const jd = AstroCore.julianDay(opts.year, opts.month, opts.day, opts.hour, opts.minute, opts.second);
       const T = AstroCore.centuriesSinceJ2000(jd);
       const order = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
       const planets = {};
@@ -490,10 +497,100 @@ const AstroCarto = (function() {
         planets[name] = Object.assign({ name, nameBg: AstroCore.PLANET_NAMES_BG[name] }, pos, AstroCore.longitudeToSign(pos.lon));
       });
 
-      return { jd, T, now: new Date(), planets, order };
+      return { jd, T, now: new Date(), planets, order, opts };
     } catch (e) {
       console.error('Chart calculation error:', e);
       return null;
+    }
+  }
+
+  // Инициализирай астрокартография форма
+  function initAcgForm() {
+    const dateBtn = document.getElementById('acg-date-btn');
+    const timeBtn = document.getElementById('acg-time-btn');
+    const cityInput = document.getElementById('acg-city-input');
+    const cityDropdown = document.getElementById('acg-city-dropdown');
+    const cityError = document.getElementById('acg-city-error');
+
+    // Дата пикер (опростено - использу native date input)
+    if (dateBtn) {
+      dateBtn.addEventListener('click', () => {
+        // Създай временен input за дата
+        const input = document.createElement('input');
+        input.type = 'date';
+        if (acgBirthDate) {
+          input.value = acgBirthDate.toISOString().split('T')[0];
+        }
+        input.addEventListener('change', () => {
+          if (input.value) {
+            const [year, month, day] = input.value.split('-').map(Number);
+            acgBirthDate = new Date(year, month - 1, day);
+            document.getElementById('acg-date-value').textContent =
+              acgBirthDate.getDate() + ' ' + ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'][acgBirthDate.getMonth()] + ' ' + year;
+          }
+        });
+        input.click();
+      });
+    }
+
+    // Час пикер (опростено)
+    if (timeBtn) {
+      timeBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'time';
+        input.value = String(acgBirthTime.h).padStart(2, '0') + ':' + String(acgBirthTime.m).padStart(2, '0');
+        input.addEventListener('change', () => {
+          if (input.value) {
+            const [h, m] = input.value.split(':').map(Number);
+            acgBirthTime = { h, m };
+            document.getElementById('acg-time-value').textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+          }
+        });
+        input.click();
+      });
+    }
+
+    // Град автодовършване (опростено - използваме същата логика като наталната форма)
+    if (cityInput) {
+      cityInput.addEventListener('input', () => {
+        acgSelectedCity = null;
+        cityError.textContent = '';
+        const q = cityInput.value.trim().toLowerCase();
+        if (!q) {
+          cityDropdown.innerHTML = '';
+          return;
+        }
+
+        // Провери дали window.BG_CITIES е наличен
+        if (!window.BG_CITIES || !window.BG_CITIES.places) {
+          console.warn('BG_CITIES не е наличен');
+          return;
+        }
+
+        const matches = window.BG_CITIES.places.filter(p => p[0].toLowerCase().includes(q)).slice(0, 8);
+        cityDropdown.innerHTML = '';
+
+        matches.forEach(p => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.innerHTML = '<span>' + p[0] + '</span><span style="font-size:0.8rem; opacity:0.6;"> · ' + (window.BG_CITIES.oblasti[p[1]] || '') + '</span>';
+          btn.style.display = 'block';
+          btn.style.width = '100%';
+          btn.style.textAlign = 'left';
+          btn.style.padding = '8px';
+          btn.style.border = 'none';
+          btn.style.background = 'rgba(182,157,232,0.08)';
+          btn.style.color = 'var(--foreground)';
+          btn.style.cursor = 'pointer';
+          btn.addEventListener('mousedown', () => {
+            cityInput.value = p[0];
+            acgSelectedCity = { name: p[0], lat: p[2], lon: p[3] };
+            cityError.textContent = '';
+            cityDropdown.innerHTML = '';
+          });
+          cityDropdown.appendChild(btn);
+        });
+      });
     }
   }
 
