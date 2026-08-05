@@ -225,7 +225,7 @@ button { font-family: var(--font-body); }
   text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.13em;
   text-transform: uppercase; color: var(--outline); margin-bottom: 12px;
 }
-.section-head { text-align: center; margin-bottom: 56px; }
+.section-head { text-align: center; margin-bottom: 40px; }
 .section-head h2 { font-size: clamp(1.5rem, 3vw, 2.4rem); color: var(--foreground); }
 .section-head p { margin-top: 12px; color: var(--muted-foreground); max-width: 34rem; margin-left: auto; margin-right: auto; line-height: 1.75; }
 
@@ -259,7 +259,7 @@ button { font-family: var(--font-body); }
 .hero-scroll-cue svg { animation: bounceDown 2s infinite; }
 
 /* ── Sections ─────────────────────────────────────────────────────── */
-section { padding: 96px 20px; }
+section { padding: 60px 20px; }
 #moon { background: linear-gradient(180deg, #140A1E 0%, #1E1428 100%); }
 #horoscope { background: var(--background); }
 #natal { background: linear-gradient(180deg, #140A1E 0%, #1C1030 50%, #140A1E 100%); }

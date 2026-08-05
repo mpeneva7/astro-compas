@@ -21,6 +21,7 @@
       <a href="#moon">Луна</a>
       <a href="#horoscope">Хороскоп</a>
       <a href="#natal">Натална карта</a>
+      <a href="#astrocartography">Карта & Статии</a>
     </nav>
     <button class="menu-btn" id="menu-open-btn" aria-label="Меню">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -319,7 +320,7 @@
         <h2>Вдъхновение от звездите</h2>
       </div>
       <div class="articles-grid">
-        <article class="article-card" onclick="window.open('articles/zodiac.html', '_blank')">
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/zodiac.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/zodiac.html', '_blank'); return false; }">
           <div class="article-header">
             <h3 class="article-title">Съзвездията на зодиака</h3>
           </div>
