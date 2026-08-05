@@ -576,14 +576,65 @@ section { padding: 96px 20px; }
   border-radius: var(--radius-md);
   padding: 20px;
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
+  aspect-ratio: 2 / 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .acg-map svg {
   width: 100%;
-  height: auto;
-  min-width: 400px;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Fullscreen режим за картата */
+.acg-map.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  z-index: 1000;
+  border-radius: 0;
+  border: none;
+  padding: 0;
+  background: #0f0e12;
+}
+
+.acg-map.fullscreen svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Бутон за fullscreen */
+.acg-fullscreen-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(182,157,232,0.15);
+  border: 1px solid rgba(182,157,232,0.3);
+  color: #b69de8;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.acg-fullscreen-btn:hover {
+  background: rgba(182,157,232,0.25);
+}
+
+.acg-map.fullscreen .acg-fullscreen-btn {
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.5);
+  border-color: rgba(182,157,232,0.5);
 }
 
 .acg-legend {

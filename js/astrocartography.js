@@ -136,53 +136,89 @@ const AstroCarto = (function() {
 
   // Опростена карта на света (вграда контури на континентите)
   function getWorldMapSvg(width, height) {
-    // Това е опростена карта на света като SVG path
-    // Для простоту, използвам вградени контури на главните континенти
-    return `
-      <!-- Фон -->
-      <rect width="${width}" height="${height}" fill="#1a1625" stroke="#3a3f4a" stroke-width="0.5"/>
-      <!-- Решетка (меридиани и паралели) -->
-      ${Array.from({length: 7}, (_, i) => {
-        const lon = -180 + i * 60;
-        const x = ((lon + 180) / 360) * width;
-        return `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="rgba(182,157,232,0.1)" stroke-width="0.5"/>`;
-      }).join('')}
-      ${Array.from({length: 4}, (_, i) => {
-        const lat = 60 - i * 60;
-        const y = ((90 - lat) / 180) * height;
-        return `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(182,157,232,0.1)" stroke-width="0.5"/>`;
-      }).join('')}
-      <!-- Основни континенти (опростено) -->
-      <g fill="rgba(182,157,232,0.08)" stroke="rgba(182,157,232,0.3)" stroke-width="0.5">
-        <!-- Африка (приблизително) -->
-        <path d="M ${projectCoord(-30, 20, width, height).x} ${projectCoord(-30, 20, width, height).y}
-                 L ${projectCoord(-30, 55, width, height).x} ${projectCoord(-30, 55, width, height).y}
-                 L ${projectCoord(35, 55, width, height).x} ${projectCoord(35, 55, width, height).y}
-                 L ${projectCoord(35, 20, width, height).x} ${projectCoord(35, 20, width, height).y} Z"/>
-        <!-- Евразия (приблизително) -->
-        <path d="M ${projectCoord(35, 50, width, height).x} ${projectCoord(35, 50, width, height).y}
-                 L ${projectCoord(35, 180, width, height).x} ${projectCoord(35, 180, width, height).y}
-                 L ${projectCoord(70, 180, width, height).x} ${projectCoord(70, 180, width, height).y}
-                 L ${projectCoord(70, 50, width, height).x} ${projectCoord(70, 50, width, height).y} Z"/>
-        <!-- Америки (приблизително) -->
-        <path d="M ${projectCoord(-55, -130, width, height).x} ${projectCoord(-55, -130, width, height).y}
-                 L ${projectCoord(-55, -40, width, height).x} ${projectCoord(-55, -40, width, height).y}
-                 L ${projectCoord(70, -40, width, height).x} ${projectCoord(70, -40, width, height).y}
-                 L ${projectCoord(70, -130, width, height).x} ${projectCoord(70, -130, width, height).y} Z"/>
-        <!-- Австралия (приблизително) -->
-        <path d="M ${projectCoord(-45, 110, width, height).x} ${projectCoord(-45, 110, width, height).y}
-                 L ${projectCoord(-45, 160, width, height).x} ${projectCoord(-45, 160, width, height).y}
-                 L ${projectCoord(-10, 160, width, height).x} ${projectCoord(-10, 160, width, height).y}
-                 L ${projectCoord(-10, 110, width, height).x} ${projectCoord(-10, 110, width, height).y} Z"/>
-      </g>
+    // Генериране на пълна карта със континенти, мрежа и етикети
+    const gridLon = 30, gridLat = 30; // меридиани и паралели на всеки 30°
+
+    // Основни приблизителни paths на континентите в equirectangular проекция
+    const continents = [
+      // Африка
+      { points: [[35, -15], [35, 50], [-35, 50], [-35, -15]], name: 'Африка' },
+      // Евразия (разбити на части за простота)
+      { points: [[40, 30], [40, 180], [70, 180], [70, 30]], name: 'Азия' },
+      { points: [[45, -30], [45, 40], [65, 40], [65, -30]], name: 'Европа' },
+      // Америки
+      { points: [[10, -130], [10, -50], [60, -50], [60, -130]], name: 'С. Америка' },
+      { points: [[-10, -85], [-10, -35], [-55, -35], [-55, -85]], name: 'Ю. Америка' },
+      // Австралия
+      { points: [[-10, 110], [-10, 160], [-45, 160], [-45, 110]], name: 'Австралия' },
+    ];
+
+    let svg = `<!-- Фон -->
+      <rect width="${width}" height="${height}" fill="#0f0e12"/>
+
+      <!-- Мрежа (меридиани) -->`;
+
+    // Меридиани
+    for (let lon = -180; lon <= 180; lon += gridLon) {
+      const x = ((lon + 180) / 360) * width;
+      const isMain = (lon === 0 || lon === -180 || lon === 180);
+      svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="rgba(182,157,232,${isMain ? 0.2 : 0.08})" stroke-width="${isMain ? 1 : 0.5}"/>`;
+    }
+
+    // Паралели
+    for (let lat = -90; lat <= 90; lat += gridLat) {
+      const y = ((90 - lat) / 180) * height;
+      const isMain = (lat === 0);
+      svg += `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(182,157,232,${isMain ? 0.2 : 0.08})" stroke-width="${isMain ? 1 : 0.5}"/>`;
+    }
+
+    svg += `<!-- Континенти -->
+      <g fill="rgba(182,157,232,0.12)" stroke="rgba(182,157,232,0.25)" stroke-width="0.8">`;
+
+    for (const continent of continents) {
+      let pathD = '';
+      for (let i = 0; i < continent.points.length; i++) {
+        const [lat, lon] = continent.points[i];
+        const proj = projectCoord(lat, lon, width, height);
+        pathD += (i === 0 ? 'M' : 'L') + ` ${proj.x} ${proj.y}`;
+      }
+      pathD += ' Z';
+      svg += `<path d="${pathD}"/>`;
+    }
+
+    svg += `</g>
+
+      <!-- Етикети на дължини (долу) -->
+      <g font-size="10" fill="rgba(182,157,232,0.5)" text-anchor="middle" font-family="monospace">`;
+
+    for (let lon = -180; lon <= 180; lon += 60) {
+      const x = ((lon + 180) / 360) * width;
+      const label = lon === 0 ? '0°' : (lon > 0 ? lon + '°E' : Math.abs(lon) + '°W');
+      svg += `<text x="${x}" y="${height + 14}">${label}</text>`;
+    }
+
+    svg += `</g>
+
+      <!-- Етикели на ширини (ляво) -->
+      <g font-size="10" fill="rgba(182,157,232,0.5)" text-anchor="end" font-family="monospace">`;
+
+    for (let lat = 60; lat >= -60; lat -= 30) {
+      const y = ((90 - lat) / 180) * height;
+      const label = lat === 0 ? '0°' : (lat > 0 ? lat + '°N' : Math.abs(lat) + '°S');
+      svg += `<text x="-8" y="${y + 4}">${label}</text>`;
+    }
+
+    svg += `</g>
+
       <!-- Граница на карта -->
-      <rect width="${width}" height="${height}" fill="none" stroke="rgba(182,157,232,0.4)" stroke-width="1"/>
-    `;
+      <rect width="${width}" height="${height}" fill="none" stroke="rgba(182,157,232,0.4)" stroke-width="1"/>`;
+
+    return svg;
   }
 
-  // Генериране на SVG линии за всички планети
+  // Генериране на SVG линии за всички планети със означения
   function generateAcgSvg(lines, width, height) {
-    let svg = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
+    let svg = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" style="display:block; margin:0 auto; max-width:100%; height:auto;">`;
     svg += getWorldMapSvg(width, height);
 
     // За всяка планета рисувай линиите
@@ -194,17 +230,28 @@ const AstroCarto = (function() {
       // MC линия
       if (pLines.mc) {
         const x = projectCoord(0, pLines.mc.lon, width, height).x;
-        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="${planet.color}" stroke-width="2" opacity="0.8" data-planet="${planet.nameBg}" data-type="MC"/>`;
+        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="${planet.color}" stroke-width="2.5" opacity="0.85" data-planet="${planet.nameBg}" data-type="MC"/>`;
+        // Означение за MC (горе)
+        svg += `<g transform="translate(${x},10)" text-anchor="middle">
+          <text font-size="12" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
+          <text font-size="8" fill="${planet.color}" opacity="0.7" y="12">MC</text>
+        </g>`;
       }
 
       // IC линия
       if (pLines.ic) {
         const x = projectCoord(0, pLines.ic.lon, width, height).x;
-        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="${planet.color}" stroke-width="2" opacity="0.6" stroke-dasharray="4,4" data-planet="${planet.nameBg}" data-type="IC"/>`;
+        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="${planet.color}" stroke-width="2" opacity="0.6" stroke-dasharray="5,3" data-planet="${planet.nameBg}" data-type="IC"/>`;
+        // Означение за IC (долу)
+        svg += `<g transform="translate(${x},${height - 5})" text-anchor="middle">
+          <text font-size="12" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
+          <text font-size="8" fill="${planet.color}" opacity="0.7" y="-12">IC</text>
+        </g>`;
       }
 
       // ASC линия (криви)
       if (pLines.asc && pLines.asc.points.length > 0) {
+        let hasLabel = false;
         for (let segIdx = 0; segIdx < pLines.asc.points.length; segIdx++) {
           const segment = pLines.asc.points[segIdx];
           if (segment.length < 2) continue;
@@ -214,12 +261,23 @@ const AstroCarto = (function() {
             const p = projectCoord(segment[i].lat, segment[i].lon, width, height);
             pathData += ` L ${p.x} ${p.y}`;
           }
-          svg += `<path d="${pathData}" stroke="${planet.color}" stroke-width="1.5" fill="none" opacity="0.7" data-planet="${planet.nameBg}" data-type="ASC"/>`;
+          svg += `<path d="${pathData}" stroke="${planet.color}" stroke-width="2" fill="none" opacity="0.75" data-planet="${planet.nameBg}" data-type="ASC"/>`;
+
+          // Означение за ASC (на първа точка)
+          if (!hasLabel && segment.length > 0) {
+            const p = projectCoord(segment[0].lat, segment[0].lon, width, height);
+            svg += `<g transform="translate(${p.x},${p.y - 8})" text-anchor="middle" pointer-events="none">
+              <text font-size="11" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
+              <text font-size="7" fill="${planet.color}" opacity="0.7" y="10">ASC</text>
+            </g>`;
+            hasLabel = true;
+          }
         }
       }
 
       // DSC линия (криви)
       if (pLines.dsc && pLines.dsc.points.length > 0) {
+        let hasLabel = false;
         for (let segIdx = 0; segIdx < pLines.dsc.points.length; segIdx++) {
           const segment = pLines.dsc.points[segIdx];
           if (segment.length < 2) continue;
@@ -229,7 +287,17 @@ const AstroCarto = (function() {
             const p = projectCoord(segment[i].lat, segment[i].lon, width, height);
             pathData += ` L ${p.x} ${p.y}`;
           }
-          svg += `<path d="${pathData}" stroke="${planet.color}" stroke-width="1.5" fill="none" opacity="0.5" stroke-dasharray="2,2" data-planet="${planet.nameBg}" data-type="DSC"/>`;
+          svg += `<path d="${pathData}" stroke="${planet.color}" stroke-width="2" fill="none" opacity="0.6" data-planet="${planet.nameBg}" data-type="DSC"/>`;
+
+          // Означение за DSC (на първа точка)
+          if (!hasLabel && segment.length > 0) {
+            const p = projectCoord(segment[0].lat, segment[0].lon, width, height);
+            svg += `<g transform="translate(${p.x},${p.y + 12})" text-anchor="middle" pointer-events="none">
+              <text font-size="11" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
+              <text font-size="7" fill="${planet.color}" opacity="0.7" y="10">DSC</text>
+            </g>`;
+            hasLabel = true;
+          }
         }
       }
     }
@@ -293,12 +361,34 @@ const AstroCarto = (function() {
   function init() {
     const btnCalc = document.getElementById('acg-calc-btn');
     const btnPdf = document.getElementById('acg-pdf-btn');
+    const btnFullscreen = document.getElementById('acg-fullscreen-btn');
     const msgEl = document.getElementById('acg-message');
     const containerEl = document.getElementById('acg-container');
     const mapEl = document.getElementById('acg-map');
     const legendEl = document.getElementById('acg-legend');
 
     if (!btnCalc) return;
+
+    // Fullscreen функция
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mapEl.classList.toggle('fullscreen');
+        btnFullscreen.textContent = mapEl.classList.contains('fullscreen') ? '✕' : '⛶';
+
+        // Затвори fullscreen при ESC
+        if (mapEl.classList.contains('fullscreen')) {
+          const closeFullscreen = (e) => {
+            if (e.key === 'Escape') {
+              mapEl.classList.remove('fullscreen');
+              btnFullscreen.textContent = '⛶';
+              document.removeEventListener('keydown', closeFullscreen);
+            }
+          };
+          document.addEventListener('keydown', closeFullscreen);
+        }
+      });
+    }
 
     btnCalc.addEventListener('click', () => {
       // Провери дали наталната форма е попълнена
@@ -407,9 +497,61 @@ const AstroCarto = (function() {
     }
   }
 
-  // PDF експорт (stub за сега)
+  // PDF експорт
   function exportToPdf(chart) {
-    alert('PDF експортът е под разработка.');
+    const mapEl = document.getElementById('acg-map');
+    if (!mapEl) return;
+
+    // Попълни в PDF с html2canvas
+    Promise.all([
+      typeof html2canvas !== 'undefined' ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+      typeof jsPDF !== 'undefined' ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+    ]).then(() => {
+      html2canvas(mapEl, { scale: 2, backgroundColor: '#0f0e12' }).then(canvas => {
+        const { jsPDF } = window;
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        // Картата е 2:1, така че задай съотношение
+        const imgWidth = pageWidth - 20;
+        const imgHeight = imgWidth / 2;
+        const x = 10;
+        const y = 10;
+
+        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+
+        // Добави легенда под картата
+        const legendY = y + imgHeight + 10;
+        pdf.setFontSize(10);
+        pdf.text('Астрокартография — планетни линии', x, legendY);
+
+        pdf.save('астрокартография.pdf');
+      }).catch(err => {
+        console.error('Грешка при конвертирането на картата:', err);
+        alert('Грешка при изтегляне на PDF-а.');
+      });
+    }).catch(err => {
+      console.error('Грешка при зареждането на библиотеките:', err);
+      alert('Грешка при зареждането на PDF библиотеките.');
+    });
+  }
+
+  // Помощна функция за зареждане на скрипти
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
   }
 
   return {
