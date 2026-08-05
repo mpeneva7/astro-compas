@@ -302,49 +302,70 @@ const AstroCarto = (function() {
 
     btnCalc.addEventListener('click', () => {
       // Провери дали наталната форма е попълнена
-      const birthName = document.getElementById('birth-name')?.value;
       const birthDate = document.getElementById('birth-date')?.value;
       const birthTime = document.getElementById('birth-time')?.value;
       const birthLat = document.getElementById('birthLat')?.value;
       const birthLon = document.getElementById('birthLon')?.value;
 
+      console.log('ACG button clicked:', { birthDate, birthTime, birthLat, birthLon, hasLastChart: !!window.lastNatalChart });
+
       if (!birthDate || !birthTime || !birthLat || !birthLon) {
         msgEl.className = 'acg-message error';
-        msgEl.textContent = '❌ Попълни наталните данни горе (дата, час, място).';
+        msgEl.textContent = '❌ Попълни наталните данни горе (дата, час, място) и щракни "Виж карта".';
         return;
       }
 
-      msgEl.textContent = '';
+      msgEl.textContent = 'Изчислява се…';
       msgEl.className = '';
 
       // Получи наталната карта от съществуващия калкулатор
       try {
         // Вземи вече изчислената карта ако е налична, или преизчисли
-        const chart = window.lastNatalChart || recalculateChart();
+        let chart = window.lastNatalChart;
+        if (!chart) {
+          console.log('lastNatalChart not found, recalculating...');
+          chart = recalculateChart();
+        } else {
+          console.log('Using existing lastNatalChart');
+        }
 
         if (!chart) {
           msgEl.className = 'acg-message error';
-          msgEl.textContent = '❌ Грешка при изчисление на наталната карта.';
+          msgEl.textContent = '❌ Грешка при изчисление на наталната карта. Опитай отново.';
+          console.error('Chart is null after calculation');
           return;
         }
 
+        console.log('Chart calculated successfully:', chart);
+
         // Изчисли ACG
+        console.log('Calculating astrocartography...');
         const acgLines = calculateAstrocartography(chart);
+        console.log('ACG lines calculated:', acgLines.length, 'lines');
 
         // Генериране на SVG
+        console.log('Generating SVG...');
         const mapSvg = generateAcgSvg(acgLines, 900, 500);
+
+        if (!mapSvg) {
+          throw new Error('SVG generation returned empty result');
+        }
+
         mapEl.innerHTML = mapSvg;
+        console.log('SVG rendered to DOM');
 
         // Генериране на легенда
         legendEl.innerHTML = generateLegendHtml();
 
         // Покажи контейнера
         containerEl.style.display = 'flex';
-        msgEl.className = 'acg-message';
+        msgEl.className = 'acg-message success';
         msgEl.textContent = '✅ Астрокартографска карта генерирана успешно!';
 
         // Активирай PDF бутона
+        btnPdf.onclick = null;
         btnPdf.addEventListener('click', () => exportToPdf(chart));
+        console.log('Map generation complete');
 
       } catch (error) {
         console.error('ACG Error:', error);

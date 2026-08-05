@@ -455,6 +455,17 @@
     lastChart = chart;
     window.lastNatalChart = chart; // За астрокартография
 
+    // Попълни скритите полета за астрокартография
+    if (chart.opts) {
+      var year = chart.opts.year, month = chart.opts.month, day = chart.opts.day;
+      var dateStr = year + '-' + pad2(month) + '-' + pad2(day);
+      var timeStr = pad2(chart.opts.hour) + ':' + pad2(chart.opts.minute);
+      $('birth-date').value = dateStr;
+      $('birth-time').value = timeStr;
+      $('birthLat').value = chart.opts.lat;
+      $('birthLon').value = chart.opts.lon;
+    }
+
     $('wheel-container').innerHTML = buildWheelSVG(chart);
 
     var big3 = [
