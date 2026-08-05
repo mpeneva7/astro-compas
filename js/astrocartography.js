@@ -504,6 +504,121 @@ const AstroCarto = (function() {
     }
   }
 
+  // Дата пикер за астрокартография
+  function openAcgDatePicker(initial, onConfirm) {
+    const today = new Date();
+    let sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
+    let viewYear = (sel || today).getFullYear();
+    let viewMonth = (sel || today).getMonth();
+    let mode = 'day';
+    const YEAR_START = 1900, YEAR_END = today.getFullYear();
+    const BG_MONTHS_GEN = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+    const BG_MONTHS = ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
+    const BG_DAYS_ABBR = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const BG_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+
+    const overlay = document.createElement('div');
+    overlay.className = 'm3-modal-overlay';
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    function render() {
+      const hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
+      let html = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
+
+      if (mode === 'day') {
+        html += '<div class="m3-nav-row"><button type="button" class="m3-icon-btn" data-act="prevmonth">◀</button><button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '</button><button type="button" class="m3-icon-btn" data-act="nextmonth">▶</button></div>';
+        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(d => '<span>' + d + '</span>').join('') + '</div>';
+
+        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        const startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+        const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+        const cells = [];
+        for (let i = 0; i < startDow; i++) cells.push({ d: prevMonthDays - startDow + 1 + i, kind: 'prev' });
+        for (let d = 1; d <= daysInMonth; d++) cells.push({ d: d, kind: 'cur' });
+        while (cells.length < 42) cells.push({ d: cells.length - startDow - daysInMonth + 1, kind: 'next' });
+
+        html += '<div class="m3-day-grid">';
+        cells.forEach(c => {
+          const cur = c.kind === 'cur';
+          const isSel = cur && sel && sel.getDate() === c.d && sel.getMonth() === viewMonth && sel.getFullYear() === viewYear;
+          const isToday = cur && c.d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+          const cls = 'm3-day-cell' + (cur ? '' : ' outside') + (isSel ? ' selected' : '') + (isToday && !isSel ? ' today' : '');
+          html += '<button type="button" class="' + cls + '" ' + (cur ? 'data-act="pickday" data-day="' + c.d + '"' : 'disabled') + '>' + c.d + '</button>';
+        });
+        html += '</div>';
+      }
+
+      html += '<div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" data-act="ok"' + (sel ? '' : ' disabled') + '>OK</button></div></div>';
+
+      overlay.innerHTML = html;
+      overlay.querySelectorAll('[data-act]').forEach(el => {
+        el.addEventListener('click', () => {
+          const act = el.dataset.act;
+          if (act === 'prevmonth') { viewMonth = (viewMonth === 0) ? 11 : viewMonth - 1; if (viewMonth === 11) viewYear--; render(); }
+          else if (act === 'nextmonth') { viewMonth = (viewMonth === 11) ? 0 : viewMonth + 1; if (viewMonth === 0) viewYear++; render(); }
+          else if (act === 'toyear') { mode = 'year'; render(); }
+          else if (act === 'pickday') { sel = new Date(viewYear, viewMonth, parseInt(el.dataset.day, 10)); render(); }
+          else if (act === 'cancel') { close(); }
+          else if (act === 'ok') { if (sel) { onConfirm(sel); close(); } }
+        });
+      });
+    }
+    render();
+  }
+
+  // Час пикер за астрокартография
+  function openAcgTimePicker(initial, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.className = 'm3-modal-overlay';
+    let hourRaw = initial ? String(initial.h).padStart(2, '0') : '';
+    let minRaw = initial ? String(initial.m).padStart(2, '0') : '';
+
+    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p style="padding:0; margin-top:4px; font-size:0.9rem; color:var(--foreground-muted);">Въведете часа (24-часов формат)</p></div><div class="m3-time-row"><div class="m3-time-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="ЧЧ" value="' + hourRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-hour-sub">Час</span></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="ММ" value="' + minRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-min-sub">Минути</span></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    const hInput = overlay.querySelector('#acg-hour');
+    const mInput = overlay.querySelector('#acg-min');
+    const okBtn = overlay.querySelector('#acg-time-ok');
+    let hourErr = false, minErr = false;
+
+    function refreshOk() { okBtn.disabled = !(hourRaw && minRaw && !hourErr && !minErr); }
+
+    hInput.addEventListener('input', () => {
+      hourRaw = hInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      hInput.value = hourRaw;
+      const n = parseInt(hourRaw, 10);
+      hourErr = hourRaw && (isNaN(n) || n < 0 || n > 23);
+      document.getElementById('acg-hour-sub').textContent = hourErr ? '0–23' : 'Час';
+      refreshOk();
+      if (hourRaw.length === 2 && !hourErr) mInput.focus();
+    });
+
+    mInput.addEventListener('input', () => {
+      minRaw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      mInput.value = minRaw;
+      const n = parseInt(minRaw, 10);
+      minErr = minRaw && (isNaN(n) || n < 0 || n > 59);
+      document.getElementById('acg-min-sub').textContent = minErr ? '0–59' : 'Минути';
+      refreshOk();
+    });
+
+    overlay.querySelector('[data-act="cancel"]').addEventListener('click', close);
+    okBtn.addEventListener('click', () => {
+      if (hourRaw && minRaw && !hourErr && !minErr) {
+        onConfirm({ h: parseInt(hourRaw, 10), m: parseInt(minRaw, 10) });
+        close();
+      }
+    });
+
+    hInput.focus();
+  }
+
   // Инициализирай астрокартография форма
   function initAcgForm() {
     const dateBtn = document.getElementById('acg-date-btn');
@@ -512,41 +627,28 @@ const AstroCarto = (function() {
     const cityDropdown = document.getElementById('acg-city-dropdown');
     const cityError = document.getElementById('acg-city-error');
 
-    // Дата пикер (опростено - использу native date input)
+    // Дата пикер
     if (dateBtn) {
-      dateBtn.addEventListener('click', () => {
-        // Създай временен input за дата
-        const input = document.createElement('input');
-        input.type = 'date';
-        if (acgBirthDate) {
-          input.value = acgBirthDate.toISOString().split('T')[0];
-        }
-        input.addEventListener('change', () => {
-          if (input.value) {
-            const [year, month, day] = input.value.split('-').map(Number);
-            acgBirthDate = new Date(year, month - 1, day);
-            document.getElementById('acg-date-value').textContent =
-              acgBirthDate.getDate() + ' ' + ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'][acgBirthDate.getMonth()] + ' ' + year;
-          }
+      dateBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openAcgDatePicker(acgBirthDate, (date) => {
+          acgBirthDate = date;
+          const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
+          document.getElementById('acg-date-value').textContent =
+            date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
         });
-        input.click();
       });
     }
 
-    // Час пикер (опростено)
+    // Час пикер
     if (timeBtn) {
-      timeBtn.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'time';
-        input.value = String(acgBirthTime.h).padStart(2, '0') + ':' + String(acgBirthTime.m).padStart(2, '0');
-        input.addEventListener('change', () => {
-          if (input.value) {
-            const [h, m] = input.value.split(':').map(Number);
-            acgBirthTime = { h, m };
-            document.getElementById('acg-time-value').textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-          }
+      timeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openAcgTimePicker(acgBirthTime, (time) => {
+          acgBirthTime = time;
+          document.getElementById('acg-time-value').textContent =
+            String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
         });
-        input.click();
       });
     }
 
