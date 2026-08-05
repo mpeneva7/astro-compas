@@ -758,7 +758,9 @@ const AstroCarto = (function() {
     calculateAstrocartography,
     generateAcgSvg,
     eclipticToEquatorial,
-    computeGST
+    computeGST,
+    openAcgDatePicker,
+    openAcgTimePicker
   };
 })();
 
