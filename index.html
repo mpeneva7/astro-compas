@@ -227,6 +227,42 @@
     </div>
   </section>
 
+  <!-- ═══════════════════════ ASTROCARTOGRAPHY ═══════════════════════ -->
+  <section id="astrocartography">
+    <div class="container reveal" data-reveal>
+      <div class="section-head">
+        <p class="section-kicker">Планетни линии</p>
+        <h2>Астрокартография</h2>
+      </div>
+
+      <div class="astro-intro">
+        <p><strong>Какво е астрокартография?</strong> Това е техника, която показва как планетите от вашата рождена карта влияят на различни географски места по света. Върху карта на света се начертават линии за всяка планета, които показват къде тя е била на ъгловите точки (изгряваща, залязваща, в зенита, в надира) в момента на вашето раждане.</p>
+
+        <p><strong>За какво служи?</strong> Астрокартографията се използва за избор на места за живеене, пътуване, работа или почивка, според типа енергия, който човек търси. Например, линия на Венера съответства на любов и красота; линия на Юпитер — на растеж и възможности; линия на Сатурн — на отговорност и структура.</p>
+
+        <p><strong>История:</strong> Методът е създаден и популяризиран от астролога Джим Луис през 70-те години на 20 век, под името Astro*Carto*Graphy. <em>Важно: астрокартографията е астрологична техника без научна основа, предназначена за размисъл и забавление.</em></p>
+      </div>
+
+      <div class="astro-controls">
+        <button id="acg-calc-btn" class="btn btn-filled">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ⟡ Изчисли астрокартографска карта
+        </button>
+        <div id="acg-message" class="acg-message"></div>
+      </div>
+
+      <div id="acg-container" class="acg-output" style="display: none;">
+        <div id="acg-map" class="acg-map"></div>
+        <div id="acg-legend" class="acg-legend"></div>
+        <button id="acg-pdf-btn" class="btn btn-tonal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ⭳ Свали като PDF
+        </button>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ═══════════════════════ ARTICLES ═══════════════════════ -->
   <section id="articles">
     <div class="container reveal" data-reveal>
@@ -279,6 +315,7 @@
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script src="js/vendor/svg2pdf.umd.min.js"></script>
 <script src="js/vendor/pdf-fonts.js"></script>
+<script src="js/astrocartography.js?v=1"></script>
 <script src="js/app.js?v=6"></script>
 </body>
 </html>
