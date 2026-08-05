@@ -453,6 +453,7 @@
 
   function renderNatalResults(chart) {
     lastChart = chart;
+    window.lastNatalChart = chart; // За астрокартография
 
     $('wheel-container').innerHTML = buildWheelSVG(chart);
 
