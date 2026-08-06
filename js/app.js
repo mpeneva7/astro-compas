@@ -321,7 +321,7 @@
   // по-големите места излизат първи при еднакво съвпадение.
   function matchCities(q, limit) {
     q = q.trim().toLowerCase();
-    if (!q) return [];
+    if (!q) return CITY_DB.slice(0, limit);
     var starts = [], contains = [];
     for (var i = 0; i < CITY_DB.length; i++) {
       var nm = CITY_DB[i][0].toLowerCase();
