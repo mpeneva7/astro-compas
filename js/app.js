@@ -128,17 +128,25 @@
 
   /* ───────────────────────── Луна ───────────────────────── */
 
-  function moonIllustrationSVG(phaseAngleDeg) {
-    // Normalize phase to 0-1 and calculate illumination
+  function moonIllustrationSVG(phaseAngleDeg, illumination) {
+    // Normalize phase to 0-1
     var phase = (phaseAngleDeg % 360) / 360;
-    var illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
+    var illum = illumination || (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
     // Moon geometry
     var cx = 100, cy = 100, r = 74;
 
-    // Calculate the width of the visible lit portion (ellipse axis)
-    var theta = phase * 2 * Math.PI;
-    var rx = Math.abs(r * Math.cos(theta));
+    // Determine if waxing or waning
+    var isWaxing = phase < 0.5;
+
+    // Calculate ellipse width proportional to illumination
+    // At new moon (illum=0): rx approaches 0
+    // At first/last quarter (illum=0.5): rx = r (since 2*illum = 1 for waxing, or 2*(1-illum)=1 for waning)
+    // At full moon (illum=1): rx approaches r
+    var rx = isWaxing ? r * Math.max(0.01, illum * 2) : r * Math.max(0.01, (1 - illum) * 2);
+
+    // Clamp rx to reasonable values for visual accuracy
+    rx = Math.min(r, Math.max(0, rx));
 
     // Determine sweep directions based on phase
     var sweepOuter, sweepInner;
@@ -188,7 +196,7 @@
     moonEl.innerHTML = '';
     // Add a data attribute that changes to ensure re-render
     moonEl.dataset.updateTime = Date.now();
-    moonEl.innerHTML = moonIllustrationSVG(phase.angle);
+    moonEl.innerHTML = moonIllustrationSVG(phase.angle, phase.illumination);
     // Force browser repaint
     moonEl.offsetHeight;
 
