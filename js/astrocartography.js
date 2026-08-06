@@ -504,94 +504,105 @@ const AstroCarto = (function() {
     }
   }
 
-  // Дата пикер за астрокартография
+  // Дата пикер за астрокартография (идентичен с наталната форма)
   function openAcgDatePicker(initial, onConfirm) {
-    const today = new Date();
-    let sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
-    let viewYear = (sel || today).getFullYear();
-    let viewMonth = (sel || today).getMonth();
-    let mode = 'day';
-    const YEAR_START = 1900, YEAR_END = today.getFullYear();
-    const BG_MONTHS_GEN = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-    const BG_MONTHS = ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
-    const BG_DAYS_ABBR = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    const BG_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+    var today = new Date();
+    var sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
+    var viewYear = (sel || today).getFullYear();
+    var viewMonth = (sel || today).getMonth();
+    var mode = 'day';
+    var YEAR_START = 1900, YEAR_END = today.getFullYear();
 
-    const overlay = document.createElement('div');
+    var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
     document.body.appendChild(overlay);
-
     function close() { overlay.remove(); }
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
     function render() {
-      const hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
-      let html = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
+      var hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
+      var html = '<div class="m3-modal-panel">';
+      html += '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
 
       if (mode === 'day') {
-        html += '<div class="m3-nav-row"><button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>';
-        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(d => '<span>' + d + '</span>').join('') + '</div>';
+        html += '<div class="m3-nav-row">' +
+          '<button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+          '</div>';
+        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
 
-        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-        const startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
-        const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
-        const cells = [];
-        for (let i = 0; i < startDow; i++) cells.push({ d: prevMonthDays - startDow + 1 + i, kind: 'prev' });
-        for (let d = 1; d <= daysInMonth; d++) cells.push({ d: d, kind: 'cur' });
+        var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        var startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+        var prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+        var cells = [];
+        for (var i = 0; i < startDow; i++) cells.push({ d: prevMonthDays - startDow + 1 + i, kind: 'prev' });
+        for (var d = 1; d <= daysInMonth; d++) cells.push({ d: d, kind: 'cur' });
         while (cells.length < 42) cells.push({ d: cells.length - startDow - daysInMonth + 1, kind: 'next' });
 
         html += '<div class="m3-day-grid">';
-        cells.forEach(c => {
-          const cur = c.kind === 'cur';
-          const isSel = cur && sel && sel.getDate() === c.d && sel.getMonth() === viewMonth && sel.getFullYear() === viewYear;
-          const isToday = cur && c.d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-          const cls = 'm3-day-cell' + (cur ? '' : ' outside') + (isSel ? ' selected' : '') + (isToday && !isSel ? ' today' : '');
+        cells.forEach(function (c) {
+          var cur = c.kind === 'cur';
+          var isSel = cur && sel && sel.getDate() === c.d && sel.getMonth() === viewMonth && sel.getFullYear() === viewYear;
+          var isToday = cur && c.d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+          var cls = 'm3-day-cell' + (cur ? '' : ' outside') + (isSel ? ' selected' : '') + (isToday && !isSel ? ' today' : '');
           html += '<button type="button" class="' + cls + '" ' + (cur ? 'data-act="pickday" data-day="' + c.d + '"' : 'disabled') + '>' + c.d + '</button>';
         });
         html += '</div>';
       } else if (mode === 'month') {
-        html += '<div class="m3-nav-row"><span style="flex:1;"></span><button type="button" class="m3-nav-label" data-act="toyear" style="flex:0 0 auto; padding-left:14px; padding-right:14px;">' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+        html += '<div class="m3-nav-row"><span style="flex:1;"></span>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear" style="flex:0 0 auto; padding-left:14px; padding-right:14px;">' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+          '</div>';
         html += '<div class="m3-month-grid">';
-        BG_MONTHS.forEach((name, i) => {
-          const active = i === viewMonth;
-          const isCurMonth = viewYear === today.getFullYear() && i === today.getMonth();
+        BG_MONTHS.forEach(function (name, i) {
+          var active = i === viewMonth;
+          var isCurMonth = viewYear === today.getFullYear() && i === today.getMonth();
           html += '<button type="button" class="m3-chip' + (active ? ' selected' : '') + (isCurMonth && !active ? ' today' : '') + '" data-act="pickmonth" data-month="' + i + '">' + name + '</button>';
         });
         html += '</div>';
       } else {
-        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span><button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span>' +
+          '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+          '</div>';
         html += '<div class="m3-year-scroll" id="m3-year-scroll"><div class="m3-year-grid-inner">';
-        for (let y = YEAR_START; y <= YEAR_END; y++) {
-          const activeY = y === viewYear;
+        for (var y = YEAR_START; y <= YEAR_END; y++) {
+          var activeY = y === viewYear;
           html += '<button type="button" class="m3-chip' + (activeY ? ' selected' : '') + (y === today.getFullYear() && !activeY ? ' today' : '') + '" data-act="pickyear" data-year="' + y + '" ' + (activeY ? 'data-selected="1"' : '') + '>' + y + '</button>';
         }
         html += '</div></div>';
       }
 
-      html += '<div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" data-act="ok"' + (sel ? '' : ' disabled') + '>OK</button></div></div>';
+      html += '<div class="m3-modal-divider"></div>';
+      html += '<div class="m3-modal-actions">' +
+        '<button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button>' +
+        '<button type="button" class="m3-modal-btn filled" data-act="ok"' + (sel ? '' : ' disabled') + '>OK</button>' +
+        '</div></div>';
 
       overlay.innerHTML = html;
-      overlay.querySelectorAll('[data-act]').forEach(el => {
-        el.addEventListener('click', () => {
-          const act = el.dataset.act;
-          if (act === 'prevmonth') { viewMonth = (viewMonth === 0) ? 11 : viewMonth - 1; if (viewMonth === 11) viewYear--; render(); }
-          else if (act === 'nextmonth') { viewMonth = (viewMonth === 11) ? 0 : viewMonth + 1; if (viewMonth === 0) viewYear++; render(); }
-          else if (act === 'toyear') { mode = mode === 'day' ? 'month' : 'year'; render(); }
+
+      overlay.querySelectorAll('[data-act]').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var act = el.dataset.act;
+          if (act === 'prevmonth') { if (viewMonth === 0) { viewMonth = 11; viewYear--; } else viewMonth--; render(); }
+          else if (act === 'nextmonth') { if (viewMonth === 11) { viewMonth = 0; viewYear++; } else viewMonth++; render(); }
+          else if (act === 'toyear') { mode = 'year'; render(); }
+          else if (act === 'todayview') { mode = 'day'; render(); }
           else if (act === 'pickday') { sel = new Date(viewYear, viewMonth, parseInt(el.dataset.day, 10)); render(); }
           else if (act === 'pickmonth') { viewMonth = parseInt(el.dataset.month, 10); mode = 'day'; render(); }
           else if (act === 'pickyear') { viewYear = parseInt(el.dataset.year, 10); mode = 'month'; render(); }
-          else if (act === 'todayview') { mode = 'day'; render(); }
           else if (act === 'cancel') { close(); }
           else if (act === 'ok') { if (sel) { onConfirm(sel); close(); } }
         });
       });
 
       if (mode === 'year') {
-        const container = overlay.querySelector('#m3-year-scroll');
-        const target = overlay.querySelector('[data-selected="1"]');
+        var container = overlay.querySelector('#m3-year-scroll');
+        var target = overlay.querySelector('[data-selected="1"]');
         if (container && target) container.scrollTop = target.offsetTop - container.clientHeight / 2 + target.clientHeight / 2;
       }
     }
+
     render();
   }
 
