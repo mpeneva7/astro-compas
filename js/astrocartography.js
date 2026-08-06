@@ -700,15 +700,10 @@ const AstroCarto = (function() {
 
     // Град автодовършване (опростено - използваме същата логика като наталната форма)
     if (cityInput) {
-      cityInput.addEventListener('input', () => {
+      function showCityMatches() {
         acgSelectedCity = null;
         cityError.textContent = '';
         const q = cityInput.value.trim().toLowerCase();
-        if (!q) {
-          cityDropdown.innerHTML = '';
-          cityDropdown.classList.remove('open');
-          return;
-        }
 
         // Провери дали window.BG_CITIES е наличен
         if (!window.BG_CITIES || !window.BG_CITIES.places) {
@@ -716,7 +711,22 @@ const AstroCarto = (function() {
           return;
         }
 
-        const matches = window.BG_CITIES.places.filter(p => p[0].toLowerCase().includes(q)).slice(0, 8);
+        if (!q) {
+          cityDropdown.innerHTML = '';
+          cityDropdown.classList.remove('open');
+          return;
+        }
+
+        // Prioritize prefix matches like in natal form
+        const starts = [], contains = [];
+        const limit = 8;
+        for (let i = 0; i < window.BG_CITIES.places.length; i++) {
+          const nm = window.BG_CITIES.places[i][0].toLowerCase();
+          const pos = nm.indexOf(q);
+          if (pos === 0) { starts.push(window.BG_CITIES.places[i]); if (starts.length >= limit) break; }
+          else if (pos > 0 && contains.length < limit) contains.push(window.BG_CITIES.places[i]);
+        }
+        const matches = starts.concat(contains).slice(0, 8);
         cityDropdown.innerHTML = '';
 
         if (matches.length > 0) {
@@ -737,8 +747,10 @@ const AstroCarto = (function() {
         } else {
           cityDropdown.classList.remove('open');
         }
-      });
+      }
 
+      cityInput.addEventListener('input', showCityMatches);
+      cityInput.addEventListener('focus', showCityMatches);
       cityInput.addEventListener('blur', () => {
         setTimeout(() => {
           cityDropdown.classList.remove('open');
