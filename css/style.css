@@ -259,7 +259,7 @@ button { font-family: var(--font-body); }
 .hero-scroll-cue svg { animation: bounceDown 2s infinite; }
 
 /* ── Sections ─────────────────────────────────────────────────────── */
-section { padding: 60px 20px; }
+section { padding: 40px 20px; }
 #moon { background: linear-gradient(180deg, #140A1E 0%, #1E1428 100%); }
 #horoscope { background: var(--background); }
 #natal { background: linear-gradient(180deg, #140A1E 0%, #1C1030 50%, #140A1E 100%); }
