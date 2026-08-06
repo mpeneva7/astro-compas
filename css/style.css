@@ -436,11 +436,17 @@ section { padding: 60px 20px; }
   border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative;
   transition: border-color 0.15s ease;
 }
+.m3-time-box:last-of-type { width: 120px; }
 .m3-time-box.focus { border-color: var(--primary); }
 .m3-time-box.err { border-color: var(--destructive); }
 .m3-time-box input {
   width: 100%; text-align: center; background: transparent; border: none; outline: none;
   font-family: var(--font-body); font-size: 2.25rem; font-weight: 700; color: var(--foreground); letter-spacing: 0.04em;
+  padding: 0 8px;
+}
+.m3-time-box input::placeholder {
+  color: var(--outline);
+  opacity: 0.6;
 }
 .m3-time-box .m3-time-sub {
   position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 0.72rem; color: var(--outline);
