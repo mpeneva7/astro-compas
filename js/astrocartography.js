@@ -529,7 +529,7 @@ const AstroCarto = (function() {
       let html = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
 
       if (mode === 'day') {
-        html += '<div class="m3-nav-row"><button type="button" class="m3-icon-btn" data-act="prevmonth">◀</button><button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '</button><button type="button" class="m3-icon-btn" data-act="nextmonth">▶</button></div>';
+        html += '<div class="m3-nav-row"><button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '</button><button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>';
         html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(d => '<span>' + d + '</span>').join('') + '</div>';
 
         const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -576,7 +576,7 @@ const AstroCarto = (function() {
     let hourRaw = initial ? String(initial.h).padStart(2, '0') : '';
     let minRaw = initial ? String(initial.m).padStart(2, '0') : '';
 
-    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p style="padding:0; margin-top:4px; font-size:0.9rem; color:var(--foreground-muted);">Въведете часа (24-часов формат)</p></div><div class="m3-time-row"><div class="m3-time-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="ЧЧ" value="' + hourRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-hour-sub">Час</span></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="ММ" value="' + minRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-min-sub">Минути</span></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
+    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p style="padding:0; margin-top:4px; font-size:0.9rem; color:var(--foreground-muted);">Въведете часа директно (24-часов формат)</p></div><div class="m3-time-row"><div class="m3-time-box" id="acg-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="00" value="' + hourRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-hour-sub">Час</span></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box" id="acg-min-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="00" value="' + minRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-min-sub">Минути</span></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
     document.body.appendChild(overlay);
 
     function close() { overlay.remove(); }
@@ -584,9 +584,12 @@ const AstroCarto = (function() {
 
     const hInput = overlay.querySelector('#acg-hour');
     const mInput = overlay.querySelector('#acg-min');
+    const hBox = overlay.querySelector('#acg-hour-box');
+    const mBox = overlay.querySelector('#acg-min-box');
     const okBtn = overlay.querySelector('#acg-time-ok');
     let hourErr = false, minErr = false;
 
+    function pad2(n) { return String(n).padStart(2, '0'); }
     function refreshOk() { okBtn.disabled = !(hourRaw && minRaw && !hourErr && !minErr); }
 
     hInput.addEventListener('input', () => {
@@ -594,6 +597,7 @@ const AstroCarto = (function() {
       hInput.value = hourRaw;
       const n = parseInt(hourRaw, 10);
       hourErr = hourRaw && (isNaN(n) || n < 0 || n > 23);
+      hBox.classList.toggle('err', hourErr);
       document.getElementById('acg-hour-sub').textContent = hourErr ? '0–23' : 'Час';
       refreshOk();
       if (hourRaw.length === 2 && !hourErr) mInput.focus();
@@ -604,9 +608,15 @@ const AstroCarto = (function() {
       mInput.value = minRaw;
       const n = parseInt(minRaw, 10);
       minErr = minRaw && (isNaN(n) || n < 0 || n > 59);
+      mBox.classList.toggle('err', minErr);
       document.getElementById('acg-min-sub').textContent = minErr ? '0–59' : 'Минути';
       refreshOk();
     });
+
+    hInput.addEventListener('focus', () => { hBox.classList.add('focus'); });
+    hInput.addEventListener('blur', () => { hBox.classList.remove('focus'); if (hourRaw && !hourErr) { hourRaw = pad2(parseInt(hourRaw, 10)); hInput.value = hourRaw; } });
+    mInput.addEventListener('focus', () => { mBox.classList.add('focus'); });
+    mInput.addEventListener('blur', () => { mBox.classList.remove('focus'); if (minRaw && !minErr) { minRaw = pad2(parseInt(minRaw, 10)); mInput.value = minRaw; } });
 
     overlay.querySelector('[data-act="cancel"]').addEventListener('click', close);
     okBtn.addEventListener('click', () => {
