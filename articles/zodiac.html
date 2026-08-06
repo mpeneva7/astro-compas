@@ -55,8 +55,15 @@
             color: var(--outline);
             font-size: 0.9rem;
             text-align: center;
-            padding: 20px;
+            padding: 0;
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .zodiac-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .zodiac-text h3 {
@@ -189,11 +196,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <span style="display: none;" data-constellation="aries">SVG: Aries</span>
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♈</div>
-                        <div>Овен</div>
-                    </div>
+                    <img src="../assets/constellations/aries.svg" alt="Aries constellation" data-constellation="aries">
                 </div>
                 <div class="zodiac-text">
                     <h3>Овен</h3>
@@ -207,10 +210,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♉</div>
-                        <div>Телец</div>
-                    </div>
+                    <img src="../assets/constellations/taurus.svg" alt="Taurus constellation" data-constellation="taurus">
                 </div>
                 <div class="zodiac-text">
                     <h3>Телец</h3>
@@ -224,9 +224,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♊</div>
-                        <div>Близнаци</div>
+                    <img src="../assets/constellations/gemini.svg" alt="Gemini constellation" data-constellation="gemini">
                     </div>
                 </div>
                 <div class="zodiac-text">
@@ -241,10 +239,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♋</div>
-                        <div>Рак</div>
-                    </div>
+                    <img src="../assets/constellations/cancer.svg" alt="Cancer constellation" data-constellation="cancer">
                 </div>
                 <div class="zodiac-text">
                     <h3>Рак</h3>
@@ -258,10 +253,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♌</div>
-                        <div>Лъв</div>
-                    </div>
+                    <img src="../assets/constellations/leo.svg" alt="Leo constellation" data-constellation="leo">
                 </div>
                 <div class="zodiac-text">
                     <h3>Лъв</h3>
@@ -275,10 +267,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♍</div>
-                        <div>Дева</div>
-                    </div>
+                    <img src="../assets/constellations/virgo.svg" alt="Virgo constellation" data-constellation="virgo">
                 </div>
                 <div class="zodiac-text">
                     <h3>Дева</h3>
@@ -292,10 +281,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♎</div>
-                        <div>Везни</div>
-                    </div>
+                    <img src="../assets/constellations/libra.svg" alt="Libra constellation" data-constellation="libra">
                 </div>
                 <div class="zodiac-text">
                     <h3>Везни</h3>
@@ -309,10 +295,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♏</div>
-                        <div>Скорпион</div>
-                    </div>
+                    <img src="../assets/constellations/scorpius.svg" alt="Scorpius constellation" data-constellation="scorpius">
                 </div>
                 <div class="zodiac-text">
                     <h3>Скорпион</h3>
@@ -326,10 +309,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♐</div>
-                        <div>Стрелец</div>
-                    </div>
+                    <img src="../assets/constellations/sagittarius.svg" alt="Sagittarius constellation" data-constellation="sagittarius">
                 </div>
                 <div class="zodiac-text">
                     <h3>Стрелец</h3>
@@ -343,10 +323,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♑</div>
-                        <div>Козирог</div>
-                    </div>
+                    <img src="../assets/constellations/capricornus.svg" alt="Capricornus constellation" data-constellation="capricornus">
                 </div>
                 <div class="zodiac-text">
                     <h3>Козирог</h3>
@@ -360,10 +337,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♒</div>
-                        <div>Водолей</div>
-                    </div>
+                    <img src="../assets/constellations/aquarius.svg" alt="Aquarius constellation" data-constellation="aquarius">
                 </div>
                 <div class="zodiac-text">
                     <h3>Водолей</h3>
@@ -377,10 +351,7 @@
         <div class="zodiac-section">
             <div class="zodiac-layout">
                 <div class="zodiac-img">
-                    <div style="text-align:center;">
-                        <div style="font-size:3rem; margin-bottom:8px;">♓</div>
-                        <div>Риби</div>
-                    </div>
+                    <img src="../assets/constellations/pisces.svg" alt="Pisces constellation" data-constellation="pisces">
                 </div>
                 <div class="zodiac-text">
                     <h3>Риби</h3>
