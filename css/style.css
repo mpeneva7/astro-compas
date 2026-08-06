@@ -456,7 +456,7 @@ section { padding: 40px 20px; }
 .m3-time-hint { padding: 0 24px; margin: 0; font-size: 0.75rem; color: var(--outline); }
 
 .city-dropdown {
-  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20;
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 1000;
   background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
   overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.4); max-height: 220px; overflow-y: auto;
   display: none;
@@ -723,7 +723,7 @@ section { padding: 40px 20px; }
   display: block;
 }
 
-.article-header { margin-bottom: 12px; padding: 24px 24px 0; }
+.article-header { margin-bottom: 12px; padding: 28px 24px 0; }
 .article-title {
   font-size: 1.3rem;
   font-weight: 700;

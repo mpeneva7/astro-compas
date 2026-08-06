@@ -522,7 +522,7 @@ const AstroCarto = (function() {
     function render() {
       var hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
       var html = '<div class="m3-modal-panel">';
-      html += '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
+      html += '<div class="m3-modal-header"><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
 
       if (mode === 'day') {
         html += '<div class="m3-nav-row">' +
@@ -562,7 +562,8 @@ const AstroCarto = (function() {
         });
         html += '</div>';
       } else {
-        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span>' +
+        html += '<div class="m3-nav-row"><span style="flex:1;"></span>' +
+          '<button type="button" class="m3-nav-label" data-act="todayview" style="padding-left:14px; padding-right:14px; cursor:pointer;">' + viewYear + '</button>' +
           '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
           '</div>';
         html += '<div class="m3-year-scroll" id="m3-year-scroll"><div class="m3-year-grid-inner">';
@@ -613,7 +614,7 @@ const AstroCarto = (function() {
     let hourRaw = initial ? String(initial.h).padStart(2, '0') : '';
     let minRaw = initial ? String(initial.m).padStart(2, '0') : '';
 
-    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p style="padding:0; margin-top:4px; font-size:0.9rem; color:var(--foreground-muted);">Въведете часа директно (24-часов формат)</p></div><div class="m3-time-row"><div class="m3-time-box" id="acg-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="00" value="' + hourRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-hour-sub">Час</span></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box" id="acg-min-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="00" value="' + minRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-min-sub">Минути</span></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
+    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p></div><div class="m3-time-row"><div class="m3-time-box" id="acg-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="ЧЧ" value="' + hourRaw + '"></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box" id="acg-min-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="ММ" value="' + minRaw + '"></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
     document.body.appendChild(overlay);
 
     function close() { overlay.remove(); }
@@ -635,7 +636,6 @@ const AstroCarto = (function() {
       const n = parseInt(hourRaw, 10);
       hourErr = hourRaw && (isNaN(n) || n < 0 || n > 23);
       hBox.classList.toggle('err', hourErr);
-      document.getElementById('acg-hour-sub').textContent = hourErr ? '0–23' : 'Час';
       refreshOk();
       if (hourRaw.length === 2 && !hourErr) mInput.focus();
     });
@@ -646,7 +646,6 @@ const AstroCarto = (function() {
       const n = parseInt(minRaw, 10);
       minErr = minRaw && (isNaN(n) || n < 0 || n > 59);
       mBox.classList.toggle('err', minErr);
-      document.getElementById('acg-min-sub').textContent = minErr ? '0–59' : 'Минути';
       refreshOk();
     });
 
@@ -701,15 +700,10 @@ const AstroCarto = (function() {
 
     // Град автодовършване (опростено - използваме същата логика като наталната форма)
     if (cityInput) {
-      cityInput.addEventListener('input', () => {
+      function showCityMatches() {
         acgSelectedCity = null;
         cityError.textContent = '';
         const q = cityInput.value.trim().toLowerCase();
-        if (!q) {
-          cityDropdown.innerHTML = '';
-          cityDropdown.classList.remove('open');
-          return;
-        }
 
         // Провери дали window.BG_CITIES е наличен
         if (!window.BG_CITIES || !window.BG_CITIES.places) {
@@ -717,7 +711,22 @@ const AstroCarto = (function() {
           return;
         }
 
-        const matches = window.BG_CITIES.places.filter(p => p[0].toLowerCase().includes(q)).slice(0, 8);
+        if (!q) {
+          cityDropdown.innerHTML = '';
+          cityDropdown.classList.remove('open');
+          return;
+        }
+
+        // Prioritize prefix matches like in natal form
+        const starts = [], contains = [];
+        const limit = 8;
+        for (let i = 0; i < window.BG_CITIES.places.length; i++) {
+          const nm = window.BG_CITIES.places[i][0].toLowerCase();
+          const pos = nm.indexOf(q);
+          if (pos === 0) { starts.push(window.BG_CITIES.places[i]); if (starts.length >= limit) break; }
+          else if (pos > 0 && contains.length < limit) contains.push(window.BG_CITIES.places[i]);
+        }
+        const matches = starts.concat(contains).slice(0, 8);
         cityDropdown.innerHTML = '';
 
         if (matches.length > 0) {
@@ -738,8 +747,10 @@ const AstroCarto = (function() {
         } else {
           cityDropdown.classList.remove('open');
         }
-      });
+      }
 
+      cityInput.addEventListener('input', showCityMatches);
+      cityInput.addEventListener('focus', showCityMatches);
       cityInput.addEventListener('blur', () => {
         setTimeout(() => {
           cityDropdown.classList.remove('open');
