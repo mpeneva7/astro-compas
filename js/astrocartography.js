@@ -707,6 +707,7 @@ const AstroCarto = (function() {
         const q = cityInput.value.trim().toLowerCase();
         if (!q) {
           cityDropdown.innerHTML = '';
+          cityDropdown.classList.remove('open');
           return;
         }
 
@@ -719,26 +720,30 @@ const AstroCarto = (function() {
         const matches = window.BG_CITIES.places.filter(p => p[0].toLowerCase().includes(q)).slice(0, 8);
         cityDropdown.innerHTML = '';
 
-        matches.forEach(p => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.innerHTML = '<span>' + p[0] + '</span><span style="font-size:0.8rem; opacity:0.6;"> · ' + (window.BG_CITIES.oblasti[p[1]] || '') + '</span>';
-          btn.style.display = 'block';
-          btn.style.width = '100%';
-          btn.style.textAlign = 'left';
-          btn.style.padding = '8px';
-          btn.style.border = 'none';
-          btn.style.background = 'rgba(182,157,232,0.08)';
-          btn.style.color = 'var(--foreground)';
-          btn.style.cursor = 'pointer';
-          btn.addEventListener('mousedown', () => {
-            cityInput.value = p[0];
-            acgSelectedCity = { name: p[0], lat: p[2], lon: p[3] };
-            cityError.textContent = '';
-            cityDropdown.innerHTML = '';
+        if (matches.length > 0) {
+          cityDropdown.classList.add('open');
+          matches.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = '<span class="city-name">' + p[0] + '</span><span class="city-oblast"> · ' + (window.BG_CITIES.oblasti[p[1]] || '') + '</span>';
+            btn.addEventListener('mousedown', () => {
+              cityInput.value = p[0];
+              acgSelectedCity = { name: p[0], lat: p[2], lon: p[3] };
+              cityError.textContent = '';
+              cityDropdown.innerHTML = '';
+              cityDropdown.classList.remove('open');
+            });
+            cityDropdown.appendChild(btn);
           });
-          cityDropdown.appendChild(btn);
-        });
+        } else {
+          cityDropdown.classList.remove('open');
+        }
+      });
+
+      cityInput.addEventListener('blur', () => {
+        setTimeout(() => {
+          cityDropdown.classList.remove('open');
+        }, 100);
       });
     }
   }
