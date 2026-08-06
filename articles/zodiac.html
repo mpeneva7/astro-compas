@@ -104,8 +104,9 @@
         .back-btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 12px 20px;
+            padding: 12px 16px;
             background: rgba(182,157,232,0.1);
             border: 1px solid rgba(182,157,232,0.3);
             border-radius: var(--radius-sm);
@@ -113,13 +114,29 @@
             text-decoration: none;
             font-weight: 600;
             transition: all 0.2s ease;
-            margin-bottom: 32px;
             cursor: pointer;
+            font-size: 0.95rem;
+            min-width: 40px;
+            height: 40px;
         }
 
         .back-btn:hover {
             background: rgba(182,157,232,0.2);
             border-color: var(--primary);
+        }
+
+        .back-btn-top-right {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .back-btn-bottom-left {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
         }
 
         @media (max-width: 768px) {
@@ -145,8 +162,15 @@
     </style>
 </head>
 <body style="background: var(--background); color: var(--foreground);">
+    <!-- Бутон назад в горен десен ъгъл -->
+    <button class="back-btn back-btn-top-right" onclick="window.history.back();" aria-label="Назад" title="Назад">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    </button>
+
     <div class="article-container">
-        <button class="back-btn" onclick="window.history.back();">← Назад</button>
 
         <div class="article-header-section">
             <h1>Съзвездията на зодиака</h1>
@@ -371,5 +395,13 @@
             <p class="article-sources">Всички астрономически данни са проверени по източници на NASA, Международния астрономически съюз (IAU) и обсерваторията NOIRLab. Съзвездията тук са представени като астрономия; зодиакалните знаци в хороскопа са отделна, символична традиция.</p>
         </div>
     </div>
+
+    <!-- Бутон назад в долен ляв ъгъл -->
+    <button class="back-btn back-btn-bottom-left" onclick="window.history.back();" aria-label="Назад" title="Назад">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    </button>
 </body>
 </html>
