@@ -504,6 +504,9 @@ const AstroCarto = (function() {
     }
   }
 
+  // Помощна функция за форматиране
+  function pad2(n) { return String(n).padStart(2, '0'); }
+
   // Дата пикер за астрокартография (идентичен с наталната форма)
   function openAcgDatePicker(initial, onConfirm) {
     var today = new Date();
@@ -522,7 +525,7 @@ const AstroCarto = (function() {
     function render() {
       var hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
       var html = '<div class="m3-modal-panel">';
-      html += '<div class="m3-modal-header"><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
+      html += '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
 
       if (mode === 'day') {
         html += '<div class="m3-nav-row">' +
@@ -562,8 +565,7 @@ const AstroCarto = (function() {
         });
         html += '</div>';
       } else {
-        html += '<div class="m3-nav-row"><span style="flex:1;"></span>' +
-          '<button type="button" class="m3-nav-label" data-act="todayview" style="padding-left:14px; padding-right:14px; cursor:pointer;">' + viewYear + '</button>' +
+        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span>' +
           '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
           '</div>';
         html += '<div class="m3-year-scroll" id="m3-year-scroll"><div class="m3-year-grid-inner">';
@@ -607,61 +609,70 @@ const AstroCarto = (function() {
     render();
   }
 
-  // Час пикер за астрокартография
+  // Час пикер за астрокартография (идентичен с наталната форма)
   function openAcgTimePicker(initial, onConfirm) {
-    const overlay = document.createElement('div');
+    var hourRaw = initial ? pad2(initial.h) : '';
+    var minRaw = initial ? pad2(initial.m) : '';
+
+    var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
-    let hourRaw = '';
-    let minRaw = '';
-
-    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p></div><div class="m3-time-row"><div class="m3-time-box" id="acg-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="ЧЧ" value="' + hourRaw + '"></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box" id="acg-min-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="ММ" value="' + minRaw + '"></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
+    overlay.innerHTML =
+      '<div class="m3-modal-panel">' +
+      '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p class="m3-time-hint" style="padding:0; margin-top:4px;">Въведете часа директно (24-часов формат)</p></div>' +
+      '<div class="m3-time-row">' +
+      '<div class="m3-time-box" id="m3-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="m3-hour-input" placeholder="ЧЧ" value="' + hourRaw + '"><span class="m3-time-sub" id="m3-hour-sub">Час</span></div>' +
+      '<span class="m3-time-colon">:</span>' +
+      '<div class="m3-time-box" id="m3-min-box"><input type="text" inputmode="numeric" maxlength="2" id="m3-min-input" placeholder="ММ" value="' + minRaw + '"><span class="m3-time-sub" id="m3-min-sub">Минути</span></div>' +
+      '</div>' +
+      '<div class="m3-modal-divider"></div>' +
+      '<div class="m3-modal-actions">' +
+      '<button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button>' +
+      '<button type="button" class="m3-modal-btn filled" id="m3-time-ok" disabled>OK</button>' +
+      '</div></div>';
     document.body.appendChild(overlay);
-
     function close() { overlay.remove(); }
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
-    const hInput = overlay.querySelector('#acg-hour');
-    const mInput = overlay.querySelector('#acg-min');
-    const hBox = overlay.querySelector('#acg-hour-box');
-    const mBox = overlay.querySelector('#acg-min-box');
-    const okBtn = overlay.querySelector('#acg-time-ok');
-    let hourErr = false, minErr = false;
+    var hInput = overlay.querySelector('#m3-hour-input'), mInput = overlay.querySelector('#m3-min-input');
+    var hBox = overlay.querySelector('#m3-hour-box'), mBox = overlay.querySelector('#m3-min-box');
+    var hSub = overlay.querySelector('#m3-hour-sub'), mSub = overlay.querySelector('#m3-min-sub');
+    var okBtn = overlay.querySelector('#m3-time-ok');
+    var hourErr = false, minErr = false;
 
-    function pad2(n) { return String(n).padStart(2, '0'); }
-    function refreshOk() { okBtn.disabled = !(hourRaw && minRaw && !hourErr && !minErr); }
+    function refreshOk() { okBtn.disabled = !(hourRaw !== '' && minRaw !== '' && !hourErr && !minErr); }
 
-    hInput.addEventListener('input', () => {
-      hourRaw = hInput.value.replace(/[^0-9]/g, '').slice(0, 2);
-      hInput.value = hourRaw;
-      const n = parseInt(hourRaw, 10);
-      hourErr = hourRaw && (isNaN(n) || n < 0 || n > 23);
+    hInput.addEventListener('input', function () {
+      var raw = hInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      hInput.value = raw; hourRaw = raw;
+      var n = parseInt(raw, 10);
+      hourErr = raw !== '' && (isNaN(n) || n < 0 || n > 23);
       hBox.classList.toggle('err', hourErr);
+      hSub.textContent = hourErr ? '0–23' : 'Час';
       refreshOk();
-      if (hourRaw.length === 2 && !hourErr) mInput.focus();
+      if (raw.length === 2 && !hourErr) { mInput.focus(); }
     });
-
-    mInput.addEventListener('input', () => {
-      minRaw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
-      mInput.value = minRaw;
-      const n = parseInt(minRaw, 10);
-      minErr = minRaw && (isNaN(n) || n < 0 || n > 59);
+    mInput.addEventListener('input', function () {
+      var raw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      mInput.value = raw; minRaw = raw;
+      var n = parseInt(raw, 10);
+      minErr = raw !== '' && (isNaN(n) || n < 0 || n > 59);
       mBox.classList.toggle('err', minErr);
+      mSub.textContent = minErr ? '0–59' : 'Минути';
       refreshOk();
     });
-
-    hInput.addEventListener('focus', () => { hBox.classList.add('focus'); });
-    hInput.addEventListener('blur', () => { hBox.classList.remove('focus'); if (hourRaw && !hourErr) { hourRaw = pad2(parseInt(hourRaw, 10)); hInput.value = hourRaw; } });
-    mInput.addEventListener('focus', () => { mBox.classList.add('focus'); });
-    mInput.addEventListener('blur', () => { mBox.classList.remove('focus'); if (minRaw && !minErr) { minRaw = pad2(parseInt(minRaw, 10)); mInput.value = minRaw; } });
+    hInput.addEventListener('focus', function () { hBox.classList.add('focus'); });
+    hInput.addEventListener('blur', function () { hBox.classList.remove('focus'); if (hourRaw && !hourErr) { hourRaw = pad2(parseInt(hourRaw, 10)); hInput.value = hourRaw; } });
+    mInput.addEventListener('focus', function () { mBox.classList.add('focus'); });
+    mInput.addEventListener('blur', function () { mBox.classList.remove('focus'); if (minRaw && !minErr) { minRaw = pad2(parseInt(minRaw, 10)); mInput.value = minRaw; } });
 
     overlay.querySelector('[data-act="cancel"]').addEventListener('click', close);
-    okBtn.addEventListener('click', () => {
-      if (hourRaw && minRaw && !hourErr && !minErr) {
-        onConfirm({ h: parseInt(hourRaw, 10), m: parseInt(minRaw, 10) });
-        close();
-      }
+    okBtn.addEventListener('click', function () {
+      if (okBtn.disabled) return;
+      onConfirm({ h: parseInt(hourRaw, 10), m: parseInt(minRaw, 10) });
+      close();
     });
 
+    refreshOk();
     hInput.focus();
   }
 
