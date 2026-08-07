@@ -140,10 +140,11 @@
     var isWaxing = phase < 0.5;
 
     // Calculate ellipse width proportional to illumination
-    // At new moon (illum=0): rx approaches 0
-    // At first/last quarter (illum=0.5): rx = r (since 2*illum = 1 for waxing, or 2*(1-illum)=1 for waning)
-    // At full moon (illum=1): rx approaches r
-    var rx = isWaxing ? r * Math.max(0.01, illum * 2) : r * Math.max(0.01, (1 - illum) * 2);
+    // Illumination ranges from 0 to 1, so rx maps directly
+    // At new moon (illum=0): rx ≈ 0
+    // At quarter moon (illum=0.5): rx = r/2
+    // At full moon (illum=1): rx = r
+    var rx = r * Math.max(0.01, illum);
 
     // Clamp rx to reasonable values for visual accuracy
     rx = Math.min(r, Math.max(0, rx));
