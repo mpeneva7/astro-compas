@@ -611,8 +611,8 @@ const AstroCarto = (function() {
   function openAcgTimePicker(initial, onConfirm) {
     const overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
-    let hourRaw = initial ? String(initial.h).padStart(2, '0') : '';
-    let minRaw = initial ? String(initial.m).padStart(2, '0') : '';
+    let hourRaw = '';
+    let minRaw = '';
 
     overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p></div><div class="m3-time-row"><div class="m3-time-box" id="acg-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="ЧЧ" value="' + hourRaw + '"></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box" id="acg-min-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="ММ" value="' + minRaw + '"></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
     document.body.appendChild(overlay);
