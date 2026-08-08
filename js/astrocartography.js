@@ -515,7 +515,6 @@ const AstroCarto = (function() {
 
   // Дата пикер за астрокартография (идентичен с наталната форма)
   function openAcgDatePicker(initial, onConfirm) {
-    console.log('[ACG] openAcgDatePicker called');
     var today = new Date();
     var sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
     var viewYear = (sel || today).getFullYear();
@@ -525,10 +524,7 @@ const AstroCarto = (function() {
 
     var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
-    overlay.style.display = 'flex';  // Force display: flex to ensure modal is visible
-    console.log('[ACG] Modal overlay created, BG_DAYS_ABBR available?', typeof BG_DAYS_ABBR);
     document.body.appendChild(overlay);
-    console.log('[ACG] Overlay appended to body, computed display:', window.getComputedStyle(overlay).display);
     function close() { overlay.remove(); }
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
