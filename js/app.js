@@ -149,14 +149,16 @@
     // Clamp rx to reasonable values for visual accuracy
     rx = Math.min(r, Math.max(0, rx));
 
-    // Determine sweep directions based on phase
+    // Determine sweep directions based on waxing/waning
+    // Waxing (0-180°): sun to the right, outer arc goes clockwise, inner arc counter-clockwise
+    // Waning (180-360°): sun to the left, outer arc goes counter-clockwise, inner arc clockwise
     var sweepOuter, sweepInner;
     if (phase < 0.5) {
       sweepOuter = 1;
-      sweepInner = (phase < 0.25) ? 1 : 0;
+      sweepInner = 0;  // Counter-clockwise inner arc traces right side for waxing
     } else {
       sweepOuter = 0;
-      sweepInner = (phase < 0.75) ? 1 : 0;
+      sweepInner = 1;  // Clockwise inner arc traces left side for waning
     }
 
     // Build the lit portion path using arc commands
