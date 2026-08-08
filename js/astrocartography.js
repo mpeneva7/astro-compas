@@ -515,6 +515,7 @@ const AstroCarto = (function() {
 
   // Дата пикер за астрокартография (идентичен с наталната форма)
   function openAcgDatePicker(initial, onConfirm) {
+    console.log('[ACG] openAcgDatePicker called');
     var today = new Date();
     var sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
     var viewYear = (sel || today).getFullYear();
@@ -524,7 +525,9 @@ const AstroCarto = (function() {
 
     var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
+    console.log('[ACG] Modal overlay created, BG_DAYS_ABBR available?', typeof BG_DAYS_ABBR);
     document.body.appendChild(overlay);
+    console.log('[ACG] Overlay appended to body');
     function close() { overlay.remove(); }
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
@@ -690,10 +693,13 @@ const AstroCarto = (function() {
     const cityDropdown = document.getElementById('acg-city-dropdown');
     const cityError = document.getElementById('acg-city-error');
 
+    console.log('[ACG] initAcgForm called, dateBtn:', dateBtn ? 'found' : 'NOT FOUND', 'timeBtn:', timeBtn ? 'found' : 'NOT FOUND');
+
     // Дата пикер
     if (dateBtn) {
       dateBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        console.log('[ACG] Date button clicked, opening picker...');
         openAcgDatePicker(acgBirthDate, (date) => {
           acgBirthDate = date;
           const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
