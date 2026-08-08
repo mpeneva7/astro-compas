@@ -1264,4 +1264,10 @@
 
     initNatalForm();
   });
+
+  // Expose date picker constants globally for astrocartography.js
+  window.BG_MONTHS_GEN = BG_MONTHS_GEN;
+  window.BG_MONTHS = BG_MONTHS;
+  window.BG_DAYS_ABBR = BG_DAYS_ABBR;
+  window.BG_DAYS_SHORT = BG_DAYS_SHORT;
 })();

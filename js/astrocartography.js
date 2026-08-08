@@ -523,17 +523,17 @@ const AstroCarto = (function() {
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
     function render() {
-      var hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
+      var hdText = sel ? (window.BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + window.BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
       var html = '<div class="m3-modal-panel">';
       html += '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
 
       if (mode === 'day') {
         html += '<div class="m3-nav-row">' +
           '<button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
-          '<button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear">' + window.BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
           '<button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
           '</div>';
-        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
+        html += '<div class="m3-day-head">' + window.BG_DAYS_SHORT.map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
 
         var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
         var startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
@@ -558,7 +558,7 @@ const AstroCarto = (function() {
           '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
           '</div>';
         html += '<div class="m3-month-grid">';
-        BG_MONTHS.forEach(function (name, i) {
+        window.BG_MONTHS.forEach(function (name, i) {
           var active = i === viewMonth;
           var isCurMonth = viewYear === today.getFullYear() && i === today.getMonth();
           html += '<button type="button" class="m3-chip' + (active ? ' selected' : '') + (isCurMonth && !active ? ' today' : '') + '" data-act="pickmonth" data-month="' + i + '">' + name + '</button>';
