@@ -525,9 +525,10 @@ const AstroCarto = (function() {
 
     var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
+    overlay.style.display = 'flex';  // Force display: flex to ensure modal is visible
     console.log('[ACG] Modal overlay created, BG_DAYS_ABBR available?', typeof BG_DAYS_ABBR);
     document.body.appendChild(overlay);
-    console.log('[ACG] Overlay appended to body');
+    console.log('[ACG] Overlay appended to body, computed display:', window.getComputedStyle(overlay).display);
     function close() { overlay.remove(); }
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
