@@ -2,6 +2,12 @@
 const AstroCarto = (function() {
   'use strict';
 
+  // Дата пикер константи (fallback ако не са изложени от app.js)
+  const BG_MONTHS_GEN = (typeof window.BG_MONTHS_GEN !== 'undefined') ? window.BG_MONTHS_GEN : ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+  const BG_MONTHS = (typeof window.BG_MONTHS !== 'undefined') ? window.BG_MONTHS : ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
+  const BG_DAYS_ABBR = (typeof window.BG_DAYS_ABBR !== 'undefined') ? window.BG_DAYS_ABBR : ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  const BG_DAYS_SHORT = (typeof window.BG_DAYS_SHORT !== 'undefined') ? window.BG_DAYS_SHORT : ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+
   // Констани
   const DEG2RAD = Math.PI / 180;
   const RAD2DEG = 180 / Math.PI;
@@ -504,154 +510,175 @@ const AstroCarto = (function() {
     }
   }
 
-  // Дата пикер за астрокартография
-  function openAcgDatePicker(initial, onConfirm) {
-    const today = new Date();
-    let sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
-    let viewYear = (sel || today).getFullYear();
-    let viewMonth = (sel || today).getMonth();
-    let mode = 'day';
-    const YEAR_START = 1900, YEAR_END = today.getFullYear();
-    const BG_MONTHS_GEN = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-    const BG_MONTHS = ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
-    const BG_DAYS_ABBR = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    const BG_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+  // Помощна функция за форматиране
+  function pad2(n) { return String(n).padStart(2, '0'); }
 
-    const overlay = document.createElement('div');
+  // Дата пикер за астрокартография (идентичен с наталната форма)
+  function openAcgDatePicker(initial, onConfirm) {
+    var today = new Date();
+    var sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
+    var viewYear = (sel || today).getFullYear();
+    var viewMonth = (sel || today).getMonth();
+    var mode = 'day';
+    var YEAR_START = 1900, YEAR_END = today.getFullYear();
+
+    var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
     document.body.appendChild(overlay);
-
     function close() { overlay.remove(); }
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
     function render() {
-      const hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
-      let html = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
+      var hdText = sel ? (BG_DAYS_ABBR[sel.getDay()] + ', ' + sel.getDate() + ' ' + BG_MONTHS_GEN[sel.getMonth()] + ' ' + sel.getFullYear()) : 'Изберете дата';
+      var html = '<div class="m3-modal-panel">';
+      html += '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ДАТА</p><p class="m3-modal-title' + (sel ? '' : ' placeholder') + '">' + hdText + '</p></div>';
 
       if (mode === 'day') {
-        html += '<div class="m3-nav-row"><button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div>';
-        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(d => '<span>' + d + '</span>').join('') + '</div>';
+        html += '<div class="m3-nav-row">' +
+          '<button type="button" class="m3-icon-btn" data-act="prevmonth" aria-label="Предишен месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear">' + BG_MONTHS[viewMonth] + ' ' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-icon-btn" data-act="nextmonth" aria-label="Следващ месец"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+          '</div>';
+        html += '<div class="m3-day-head">' + BG_DAYS_SHORT.map(function (d) { return '<span>' + d + '</span>'; }).join('') + '</div>';
 
-        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-        const startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
-        const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
-        const cells = [];
-        for (let i = 0; i < startDow; i++) cells.push({ d: prevMonthDays - startDow + 1 + i, kind: 'prev' });
-        for (let d = 1; d <= daysInMonth; d++) cells.push({ d: d, kind: 'cur' });
+        var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        var startDow = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+        var prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+        var cells = [];
+        for (var i = 0; i < startDow; i++) cells.push({ d: prevMonthDays - startDow + 1 + i, kind: 'prev' });
+        for (var d = 1; d <= daysInMonth; d++) cells.push({ d: d, kind: 'cur' });
         while (cells.length < 42) cells.push({ d: cells.length - startDow - daysInMonth + 1, kind: 'next' });
 
         html += '<div class="m3-day-grid">';
-        cells.forEach(c => {
-          const cur = c.kind === 'cur';
-          const isSel = cur && sel && sel.getDate() === c.d && sel.getMonth() === viewMonth && sel.getFullYear() === viewYear;
-          const isToday = cur && c.d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-          const cls = 'm3-day-cell' + (cur ? '' : ' outside') + (isSel ? ' selected' : '') + (isToday && !isSel ? ' today' : '');
+        cells.forEach(function (c) {
+          var cur = c.kind === 'cur';
+          var isSel = cur && sel && sel.getDate() === c.d && sel.getMonth() === viewMonth && sel.getFullYear() === viewYear;
+          var isToday = cur && c.d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+          var cls = 'm3-day-cell' + (cur ? '' : ' outside') + (isSel ? ' selected' : '') + (isToday && !isSel ? ' today' : '');
           html += '<button type="button" class="' + cls + '" ' + (cur ? 'data-act="pickday" data-day="' + c.d + '"' : 'disabled') + '>' + c.d + '</button>';
         });
         html += '</div>';
       } else if (mode === 'month') {
-        html += '<div class="m3-nav-row"><span style="flex:1;"></span><button type="button" class="m3-nav-label" data-act="toyear" style="flex:0 0 auto; padding-left:14px; padding-right:14px;">' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+        html += '<div class="m3-nav-row"><span style="flex:1;"></span>' +
+          '<button type="button" class="m3-nav-label" data-act="toyear" style="flex:0 0 auto; padding-left:14px; padding-right:14px;">' + viewYear + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>' +
+          '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+          '</div>';
         html += '<div class="m3-month-grid">';
-        BG_MONTHS.forEach((name, i) => {
-          const active = i === viewMonth;
-          const isCurMonth = viewYear === today.getFullYear() && i === today.getMonth();
+        BG_MONTHS.forEach(function (name, i) {
+          var active = i === viewMonth;
+          var isCurMonth = viewYear === today.getFullYear() && i === today.getMonth();
           html += '<button type="button" class="m3-chip' + (active ? ' selected' : '') + (isCurMonth && !active ? ' today' : '') + '" data-act="pickmonth" data-month="' + i + '">' + name + '</button>';
         });
         html += '</div>';
       } else {
-        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span><button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+        html += '<div class="m3-nav-row"><span style="flex:1; text-align:center; font-family:var(--font-body); font-weight:600; font-size:0.9rem; color:var(--foreground); padding-left:40px;">Изберете година</span>' +
+          '<button type="button" class="m3-icon-btn" data-act="todayview" aria-label="Затвори"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+          '</div>';
         html += '<div class="m3-year-scroll" id="m3-year-scroll"><div class="m3-year-grid-inner">';
-        for (let y = YEAR_START; y <= YEAR_END; y++) {
-          const activeY = y === viewYear;
+        for (var y = YEAR_START; y <= YEAR_END; y++) {
+          var activeY = y === viewYear;
           html += '<button type="button" class="m3-chip' + (activeY ? ' selected' : '') + (y === today.getFullYear() && !activeY ? ' today' : '') + '" data-act="pickyear" data-year="' + y + '" ' + (activeY ? 'data-selected="1"' : '') + '>' + y + '</button>';
         }
         html += '</div></div>';
       }
 
-      html += '<div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" data-act="ok"' + (sel ? '' : ' disabled') + '>OK</button></div></div>';
+      html += '<div class="m3-modal-divider"></div>';
+      html += '<div class="m3-modal-actions">' +
+        '<button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button>' +
+        '<button type="button" class="m3-modal-btn filled" data-act="ok"' + (sel ? '' : ' disabled') + '>OK</button>' +
+        '</div></div>';
 
       overlay.innerHTML = html;
-      overlay.querySelectorAll('[data-act]').forEach(el => {
-        el.addEventListener('click', () => {
-          const act = el.dataset.act;
-          if (act === 'prevmonth') { viewMonth = (viewMonth === 0) ? 11 : viewMonth - 1; if (viewMonth === 11) viewYear--; render(); }
-          else if (act === 'nextmonth') { viewMonth = (viewMonth === 11) ? 0 : viewMonth + 1; if (viewMonth === 0) viewYear++; render(); }
-          else if (act === 'toyear') { mode = mode === 'day' ? 'month' : 'year'; render(); }
+
+      overlay.querySelectorAll('[data-act]').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var act = el.dataset.act;
+          if (act === 'prevmonth') { if (viewMonth === 0) { viewMonth = 11; viewYear--; } else viewMonth--; render(); }
+          else if (act === 'nextmonth') { if (viewMonth === 11) { viewMonth = 0; viewYear++; } else viewMonth++; render(); }
+          else if (act === 'toyear') { mode = 'year'; render(); }
+          else if (act === 'todayview') { mode = 'day'; render(); }
           else if (act === 'pickday') { sel = new Date(viewYear, viewMonth, parseInt(el.dataset.day, 10)); render(); }
           else if (act === 'pickmonth') { viewMonth = parseInt(el.dataset.month, 10); mode = 'day'; render(); }
           else if (act === 'pickyear') { viewYear = parseInt(el.dataset.year, 10); mode = 'month'; render(); }
-          else if (act === 'todayview') { mode = 'day'; render(); }
           else if (act === 'cancel') { close(); }
           else if (act === 'ok') { if (sel) { onConfirm(sel); close(); } }
         });
       });
 
       if (mode === 'year') {
-        const container = overlay.querySelector('#m3-year-scroll');
-        const target = overlay.querySelector('[data-selected="1"]');
+        var container = overlay.querySelector('#m3-year-scroll');
+        var target = overlay.querySelector('[data-selected="1"]');
         if (container && target) container.scrollTop = target.offsetTop - container.clientHeight / 2 + target.clientHeight / 2;
       }
     }
+
     render();
   }
 
-  // Час пикер за астрокартография
+  // Час пикер за астрокартография (идентичен с наталната форма)
   function openAcgTimePicker(initial, onConfirm) {
-    const overlay = document.createElement('div');
+    var hourRaw = initial ? pad2(initial.h) : '';
+    var minRaw = initial ? pad2(initial.m) : '';
+
+    var overlay = document.createElement('div');
     overlay.className = 'm3-modal-overlay';
-    let hourRaw = initial ? String(initial.h).padStart(2, '0') : '';
-    let minRaw = initial ? String(initial.m).padStart(2, '0') : '';
-
-    overlay.innerHTML = '<div class="m3-modal-panel"><div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p style="padding:0; margin-top:4px; font-size:0.9rem; color:var(--foreground-muted);">Въведете часа директно (24-часов формат)</p></div><div class="m3-time-row"><div class="m3-time-box" id="acg-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-hour" placeholder="00" value="' + hourRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-hour-sub">Час</span></div><span style="font-size:1.5rem; margin:0 8px;">:</span><div class="m3-time-box" id="acg-min-box"><input type="text" inputmode="numeric" maxlength="2" id="acg-min" placeholder="00" value="' + minRaw + '"><span style="font-size:0.75rem; color:var(--foreground-muted);" id="acg-min-sub">Минути</span></div></div><div class="m3-modal-divider"></div><div class="m3-modal-actions"><button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button><button type="button" class="m3-modal-btn filled" id="acg-time-ok" disabled>OK</button></div></div>';
+    overlay.innerHTML =
+      '<div class="m3-modal-panel">' +
+      '<div class="m3-modal-header"><p class="m3-modal-eyebrow">ИЗБЕРЕТЕ ЧАС</p><p class="m3-time-hint" style="padding:0; margin-top:4px;">Въведете часа директно (24-часов формат)</p></div>' +
+      '<div class="m3-time-row">' +
+      '<div class="m3-time-box" id="m3-hour-box"><input type="text" inputmode="numeric" maxlength="2" id="m3-hour-input" placeholder="ЧЧ" value="' + hourRaw + '"><span class="m3-time-sub" id="m3-hour-sub">Час</span></div>' +
+      '<span class="m3-time-colon">:</span>' +
+      '<div class="m3-time-box" id="m3-min-box"><input type="text" inputmode="numeric" maxlength="2" id="m3-min-input" placeholder="ММ" value="' + minRaw + '"><span class="m3-time-sub" id="m3-min-sub">Минути</span></div>' +
+      '</div>' +
+      '<div class="m3-modal-divider"></div>' +
+      '<div class="m3-modal-actions">' +
+      '<button type="button" class="m3-modal-btn" data-act="cancel">Отказ</button>' +
+      '<button type="button" class="m3-modal-btn filled" id="m3-time-ok" disabled>OK</button>' +
+      '</div></div>';
     document.body.appendChild(overlay);
-
     function close() { overlay.remove(); }
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
-    const hInput = overlay.querySelector('#acg-hour');
-    const mInput = overlay.querySelector('#acg-min');
-    const hBox = overlay.querySelector('#acg-hour-box');
-    const mBox = overlay.querySelector('#acg-min-box');
-    const okBtn = overlay.querySelector('#acg-time-ok');
-    let hourErr = false, minErr = false;
+    var hInput = overlay.querySelector('#m3-hour-input'), mInput = overlay.querySelector('#m3-min-input');
+    var hBox = overlay.querySelector('#m3-hour-box'), mBox = overlay.querySelector('#m3-min-box');
+    var hSub = overlay.querySelector('#m3-hour-sub'), mSub = overlay.querySelector('#m3-min-sub');
+    var okBtn = overlay.querySelector('#m3-time-ok');
+    var hourErr = false, minErr = false;
 
-    function pad2(n) { return String(n).padStart(2, '0'); }
-    function refreshOk() { okBtn.disabled = !(hourRaw && minRaw && !hourErr && !minErr); }
+    function refreshOk() { okBtn.disabled = !(hourRaw !== '' && minRaw !== '' && !hourErr && !minErr); }
 
-    hInput.addEventListener('input', () => {
-      hourRaw = hInput.value.replace(/[^0-9]/g, '').slice(0, 2);
-      hInput.value = hourRaw;
-      const n = parseInt(hourRaw, 10);
-      hourErr = hourRaw && (isNaN(n) || n < 0 || n > 23);
+    hInput.addEventListener('input', function () {
+      var raw = hInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      hInput.value = raw; hourRaw = raw;
+      var n = parseInt(raw, 10);
+      hourErr = raw !== '' && (isNaN(n) || n < 0 || n > 23);
       hBox.classList.toggle('err', hourErr);
-      document.getElementById('acg-hour-sub').textContent = hourErr ? '0–23' : 'Час';
+      hSub.textContent = hourErr ? '0–23' : 'Час';
       refreshOk();
-      if (hourRaw.length === 2 && !hourErr) mInput.focus();
+      if (raw.length === 2 && !hourErr) { mInput.focus(); }
     });
-
-    mInput.addEventListener('input', () => {
-      minRaw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
-      mInput.value = minRaw;
-      const n = parseInt(minRaw, 10);
-      minErr = minRaw && (isNaN(n) || n < 0 || n > 59);
+    mInput.addEventListener('input', function () {
+      var raw = mInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+      mInput.value = raw; minRaw = raw;
+      var n = parseInt(raw, 10);
+      minErr = raw !== '' && (isNaN(n) || n < 0 || n > 59);
       mBox.classList.toggle('err', minErr);
-      document.getElementById('acg-min-sub').textContent = minErr ? '0–59' : 'Минути';
+      mSub.textContent = minErr ? '0–59' : 'Минути';
       refreshOk();
     });
-
-    hInput.addEventListener('focus', () => { hBox.classList.add('focus'); });
-    hInput.addEventListener('blur', () => { hBox.classList.remove('focus'); if (hourRaw && !hourErr) { hourRaw = pad2(parseInt(hourRaw, 10)); hInput.value = hourRaw; } });
-    mInput.addEventListener('focus', () => { mBox.classList.add('focus'); });
-    mInput.addEventListener('blur', () => { mBox.classList.remove('focus'); if (minRaw && !minErr) { minRaw = pad2(parseInt(minRaw, 10)); mInput.value = minRaw; } });
+    hInput.addEventListener('focus', function () { hBox.classList.add('focus'); });
+    hInput.addEventListener('blur', function () { hBox.classList.remove('focus'); if (hourRaw && !hourErr) { hourRaw = pad2(parseInt(hourRaw, 10)); hInput.value = hourRaw; } });
+    mInput.addEventListener('focus', function () { mBox.classList.add('focus'); });
+    mInput.addEventListener('blur', function () { mBox.classList.remove('focus'); if (minRaw && !minErr) { minRaw = pad2(parseInt(minRaw, 10)); mInput.value = minRaw; } });
 
     overlay.querySelector('[data-act="cancel"]').addEventListener('click', close);
-    okBtn.addEventListener('click', () => {
-      if (hourRaw && minRaw && !hourErr && !minErr) {
-        onConfirm({ h: parseInt(hourRaw, 10), m: parseInt(minRaw, 10) });
-        close();
-      }
+    okBtn.addEventListener('click', function () {
+      if (okBtn.disabled) return;
+      onConfirm({ h: parseInt(hourRaw, 10), m: parseInt(minRaw, 10) });
+      close();
     });
 
+    refreshOk();
     hInput.focus();
   }
 
@@ -663,41 +690,65 @@ const AstroCarto = (function() {
     const cityDropdown = document.getElementById('acg-city-dropdown');
     const cityError = document.getElementById('acg-city-error');
 
+    console.log('✅ [ACG] initAcgForm called');
+    console.log('  dateBtn:', dateBtn ? '✅ found' : '❌ NOT FOUND');
+    console.log('  timeBtn:', timeBtn ? '✅ found' : '❌ NOT FOUND');
+    console.log('  cityInput:', cityInput ? '✅ found' : '❌ NOT FOUND');
+    console.log('  openAcgDatePicker:', typeof openAcgDatePicker);
+    console.log('  openAcgTimePicker:', typeof openAcgTimePicker);
+
     // Дата пикер
     if (dateBtn) {
+      console.log('📝 Attaching date button listener');
       dateBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        openAcgDatePicker(acgBirthDate, (date) => {
-          acgBirthDate = date;
-          const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
-          document.getElementById('acg-date-value').textContent =
-            date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
-        });
+        console.log('🗓️ [ACG] Date button clicked, opening picker...');
+        console.log('  acgBirthDate:', acgBirthDate);
+        console.log('  openAcgDatePicker type:', typeof openAcgDatePicker);
+        try {
+          openAcgDatePicker(acgBirthDate, (date) => {
+            acgBirthDate = date;
+            const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
+            document.getElementById('acg-date-value').textContent =
+              date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
+            console.log('✅ Date selected:', acgBirthDate);
+          });
+        } catch (err) {
+          console.error('❌ Date picker error:', err.message);
+        }
       });
+    } else {
+      console.error('❌ Date button not found in DOM');
     }
 
     // Час пикер
     if (timeBtn) {
+      console.log('📝 Attaching time button listener');
       timeBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        openAcgTimePicker(acgBirthTime, (time) => {
-          acgBirthTime = time;
-          document.getElementById('acg-time-value').textContent =
-            String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
-        });
+        console.log('⏰ [ACG] Time button clicked, opening picker...');
+        console.log('  acgBirthTime:', acgBirthTime);
+        try {
+          openAcgTimePicker(acgBirthTime, (time) => {
+            acgBirthTime = time;
+            document.getElementById('acg-time-value').textContent =
+              String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
+            console.log('✅ Time selected:', acgBirthTime);
+          });
+        } catch (err) {
+          console.error('❌ Time picker error:', err.message);
+        }
       });
+    } else {
+      console.error('❌ Time button not found in DOM');
     }
 
     // Град автодовършване (опростено - използваме същата логика като наталната форма)
     if (cityInput) {
-      cityInput.addEventListener('input', () => {
+      function showCityMatches() {
         acgSelectedCity = null;
         cityError.textContent = '';
         const q = cityInput.value.trim().toLowerCase();
-        if (!q) {
-          cityDropdown.innerHTML = '';
-          return;
-        }
 
         // Провери дали window.BG_CITIES е наличен
         if (!window.BG_CITIES || !window.BG_CITIES.places) {
@@ -705,29 +756,50 @@ const AstroCarto = (function() {
           return;
         }
 
-        const matches = window.BG_CITIES.places.filter(p => p[0].toLowerCase().includes(q)).slice(0, 8);
+        if (!q) {
+          cityDropdown.innerHTML = '';
+          cityDropdown.classList.remove('open');
+          return;
+        }
+
+        // Prioritize prefix matches like in natal form
+        const starts = [], contains = [];
+        const limit = 8;
+        for (let i = 0; i < window.BG_CITIES.places.length; i++) {
+          const nm = window.BG_CITIES.places[i][0].toLowerCase();
+          const pos = nm.indexOf(q);
+          if (pos === 0) { starts.push(window.BG_CITIES.places[i]); if (starts.length >= limit) break; }
+          else if (pos > 0 && contains.length < limit) contains.push(window.BG_CITIES.places[i]);
+        }
+        const matches = starts.concat(contains).slice(0, 8);
         cityDropdown.innerHTML = '';
 
-        matches.forEach(p => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.innerHTML = '<span>' + p[0] + '</span><span style="font-size:0.8rem; opacity:0.6;"> · ' + (window.BG_CITIES.oblasti[p[1]] || '') + '</span>';
-          btn.style.display = 'block';
-          btn.style.width = '100%';
-          btn.style.textAlign = 'left';
-          btn.style.padding = '8px';
-          btn.style.border = 'none';
-          btn.style.background = 'rgba(182,157,232,0.08)';
-          btn.style.color = 'var(--foreground)';
-          btn.style.cursor = 'pointer';
-          btn.addEventListener('mousedown', () => {
-            cityInput.value = p[0];
-            acgSelectedCity = { name: p[0], lat: p[2], lon: p[3] };
-            cityError.textContent = '';
-            cityDropdown.innerHTML = '';
+        if (matches.length > 0) {
+          cityDropdown.classList.add('open');
+          matches.forEach(p => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = '<span class="city-name">' + p[0] + '</span><span class="city-oblast"> · ' + (window.BG_CITIES.oblasti[p[1]] || '') + '</span>';
+            btn.addEventListener('mousedown', () => {
+              cityInput.value = p[0];
+              acgSelectedCity = { name: p[0], lat: p[2], lon: p[3] };
+              cityError.textContent = '';
+              cityDropdown.innerHTML = '';
+              cityDropdown.classList.remove('open');
+            });
+            cityDropdown.appendChild(btn);
           });
-          cityDropdown.appendChild(btn);
-        });
+        } else {
+          cityDropdown.classList.remove('open');
+        }
+      }
+
+      cityInput.addEventListener('input', showCityMatches);
+      cityInput.addEventListener('focus', showCityMatches);
+      cityInput.addEventListener('blur', () => {
+        setTimeout(() => {
+          cityDropdown.classList.remove('open');
+        }, 100);
       });
     }
   }
@@ -801,6 +873,15 @@ const AstroCarto = (function() {
 })();
 
 // Инициализирай при зареждане
-document.addEventListener('DOMContentLoaded', () => {
-  AstroCarto.init();
-});
+function initializeIfReady() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('✅ [ACG] DOMContentLoaded fired, initializing...');
+      AstroCarto.init();
+    });
+  } else {
+    console.log('✅ [ACG] DOM already loaded, initializing immediately...');
+    AstroCarto.init();
+  }
+}
+initializeIfReady();

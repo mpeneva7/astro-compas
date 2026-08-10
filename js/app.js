@@ -128,39 +128,41 @@
 
   /* ───────────────────────── Луна ───────────────────────── */
 
-  function moonIllustrationSVG(phaseAngleDeg) {
-    // Normalize phase to 0-1 and calculate illumination
+  function moonIllustrationSVG(phaseAngleDeg, illumination) {
     var phase = (phaseAngleDeg % 360) / 360;
-    var illum = (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
+    var illum = illumination || (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
-    // Moon geometry
     var cx = 100, cy = 100, r = 74;
+    var waxing = phase < 0.5;
 
-    // Calculate the width of the visible lit portion (ellipse axis)
-    var theta = phase * 2 * Math.PI;
-    var rx = Math.abs(r * Math.cos(theta));
+    // Терминаторът е елипса. rx зависи от косинуса на фазовия ъгъл
+    var phaseAngle = Math.acos(2 * illum - 1);  // 0..π радиани
+    var termRx = r * Math.cos(phaseAngle);       // -r..+r
+    var absRx = Math.abs(termRx);
 
-    // Determine sweep directions based on phase
     var sweepOuter, sweepInner;
-    if (phase < 0.5) {
-      sweepOuter = 1;
-      sweepInner = (phase < 0.25) ? 1 : 0;
+
+    // Определяме позицията на осветената част (дясна или лява)
+    if (waxing) {
+      sweepOuter = 1;  // дясна половина
+      sweepInner = (termRx >= 0) ? 1 : 0;
     } else {
-      sweepOuter = 0;
-      sweepInner = (phase < 0.75) ? 1 : 0;
+      sweepOuter = 0;  // лява половина
+      sweepInner = (termRx >= 0) ? 0 : 1;
     }
 
-    // Build the lit portion path using arc commands
-    var top = cx + ',' + (cy - r);
-    var bottom = cx + ',' + (cy + r);
-    var litPath = 'M ' + top + ' A ' + r + ',' + r + ' 0 0 ' + sweepOuter + ' ' + bottom +
-      ' A ' + rx + ',' + r + ' 0 0 ' + sweepInner + ' ' + top + ' Z';
+    var top = cy - r;
+    var bottom = cy + r;
+    var litPath = 'M ' + cx + ' ' + top +
+      ' A ' + r + ' ' + r + ' 0 0 ' + sweepOuter + ' ' + cx + ' ' + bottom +
+      ' A ' + absRx + ' ' + r + ' 0 0 ' + sweepInner + ' ' + cx + ' ' + top +
+      ' Z';
 
     var uid = Math.round(Math.random() * 100000);
     var glowId = 'mglow' + uid;
     var litId = 'mlit' + uid;
 
-    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' rx=' + rx.toFixed(1) + ' path generated');
+    console.log('🌙 SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' termRx=' + termRx.toFixed(1) + ' absRx=' + absRx.toFixed(1));
 
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
       '<defs>' +
@@ -176,35 +178,57 @@
   }
 
   function renderMoon(chart) {
-    var sun = chart.planets.sun, moon = chart.planets.moon;
-    var phase = AstroCore.moonPhase(sun.lon, moon.lon);
+    try {
+      var sun = chart.planets.sun, moon = chart.planets.moon;
+      console.log('🌙 renderMoon: sun.lon=' + sun.lon.toFixed(2) + ', moon.lon=' + moon.lon.toFixed(2));
 
-    // Debug logging
-    var percentIllum = Math.round(phase.illumination * 100);
-    console.log('🌙 renderMoon called: angle=' + phase.angle.toFixed(1) + '° illum=' + percentIllum + '% (' + phase.name + ')');
+      var phase = AstroCore.moonPhase(sun.lon, moon.lon);
+      console.log('🌙 phase calculated:', phase);
 
-    // Force SVG re-render by clearing, updating data, and recreating
-    var moonEl = $('moon-illustration');
-    moonEl.innerHTML = '';
-    // Add a data attribute that changes to ensure re-render
-    moonEl.dataset.updateTime = Date.now();
-    moonEl.innerHTML = moonIllustrationSVG(phase.angle);
-    // Force browser repaint
-    moonEl.offsetHeight;
+      // Debug logging
+      var percentIllum = Math.round(phase.illumination * 100);
+      console.log('🌙 renderMoon called: angle=' + phase.angle.toFixed(1) + '° illum=' + percentIllum + '% (' + phase.name + ')');
 
-    $('moon-illum-fill').style.width = percentIllum + '%';
-    $('moon-illum-label').textContent = percentIllum + '% осветена';
-    $('moon-phase-name').textContent = phase.name;
-    $('moon-sign-line').innerHTML = 'Луната в <strong>' + moon.sign + '</strong>';
+      // Force SVG re-render by clearing, updating data, and recreating
+      var moonEl = $('moon-illustration');
+      console.log('🌙 moon-illustration element:', moonEl ? 'found' : 'NOT FOUND');
 
-    var pt = PHASE_TEXT[phase.name] || PHASE_TEXT['Новолуние'];
-    var signInfo = SIGN_INFO[moon.signIndex];
-    $('moon-guidance').innerHTML =
-      '<p>' + pt.d + ' Луната в ' + moon.sign + ' насочва фокуса към ' + signInfo.focus + '.</p>' +
-      '<p>' + pt.a + '</p>';
+      if (!moonEl) {
+        console.error('❌ moon-illustration element not found!');
+        return;
+      }
 
-    var now = chart.now;
-    $('moon-meta').textContent = now.getDate() + ' ' + BG_MONTHS_GEN[now.getMonth()] + ' ' + now.getFullYear() + ' г.';
+      moonEl.innerHTML = '';
+      // Add a data attribute that changes to ensure re-render
+      moonEl.dataset.updateTime = Date.now();
+
+      var svgContent = moonIllustrationSVG(phase.angle, phase.illumination);
+      console.log('🌙 SVG generated, length:', svgContent ? svgContent.length : 0);
+
+      moonEl.innerHTML = svgContent;
+      console.log('🌙 SVG set to innerHTML');
+
+      // Force browser repaint
+      moonEl.offsetHeight;
+
+      $('moon-illum-fill').style.width = percentIllum + '%';
+      $('moon-illum-label').textContent = percentIllum + '% осветена';
+      $('moon-phase-name').textContent = phase.name;
+      $('moon-sign-line').innerHTML = 'Луната в <strong>' + moon.sign + '</strong>';
+
+      var pt = PHASE_TEXT[phase.name] || PHASE_TEXT['Новолуние'];
+      var signInfo = SIGN_INFO[moon.signIndex];
+      $('moon-guidance').innerHTML =
+        '<p>' + pt.d + ' Луната в ' + moon.sign + ' насочва фокуса към ' + signInfo.focus + '.</p>' +
+        '<p>' + pt.a + '</p>';
+
+      var now = chart.now;
+      $('moon-meta').textContent = now.getDate() + ' ' + BG_MONTHS_GEN[now.getMonth()] + ' ' + now.getFullYear() + ' г.';
+
+      console.log('✅ renderMoon completed successfully');
+    } catch (err) {
+      console.error('❌ Error in renderMoon:', err.message, err.stack);
+    }
   }
 
   /* ───────────────────────── Дневен хороскоп ─────────────────────────
@@ -313,7 +337,7 @@
   // по-големите места излизат първи при еднакво съвпадение.
   function matchCities(q, limit) {
     q = q.trim().toLowerCase();
-    if (!q) return [];
+    if (!q) return CITY_DB.slice(0, limit);
     var starts = [], contains = [];
     for (var i = 0; i < CITY_DB.length; i++) {
       var nm = CITY_DB[i][0].toLowerCase();
@@ -1239,20 +1263,59 @@
 
   /* ───────────────────────── Инициализация ───────────────────────── */
 
-  document.addEventListener('DOMContentLoaded', function () {
-    initChrome();
+  function initializeWhenReady() {
+    var readyFired = false;
 
-    function updateMoonAndHoroscope() {
-      console.log('⏲️ updateMoonAndHoroscope called at ' + new Date().toLocaleTimeString());
-      var nowChart = getNowChart();
-      renderMoon(nowChart);
-      renderHoroscope(nowChart);
+    function doInitialization() {
+      if (readyFired) return;
+      readyFired = true;
+
+      console.log('✅ Initialization starting (DOM ready)');
+      initChrome();
+
+      function updateMoonAndHoroscope() {
+        console.log('⏲️ updateMoonAndHoroscope called at ' + new Date().toLocaleTimeString());
+        try {
+          var nowChart = getNowChart();
+          console.log('✅ getNowChart returned:', nowChart ? 'object' : 'null/undefined');
+          if (!nowChart) {
+            console.error('❌ getNowChart returned null!');
+            return;
+          }
+          console.log('  Moon longitude:', nowChart.planets.moon.lon, '° Sign:', nowChart.planets.moon.sign);
+          console.log('  Sun longitude:', nowChart.planets.sun.lon, '°');
+
+          renderMoon(nowChart);
+          console.log('✅ renderMoon completed');
+
+          renderHoroscope(nowChart);
+          console.log('✅ renderHoroscope completed');
+        } catch (err) {
+          console.error('❌ Error in updateMoonAndHoroscope:', err.message, err.stack);
+        }
+      }
+
+      updateMoonAndHoroscope();
+      setInterval(updateMoonAndHoroscope, 60000);
+      console.log('✅ Moon auto-update enabled (every 60 seconds)');
+
+      initNatalForm();
     }
 
-    updateMoonAndHoroscope();
-    setInterval(updateMoonAndHoroscope, 60000);
-    console.log('✅ Moon auto-update enabled (every 60 seconds)');
+    if (document.readyState === 'loading') {
+      console.log('✅ app.js: DOM loading, waiting for DOMContentLoaded...');
+      document.addEventListener('DOMContentLoaded', doInitialization);
+    } else {
+      console.log('✅ app.js: DOM already loaded, initializing immediately...');
+      doInitialization();
+    }
+  }
 
-    initNatalForm();
-  });
+  initializeWhenReady();
+
+  // Expose date picker constants globally for astrocartography.js
+  window.BG_MONTHS_GEN = BG_MONTHS_GEN;
+  window.BG_MONTHS = BG_MONTHS;
+  window.BG_DAYS_ABBR = BG_DAYS_ABBR;
+  window.BG_DAYS_SHORT = BG_DAYS_SHORT;
 })();

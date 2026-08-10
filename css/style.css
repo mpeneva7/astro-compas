@@ -259,7 +259,7 @@ button { font-family: var(--font-body); }
 .hero-scroll-cue svg { animation: bounceDown 2s infinite; }
 
 /* ── Sections ─────────────────────────────────────────────────────── */
-section { padding: 60px 20px; }
+section { padding: 40px 20px; }
 #moon { background: linear-gradient(180deg, #140A1E 0%, #1E1428 100%); }
 #horoscope { background: var(--background); }
 #natal { background: linear-gradient(180deg, #140A1E 0%, #1C1030 50%, #140A1E 100%); }
@@ -367,7 +367,7 @@ section { padding: 60px 20px; }
 
 /* ── M3 modal (date / time pickers) ─────────────────────────────────── */
 .m3-modal-overlay {
-  position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
   padding: 16px; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px);
 }
 .m3-modal-panel {
@@ -432,7 +432,7 @@ section { padding: 60px 20px; }
 
 .m3-time-row { display: flex; align-items: center; gap: 10px; justify-content: center; padding: 28px 24px 30px; }
 .m3-time-box {
-  width: 96px; height: 80px; border-radius: 12px; background: var(--input-bg);
+  width: 110px; height: 80px; border-radius: 12px; background: var(--input-bg);
   border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative;
   transition: border-color 0.15s ease;
 }
@@ -441,6 +441,11 @@ section { padding: 60px 20px; }
 .m3-time-box input {
   width: 100%; text-align: center; background: transparent; border: none; outline: none;
   font-family: var(--font-body); font-size: 2.25rem; font-weight: 700; color: var(--foreground); letter-spacing: 0.04em;
+  padding: 0 6px; overflow: hidden; white-space: nowrap;
+}
+.m3-time-box input::placeholder {
+  color: var(--outline);
+  opacity: 0.6;
 }
 .m3-time-box .m3-time-sub {
   position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 0.72rem; color: var(--outline);
@@ -450,7 +455,7 @@ section { padding: 60px 20px; }
 .m3-time-hint { padding: 0 24px; margin: 0; font-size: 0.75rem; color: var(--outline); }
 
 .city-dropdown {
-  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20;
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 1000;
   background: var(--card-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
   overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.4); max-height: 220px; overflow-y: auto;
   display: none;
@@ -717,7 +722,7 @@ section { padding: 60px 20px; }
   display: block;
 }
 
-.article-header { margin-bottom: 12px; padding: 24px 24px 0; }
+.article-header { margin-bottom: 12px; padding: 28px 24px 0; }
 .article-title {
   font-size: 1.3rem;
   font-weight: 700;

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <style>
         body { padding: 20px; }
-        .article-container { max-width: 900px; margin: 0 auto; }
+        .article-container { max-width: 1152px; margin: 0 auto; }
         .article-header-section { text-align: center; margin-bottom: 48px; }
         .article-header-section h1 {
             font-size: 2.2rem;
@@ -144,13 +144,6 @@
             z-index: 1000;
         }
 
-        .back-btn-bottom-left {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-
         @media (max-width: 768px) {
             body { padding: 16px; }
             .article-container { margin: 0 auto; }
@@ -179,7 +172,7 @@
 </head>
 <body style="background: var(--background); color: var(--foreground);">
     <!-- Бутон назад в горен десен ъгъл -->
-    <button class="back-btn back-btn-top-right" onclick="window.history.back();" aria-label="Назад" title="Назад">
+    <button class="back-btn back-btn-top-right" onclick="window.location.href='/';" aria-label="Затвори" title="Затвори">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -234,7 +227,6 @@
             <div class="zodiac-layout">
                 <div class="zodiac-img">
                     <img src="../assets/constellations/gemini.svg" alt="Gemini constellation" data-constellation="gemini">
-                    </div>
                 </div>
                 <div class="zodiac-text">
                     <h3>Близнаци</h3>
@@ -375,13 +367,5 @@
             <p class="article-sources">Всички астрономически данни са проверени по източници на NASA, Международния астрономически съюз (IAU) и обсерваторията NOIRLab. Съзвездията тук са представени като астрономия; зодиакалните знаци в хороскопа са отделна, символична традиция.</p>
         </div>
     </div>
-
-    <!-- Бутон назад в долен ляв ъгъл -->
-    <button class="back-btn back-btn-bottom-left" onclick="window.history.back();" aria-label="Назад" title="Назад">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-    </button>
 </body>
 </html>
