@@ -576,7 +576,7 @@ section { padding: 40px 20px; }
 }
 
 .acg-map {
-  background: var(--card);
+  background: #0f1424;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   width: 100%;
