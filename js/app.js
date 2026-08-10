@@ -187,35 +187,57 @@
   }
 
   function renderMoon(chart) {
-    var sun = chart.planets.sun, moon = chart.planets.moon;
-    var phase = AstroCore.moonPhase(sun.lon, moon.lon);
+    try {
+      var sun = chart.planets.sun, moon = chart.planets.moon;
+      console.log('🌙 renderMoon: sun.lon=' + sun.lon.toFixed(2) + ', moon.lon=' + moon.lon.toFixed(2));
 
-    // Debug logging
-    var percentIllum = Math.round(phase.illumination * 100);
-    console.log('🌙 renderMoon called: angle=' + phase.angle.toFixed(1) + '° illum=' + percentIllum + '% (' + phase.name + ')');
+      var phase = AstroCore.moonPhase(sun.lon, moon.lon);
+      console.log('🌙 phase calculated:', phase);
 
-    // Force SVG re-render by clearing, updating data, and recreating
-    var moonEl = $('moon-illustration');
-    moonEl.innerHTML = '';
-    // Add a data attribute that changes to ensure re-render
-    moonEl.dataset.updateTime = Date.now();
-    moonEl.innerHTML = moonIllustrationSVG(phase.angle, phase.illumination);
-    // Force browser repaint
-    moonEl.offsetHeight;
+      // Debug logging
+      var percentIllum = Math.round(phase.illumination * 100);
+      console.log('🌙 renderMoon called: angle=' + phase.angle.toFixed(1) + '° illum=' + percentIllum + '% (' + phase.name + ')');
 
-    $('moon-illum-fill').style.width = percentIllum + '%';
-    $('moon-illum-label').textContent = percentIllum + '% осветена';
-    $('moon-phase-name').textContent = phase.name;
-    $('moon-sign-line').innerHTML = 'Луната в <strong>' + moon.sign + '</strong>';
+      // Force SVG re-render by clearing, updating data, and recreating
+      var moonEl = $('moon-illustration');
+      console.log('🌙 moon-illustration element:', moonEl ? 'found' : 'NOT FOUND');
 
-    var pt = PHASE_TEXT[phase.name] || PHASE_TEXT['Новолуние'];
-    var signInfo = SIGN_INFO[moon.signIndex];
-    $('moon-guidance').innerHTML =
-      '<p>' + pt.d + ' Луната в ' + moon.sign + ' насочва фокуса към ' + signInfo.focus + '.</p>' +
-      '<p>' + pt.a + '</p>';
+      if (!moonEl) {
+        console.error('❌ moon-illustration element not found!');
+        return;
+      }
 
-    var now = chart.now;
-    $('moon-meta').textContent = now.getDate() + ' ' + BG_MONTHS_GEN[now.getMonth()] + ' ' + now.getFullYear() + ' г.';
+      moonEl.innerHTML = '';
+      // Add a data attribute that changes to ensure re-render
+      moonEl.dataset.updateTime = Date.now();
+
+      var svgContent = moonIllustrationSVG(phase.angle, phase.illumination);
+      console.log('🌙 SVG generated, length:', svgContent ? svgContent.length : 0);
+
+      moonEl.innerHTML = svgContent;
+      console.log('🌙 SVG set to innerHTML');
+
+      // Force browser repaint
+      moonEl.offsetHeight;
+
+      $('moon-illum-fill').style.width = percentIllum + '%';
+      $('moon-illum-label').textContent = percentIllum + '% осветена';
+      $('moon-phase-name').textContent = phase.name;
+      $('moon-sign-line').innerHTML = 'Луната в <strong>' + moon.sign + '</strong>';
+
+      var pt = PHASE_TEXT[phase.name] || PHASE_TEXT['Новолуние'];
+      var signInfo = SIGN_INFO[moon.signIndex];
+      $('moon-guidance').innerHTML =
+        '<p>' + pt.d + ' Луната в ' + moon.sign + ' насочва фокуса към ' + signInfo.focus + '.</p>' +
+        '<p>' + pt.a + '</p>';
+
+      var now = chart.now;
+      $('moon-meta').textContent = now.getDate() + ' ' + BG_MONTHS_GEN[now.getMonth()] + ' ' + now.getFullYear() + ' г.';
+
+      console.log('✅ renderMoon completed successfully');
+    } catch (err) {
+      console.error('❌ Error in renderMoon:', err.message, err.stack);
+    }
   }
 
   /* ───────────────────────── Дневен хороскоп ─────────────────────────
@@ -1251,13 +1273,29 @@
   /* ───────────────────────── Инициализация ───────────────────────── */
 
   document.addEventListener('DOMContentLoaded', function () {
+    console.log('✅ DOMContentLoaded fired');
     initChrome();
 
     function updateMoonAndHoroscope() {
       console.log('⏲️ updateMoonAndHoroscope called at ' + new Date().toLocaleTimeString());
-      var nowChart = getNowChart();
-      renderMoon(nowChart);
-      renderHoroscope(nowChart);
+      try {
+        var nowChart = getNowChart();
+        console.log('✅ getNowChart returned:', nowChart ? 'object' : 'null/undefined');
+        if (!nowChart) {
+          console.error('❌ getNowChart returned null!');
+          return;
+        }
+        console.log('  Moon longitude:', nowChart.planets.moon.lon, '° Sign:', nowChart.planets.moon.sign);
+        console.log('  Sun longitude:', nowChart.planets.sun.lon, '°');
+
+        renderMoon(nowChart);
+        console.log('✅ renderMoon completed');
+
+        renderHoroscope(nowChart);
+        console.log('✅ renderHoroscope completed');
+      } catch (err) {
+        console.error('❌ Error in updateMoonAndHoroscope:', err.message, err.stack);
+      }
     }
 
     updateMoonAndHoroscope();
