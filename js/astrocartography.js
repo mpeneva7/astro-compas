@@ -423,8 +423,8 @@ const AstroCarto = (function() {
         byCity[m.city].push(m);
       });
 
-      let panelHtml = '<div style="padding:20px; font-size:13px; max-height:400px; overflow-y:auto;">' +
-        '<h3 style="margin:0 0 15px 0; color:#E8E6ED; font-size:1rem;">Планетни линии в градовете:</h3>';
+      let panelHtml = '<div style="padding:20px; font-size:13px;">' +
+        '<h3 style="margin:0 0 20px 0; color:#E8E6ED; font-size:1.1rem;">Планетни линии в градовете:</h3>';
 
       // Зенити на планетите
       panelHtml += '<div style="margin-bottom:15px; padding:10px; background:rgba(182,157,232,0.1); border-radius:6px; border-left:3px solid #B69DE8;">' +
@@ -446,27 +446,23 @@ const AstroCarto = (function() {
             return a.distance - b.distance; // После по разстояние
           });
 
-          panelHtml += `<div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid rgba(182,157,232,0.15);">
-            <div style="font-weight:600; color:#E8E6ED; margin-bottom:8px; font-size:13px;">${city}</div>`;
-
           cityMatches.forEach(m => {
             const mapsUrl = `https://www.google.com/maps?q=${m.point_lat.toFixed(2)},${m.point_lon.toFixed(2)}`;
             const strengthLabel = m.strength === 1 ? '' : ' (слабо влияние)';
-            panelHtml += `<div style="margin-bottom:8px; padding-left:10px; border-left:2px solid ${m.planet.color}; font-size:11px;">
-              <div style="color:${m.planet.color}; font-weight:500; margin-bottom:2px;">
+            panelHtml += `<div style="margin-bottom:16px; padding:14px; background:rgba(182,157,232,0.08); border-radius:6px; border-left:4px solid ${m.planet.color};">
+              <div style="font-weight:600; color:#E8E6ED; margin-bottom:6px; font-size:13px;">${city}</div>
+              <div style="color:${m.planet.color}; font-weight:500; margin-bottom:6px; font-size:12px;">
                 ${m.planet.symbol} ${m.planet.nameBg} • ${m.type} • ${m.distance.toFixed(0)} км${strengthLabel}
               </div>
-              <div style="color:#B0ACBA; font-size:10px; line-height:1.5; margin-bottom:2px;">
+              <div style="color:#B0ACBA; font-size:11px; line-height:1.6; margin-bottom:6px;">
                 ${m.planet.meaning}
               </div>
-              <div style="font-size:10px; color:#9A9AA8;">
+              <div style="font-size:11px; color:#9A9AA8;">
                 📍 ${m.point_lat.toFixed(2)}, ${m.point_lon.toFixed(2)} ·
-                <a href="${mapsUrl}" target="_blank" style="color:#B69DE8; text-decoration:underline;">Виж на Google Maps →</a>
+                <a href="${mapsUrl}" target="_blank" style="color:#B69DE8; text-decoration:underline; font-weight:500;">Google Maps →</a>
               </div>
             </div>`;
           });
-
-          panelHtml += `</div>`;
         }
       } else {
         panelHtml += '<p style="color:#B0ACBA; text-align:center; padding:20px 0;">Няма значими попадения в радиус 300км</p>';
@@ -887,8 +883,6 @@ const AstroCarto = (function() {
         // Рендер с Leaflet
         await renderAcgMapWithLeaflet(mapEl, acgData.lines, acgData.planets, acgSelectedCity.lat, acgSelectedCity.lon);
 
-        // Генериране на легенда
-        legendEl.innerHTML = generateLegendHtml();
 
         containerEl.style.display = 'flex';
         msgEl.className = 'acg-message success';
@@ -961,22 +955,6 @@ const AstroCarto = (function() {
       console.error('Chart calculation error:', e);
       return null;
     }
-  }
-
-  function generateLegendHtml() {
-    let html = '';
-    for (let i = 0; i < PLANETS_DATA.length; i++) {
-      const p = PLANETS_DATA[i];
-      html += `
-        <div class="acg-legend-item">
-          <div class="acg-legend-symbol">${p.symbol}</div>
-          <div>
-            <strong>${p.nameBg}:</strong> ${p.meaning}
-          </div>
-        </div>
-      `;
-    }
-    return html;
   }
 
   async function exportToPdfAsync(chart) {
