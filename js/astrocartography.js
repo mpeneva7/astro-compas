@@ -158,21 +158,79 @@ const AstroCarto = (function() {
     return lines;
   }
 
-  // Намери най-близкия град до линия (меридиан)
-  function findClosestCities(lon, type) {
-    const closestCities = [];
+  // Намери ВСИ значими попадения на град-линия (< 150км орбис)
+  function findCityLineMatches(lines) {
+    const matches = [];
 
-    for (const [cityName, cityLat, cityLon] of WORLD_CITIES) {
-      // Разстояние до меридиан (в км)
-      const dLon = normalizeLongitude(cityLon - lon);
-      const distance = Math.abs(dLon) * Math.cos(cityLat * DEG2RAD) * 111;
+    for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
+      const planet = PLANETS_DATA[pIdx];
+      const pLines = lines[pIdx];
+      if (!pLines) continue;
 
-      if (distance < 500) { // Само градове в радиус 500км
-        closestCities.push({ name: cityName, lat: cityLat, lon: cityLon, distance: Math.round(distance) });
-      }
+      // Проверка на всяка линия (MC, IC, ASC, DSC)
+      const checkLine = (lineData, lineType) => {
+        if (!lineData) return;
+
+        // За MC/IC - са меридиани (вертикални линии на фиксирана дължина)
+        if (lineType === 'MC' || lineType === 'IC') {
+          const lon = lineData.lon;
+          for (const [cityName, cityLat, cityLon] of WORLD_CITIES) {
+            const dLon = normalizeLongitude(cityLon - lon);
+            const distance = Math.abs(dLon) * Math.cos(cityLat * DEG2RAD) * 111;
+
+            if (distance < 150) { // Орбис ~1.5°
+              matches.push({
+                planet: planet,
+                city: cityName,
+                lat: cityLat,
+                lon: cityLon,
+                type: lineType,
+                distance: Math.round(distance)
+              });
+            }
+          }
+        } else if (lineType === 'ASC' || lineType === 'DSC') {
+          // За ASC/DSC - криви линии, проверй отсеченията
+          if (lineData.points && lineData.points.length > 0) {
+            for (const segment of lineData.points) {
+              for (const [cityName, cityLat, cityLon] of WORLD_CITIES) {
+                let minDist = 1000;
+
+                // Намери най-близкото разстояние до някоя точка на кривата
+                for (const point of segment) {
+                  const dLat = cityLat - point.lat;
+                  const dLon = normalizeLongitude(cityLon - point.lon);
+                  const dist = Math.sqrt(dLat * dLat + (dLon * Math.cos(cityLat * DEG2RAD)) * (dLon * Math.cos(cityLat * DEG2RAD))) * 111;
+                  minDist = Math.min(minDist, dist);
+                }
+
+                if (minDist < 150) {
+                  // Провери дали вече го има
+                  const exists = matches.find(m => m.city === cityName && m.planet.name === planet.name && m.type === lineType);
+                  if (!exists) {
+                    matches.push({
+                      planet: planet,
+                      city: cityName,
+                      lat: cityLat,
+                      lon: cityLon,
+                      type: lineType,
+                      distance: Math.round(minDist)
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      checkLine(pLines.mc, 'MC');
+      checkLine(pLines.ic, 'IC');
+      checkLine(pLines.asc, 'ASC');
+      checkLine(pLines.dsc, 'DSC');
     }
 
-    return closestCities.sort((a, b) => a.distance - b.distance).slice(0, 3);
+    return matches.sort((a, b) => a.distance - b.distance);
   }
 
   let acgLeafletMap = null; // Съхрани Leaflet картата
@@ -199,8 +257,6 @@ const AstroCarto = (function() {
     }).addTo(acgLeafletMap);
 
     // Рисувай планетни линии
-    const allCityResults = [];
-
     for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
       const planet = PLANETS_DATA[pIdx];
       const pLines = lines[pIdx];
@@ -215,29 +271,6 @@ const AstroCarto = (function() {
           opacity: 0.85,
           className: 'acg-line'
         }).bindTooltip(`${planet.symbol} ${planet.nameBg} (MC)`, { permanent: false }).addTo(acgLeafletMap);
-
-        const cities = findClosestCities(lon, 'MC');
-        cities.forEach(city => {
-          allCityResults.push({
-            symbol: planet.symbol,
-            city: city.name,
-            type: 'MC',
-            meaning: planet.meaning,
-            distance: city.distance,
-            lat: city.lat,
-            lon: city.lon,
-            color: planet.color
-          });
-          // Маркер за град
-          L.circleMarker([city.lat, city.lon], {
-            radius: 4,
-            fillColor: planet.color,
-            color: planet.color,
-            weight: 1,
-            opacity: 0.7,
-            fillOpacity: 0.5
-          }).bindTooltip(`${city.name}`).addTo(acgLeafletMap);
-        });
       }
 
       // IC линия
@@ -250,20 +283,6 @@ const AstroCarto = (function() {
           dashArray: '5, 3',
           className: 'acg-line'
         }).bindTooltip(`${planet.symbol} ${planet.nameBg} (IC)`, { permanent: false }).addTo(acgLeafletMap);
-
-        const cities = findClosestCities(lon, 'IC');
-        cities.forEach(city => {
-          allCityResults.push({
-            symbol: planet.symbol,
-            city: city.name,
-            type: 'IC',
-            meaning: planet.meaning,
-            distance: city.distance,
-            lat: city.lat,
-            lon: city.lon,
-            color: planet.color
-          });
-        });
       }
 
       // ASC криви
@@ -295,31 +314,63 @@ const AstroCarto = (function() {
       }
     }
 
-    // Рендер панел с градове
+    // Намери ВСИ значими попадения (град-линия < 150км)
+    const matches = findCityLineMatches(lines);
+
+    // Добави маркери за градове
+    const markedCities = new Set();
+    matches.forEach(m => {
+      if (!markedCities.has(m.city)) {
+        L.circleMarker([m.lat, m.lon], {
+          radius: 5,
+          fillColor: m.planet.color,
+          color: m.planet.color,
+          weight: 2,
+          opacity: 0.8,
+          fillOpacity: 0.6
+        }).bindTooltip(`${m.city}`).addTo(acgLeafletMap);
+        markedCities.add(m.city);
+      }
+    });
+
+    // Рендер панел с градове (пълен формат)
     const panelEl = document.getElementById('acg-cities-panel');
     if (panelEl) {
-      let panelHtml = '<div style="padding:15px; font-size:13px;"><h3 style="margin:0 0 10px 0;">Градове под планетни линии:</h3>';
-
       // Групирай по град
       const byCity = {};
-      allCityResults.forEach(r => {
-        if (!byCity[r.city]) byCity[r.city] = [];
-        byCity[r.city].push(r);
+      matches.forEach(m => {
+        if (!byCity[m.city]) byCity[m.city] = [];
+        byCity[m.city].push(m);
       });
 
-      const sortedCities = Object.keys(byCity).sort();
-      for (const city of sortedCities) {
-        panelHtml += `<div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(182,157,232,0.1);">
-          <strong>${city}</strong><br>`;
+      let panelHtml = '<div style="padding:20px; font-size:13px;">' +
+        '<h3 style="margin:0 0 15px 0; color:#E8E6ED; font-size:1rem;">Планетни линии в градовете:</h3>';
 
-        byCity[city].forEach(r => {
-          panelHtml += `<div style="margin-left:10px; font-size:12px; color:${r.color};">
-            ${r.symbol} ${r.type} • ${r.distance} км<br>
-            <span style="font-size:11px; opacity:0.7;">${r.meaning}</span>
+      const sortedCities = Object.keys(byCity).sort().slice(0, 30); // Топ 30 града
+      for (const city of sortedCities) {
+        const cityMatches = byCity[city].sort((a, b) => a.distance - b.distance);
+
+        panelHtml += `<div style="margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid rgba(182,157,232,0.15);">
+          <div style="font-weight:600; color:#E8E6ED; margin-bottom:8px; font-size:14px;">${city}</div>`;
+
+        cityMatches.forEach(m => {
+          panelHtml += `<div style="margin-bottom:8px; padding-left:10px; border-left:2px solid ${m.planet.color}; font-size:12px;">
+            <div style="color:${m.planet.color}; font-weight:500; margin-bottom:2px;">
+              ${m.planet.symbol} ${m.planet.nameBg} • ${m.type} • ${m.distance} км
+            </div>
+            <div style="color:#B0ACBA; font-size:11px; line-height:1.5;">
+              ${m.planet.meaning}
+            </div>
           </div>`;
         });
 
         panelHtml += `</div>`;
+      }
+
+      if (matches.length === 0) {
+        panelHtml += '<p style="color:#B0ACBA; text-align:center; padding:20px 0;">Няма значими попадения в радиус 150км</p>';
+      } else if (sortedCities.length < Object.keys(byCity).length) {
+        panelHtml += `<p style="color:#B0ACBA; font-size:12px; text-align:center;">Показани топ ${sortedCities.length} град(а) от ${Object.keys(byCity).length}</p>`;
       }
 
       panelHtml += '</div>';
@@ -327,10 +378,12 @@ const AstroCarto = (function() {
       panelEl.style.display = 'block';
     }
 
-    // Изчакай картата да е готова преди да вернеш
+    // Изчакай картата да е готова, после вызови invalidateSize
     return new Promise(resolve => {
-      acgLeafletMap.on('load', () => resolve(true));
-      setTimeout(resolve, 500); // Fallback timeout
+      setTimeout(() => {
+        acgLeafletMap.invalidateSize(true);
+        resolve(true);
+      }, 100);
     });
   }
 
