@@ -690,32 +690,57 @@ const AstroCarto = (function() {
     const cityDropdown = document.getElementById('acg-city-dropdown');
     const cityError = document.getElementById('acg-city-error');
 
-    console.log('[ACG] initAcgForm called, dateBtn:', dateBtn ? 'found' : 'NOT FOUND', 'timeBtn:', timeBtn ? 'found' : 'NOT FOUND');
+    console.log('✅ [ACG] initAcgForm called');
+    console.log('  dateBtn:', dateBtn ? '✅ found' : '❌ NOT FOUND');
+    console.log('  timeBtn:', timeBtn ? '✅ found' : '❌ NOT FOUND');
+    console.log('  cityInput:', cityInput ? '✅ found' : '❌ NOT FOUND');
+    console.log('  openAcgDatePicker:', typeof openAcgDatePicker);
+    console.log('  openAcgTimePicker:', typeof openAcgTimePicker);
 
     // Дата пикер
     if (dateBtn) {
+      console.log('📝 Attaching date button listener');
       dateBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('[ACG] Date button clicked, opening picker...');
-        openAcgDatePicker(acgBirthDate, (date) => {
-          acgBirthDate = date;
-          const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
-          document.getElementById('acg-date-value').textContent =
-            date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
-        });
+        console.log('🗓️ [ACG] Date button clicked, opening picker...');
+        console.log('  acgBirthDate:', acgBirthDate);
+        console.log('  openAcgDatePicker type:', typeof openAcgDatePicker);
+        try {
+          openAcgDatePicker(acgBirthDate, (date) => {
+            acgBirthDate = date;
+            const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
+            document.getElementById('acg-date-value').textContent =
+              date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
+            console.log('✅ Date selected:', acgBirthDate);
+          });
+        } catch (err) {
+          console.error('❌ Date picker error:', err.message);
+        }
       });
+    } else {
+      console.error('❌ Date button not found in DOM');
     }
 
     // Час пикер
     if (timeBtn) {
+      console.log('📝 Attaching time button listener');
       timeBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        openAcgTimePicker(acgBirthTime, (time) => {
-          acgBirthTime = time;
-          document.getElementById('acg-time-value').textContent =
-            String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
-        });
+        console.log('⏰ [ACG] Time button clicked, opening picker...');
+        console.log('  acgBirthTime:', acgBirthTime);
+        try {
+          openAcgTimePicker(acgBirthTime, (time) => {
+            acgBirthTime = time;
+            document.getElementById('acg-time-value').textContent =
+              String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
+            console.log('✅ Time selected:', acgBirthTime);
+          });
+        } catch (err) {
+          console.error('❌ Time picker error:', err.message);
+        }
       });
+    } else {
+      console.error('❌ Time button not found in DOM');
     }
 
     // Град автодовършване (опростено - използваме същата логика като наталната форма)
