@@ -6,7 +6,7 @@
 <title>АстроКомпас — твоят космически пътеводител</title>
 <meta name="description" content="Дневен хороскоп, натална карта и лунни фази — изчислено по VSOP87, за размисъл и вдъхновение.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 <script src="https://gumroad.com/js/gumroad.js"></script>
 </head>
 <body>
@@ -22,9 +22,8 @@
       <a href="#moon">Луна</a>
       <a href="#horoscope">Хороскоп</a>
       <a href="#natal">Натална карта</a>
-      <a href="#astrocartography">Карта & Статии</a>
     </nav>
-    <button class="menu-btn" id="menu-open-btn" aria-label="Меню">
+    <button class="menu-btn" id="menu-open-btn" aria-label="Меню" aria-expanded="false">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
   </div>
@@ -44,6 +43,8 @@
       <a href="#moon">Луна</a>
       <a href="#horoscope">Хороскоп</a>
       <a href="#natal">Натална карта</a>
+      <a href="#astrocartography">Астрокартография</a>
+      <a href="#articles">Статии</a>
     </nav>
   </div>
 </div>
@@ -376,7 +377,7 @@
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script src="js/vendor/svg2pdf.umd.min.js"></script>
 <script src="js/vendor/pdf-fonts.js"></script>
-<script src="js/astrocartography.js?v=4"></script>
+<script src="js/astrocartography.js?v=6"></script>
 <script src="js/app.js?v=7"></script>
 </body>
 </html>

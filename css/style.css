@@ -580,7 +580,8 @@ section { padding: 40px 20px; }
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   width: 100%;
-  aspect-ratio: 2 / 1;
+  height: 500px;
+  min-height: 500px;
   position: relative;
   overflow: hidden;
   z-index: 1;

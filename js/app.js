@@ -75,11 +75,38 @@
     }, { passive: true });
 
     var overlay = $('drawer-overlay');
-    $('menu-open-btn').addEventListener('click', function () { overlay.classList.add('open'); });
-    $('drawer-close-btn').addEventListener('click', function () { overlay.classList.remove('open'); });
-    $('drawer-scrim').addEventListener('click', function () { overlay.classList.remove('open'); });
+    var menuBtn = $('menu-open-btn');
+
+    var closeDrawer = function () {
+      overlay.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    };
+
+    var openDrawer = function () {
+      overlay.classList.add('open');
+      menuBtn.setAttribute('aria-expanded', 'true');
+    };
+
+    menuBtn.addEventListener('click', function () {
+      if (overlay.classList.contains('open')) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    });
+
+    $('drawer-close-btn').addEventListener('click', closeDrawer);
+    $('drawer-scrim').addEventListener('click', closeDrawer);
+
     overlay.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () { overlay.classList.remove('open'); });
+      a.addEventListener('click', function () { closeDrawer(); });
+    });
+
+    // Escape клавиш затваря drawer
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) {
+        closeDrawer();
+      }
     });
 
     var io = new IntersectionObserver(function (entries) {
