@@ -286,7 +286,7 @@ const AstroCarto = (function() {
 
   let acgLeafletMap = null; // Съхрани Leaflet картата
 
-  // Генериране с Leaflet
+  // Генериране с Leaflet със статични GeoJSON континенти
   async function renderAcgMapWithLeaflet(mapEl, lines, planets, birthLat, birthLon) {
     // Унищожи старата карта ако съществува
     if (acgLeafletMap) {
@@ -298,110 +298,112 @@ const AstroCarto = (function() {
     const L = await loadLeaflet();
     if (!L) throw new Error('Leaflet не може да се зареди');
 
-    // Инициализирай картата
-    acgLeafletMap = L.map(mapEl).setView([20, 0], 2);
+    // Инициализирай картата със правилни настройки (без дублиране и сива половина)
+    acgLeafletMap = L.map(mapEl, {
+      minZoom: 1,
+      maxZoom: 6,
+      maxBounds: [[-85, -180], [85, 180]],
+      maxBoundsViscosity: 1,
+      worldCopyJump: false
+    }).setView([20, 0], 2);
 
-    // Dark tile layer
-    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap, © CartoDB',
-      maxZoom: 19
-    }).addTo(acgLeafletMap);
+    // Функция за рисуване на планетни линии, зенити и градове
+    const drawMapContent = () => {
+      // Рисувай планетни линии
+      for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
+        const planet = PLANETS_DATA[pIdx];
+        const pLines = lines[pIdx];
+        if (!pLines) continue;
 
-    // Рисувай планетни линии
-    for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
-      const planet = PLANETS_DATA[pIdx];
-      const pLines = lines[pIdx];
-      if (!pLines) continue;
-
-      // MC линия
-      if (pLines.mc) {
-        const lon = pLines.mc.lon;
-        L.polyline([[85, lon], [-85, lon]], {
-          color: planet.color,
-          weight: 2.5,
-          opacity: 0.85,
-          className: 'acg-line'
-        }).bindTooltip(`${planet.symbol} ${planet.nameBg} (MC)`, { permanent: false }).addTo(acgLeafletMap);
-      }
-
-      // IC линия
-      if (pLines.ic) {
-        const lon = pLines.ic.lon;
-        L.polyline([[85, lon], [-85, lon]], {
-          color: planet.color,
-          weight: 2,
-          opacity: 0.6,
-          dashArray: '5, 3',
-          className: 'acg-line'
-        }).bindTooltip(`${planet.symbol} ${planet.nameBg} (IC)`, { permanent: false }).addTo(acgLeafletMap);
-      }
-
-      // ASC криви
-      if (pLines.asc && pLines.asc.points.length > 0) {
-        for (const segment of pLines.asc.points) {
-          if (segment.length < 2) continue;
-          const latlngs = segment.map(p => [p.lat, p.lon]);
-          L.polyline(latlngs, {
+        // MC линия
+        if (pLines.mc) {
+          const lon = pLines.mc.lon;
+          L.polyline([[85, lon], [-85, lon]], {
             color: planet.color,
-            weight: 2,
-            opacity: 0.75,
+            weight: 2.5,
+            opacity: 0.85,
             className: 'acg-line'
-          }).bindTooltip(`${planet.symbol} ${planet.nameBg} (ASC)`, { permanent: false }).addTo(acgLeafletMap);
+          }).bindTooltip(`${planet.symbol} ${planet.nameBg} (MC)`, { permanent: false }).addTo(acgLeafletMap);
         }
-      }
 
-      // DSC криви
-      if (pLines.dsc && pLines.dsc.points.length > 0) {
-        for (const segment of pLines.dsc.points) {
-          if (segment.length < 2) continue;
-          const latlngs = segment.map(p => [p.lat, p.lon]);
-          L.polyline(latlngs, {
+        // IC линия
+        if (pLines.ic) {
+          const lon = pLines.ic.lon;
+          L.polyline([[85, lon], [-85, lon]], {
             color: planet.color,
             weight: 2,
             opacity: 0.6,
+            dashArray: '5, 3',
             className: 'acg-line'
-          }).bindTooltip(`${planet.symbol} ${planet.nameBg} (DSC)`, { permanent: false }).addTo(acgLeafletMap);
+          }).bindTooltip(`${planet.symbol} ${planet.nameBg} (IC)`, { permanent: false }).addTo(acgLeafletMap);
+        }
+
+        // ASC криви
+        if (pLines.asc && pLines.asc.points.length > 0) {
+          for (const segment of pLines.asc.points) {
+            if (segment.length < 2) continue;
+            const latlngs = segment.map(p => [p.lat, p.lon]);
+            L.polyline(latlngs, {
+              color: planet.color,
+              weight: 2,
+              opacity: 0.75,
+              className: 'acg-line'
+            }).bindTooltip(`${planet.symbol} ${planet.nameBg} (ASC)`, { permanent: false }).addTo(acgLeafletMap);
+          }
+        }
+
+        // DSC криви
+        if (pLines.dsc && pLines.dsc.points.length > 0) {
+          for (const segment of pLines.dsc.points) {
+            if (segment.length < 2) continue;
+            const latlngs = segment.map(p => [p.lat, p.lon]);
+            L.polyline(latlngs, {
+              color: planet.color,
+              weight: 2,
+              opacity: 0.6,
+              className: 'acg-line'
+            }).bindTooltip(`${planet.symbol} ${planet.nameBg} (DSC)`, { permanent: false }).addTo(acgLeafletMap);
+          }
         }
       }
-    }
 
-    // Маркери за зенитите на планетите
-    planets.forEach(p => {
-      if (p.zenithLat >= -85 && p.zenithLat <= 85 && p.zenithLon >= -180 && p.zenithLon <= 180) {
-        L.circleMarker([p.zenithLat, p.zenithLon], {
-          radius: 8,
-          fillColor: p.color,
-          color: p.color,
-          weight: 2.5,
-          opacity: 1,
-          fillOpacity: 0.8,
-          dashArray: '2, 2'
-        }).bindTooltip(`${p.symbol} ${p.nameBg} — зенит (планетата точно отгоре)`, { permanent: false }).addTo(acgLeafletMap);
-      }
-    });
+      // Маркери за зенитите на планетите
+      planets.forEach(p => {
+        if (p.zenithLat >= -85 && p.zenithLat <= 85 && p.zenithLon >= -180 && p.zenithLon <= 180) {
+          L.circleMarker([p.zenithLat, p.zenithLon], {
+            radius: 8,
+            fillColor: p.color,
+            color: p.color,
+            weight: 2.5,
+            opacity: 1,
+            fillOpacity: 0.8,
+            dashArray: '2, 2'
+          }).bindTooltip(`${p.symbol} ${p.nameBg} — зенит (планетата точно отгоре)`, { permanent: false }).addTo(acgLeafletMap);
+        }
+      });
 
-    // Намери ВСИ значими попадения (град-линия < 150км, или 300км за слабо влияние)
-    const matches = findCityLineMatches(lines);
+      // Намери ВСИ значими попадения (град-линия < 150км, или 300км за слабо влияние)
+      const matches = findCityLineMatches(lines);
 
-    // Добави маркери за градове
-    const markedCities = new Set();
-    matches.forEach(m => {
-      if (!markedCities.has(m.city)) {
-        L.circleMarker([m.city_lat, m.city_lon], {
-          radius: 5,
-          fillColor: '#999999',
-          color: '#999999',
-          weight: 1.5,
-          opacity: 0.7,
-          fillOpacity: 0.5
-        }).bindTooltip(`${m.city}`).addTo(acgLeafletMap);
-        markedCities.add(m.city);
-      }
-    });
+      // Добави маркери за градове
+      const markedCities = new Set();
+      matches.forEach(m => {
+        if (!markedCities.has(m.city)) {
+          L.circleMarker([m.city_lat, m.city_lon], {
+            radius: 5,
+            fillColor: '#999999',
+            color: '#999999',
+            weight: 1.5,
+            opacity: 0.7,
+            fillOpacity: 0.5
+          }).bindTooltip(`${m.city}`).addTo(acgLeafletMap);
+          markedCities.add(m.city);
+        }
+      });
 
-    // Рендер панел с градове и попадения
-    const panelEl = document.getElementById('acg-cities-panel');
-    if (panelEl) {
+      // Рендер панел с градове и попадения
+      const panelEl = document.getElementById('acg-cities-panel');
+      if (panelEl) {
       // Групирай по град
       const byCity = {};
       matches.forEach(m => {
@@ -458,17 +460,42 @@ const AstroCarto = (function() {
         panelHtml += '<p style="color:#B0ACBA; text-align:center; padding:20px 0;">Няма значими попадения в радиус 300км</p>';
       }
 
-      panelHtml += '</div>';
-      panelEl.innerHTML = panelHtml;
-      panelEl.style.display = 'block';
-    }
+        panelHtml += '</div>';
+        panelEl.innerHTML = panelHtml;
+        panelEl.style.display = 'block';
+      }
 
-    // Изчакай картата да е готова, после вызови invalidateSize
-    return new Promise(resolve => {
-      setTimeout(() => {
-        acgLeafletMap.invalidateSize(true);
-        resolve(true);
-      }, 100);
+      // Инвалидирай картата след рисуване
+      setTimeout(() => { acgLeafletMap.invalidateSize(true); }, 100);
+      setTimeout(() => { acgLeafletMap.invalidateSize(true); }, 300);
+    };
+
+    // Зареди GeoJSON континентите и рисувай върху тях
+    return new Promise((resolve, reject) => {
+      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+        .then(r => r.json())
+        .then(topo => {
+          if (typeof topojson !== 'undefined' && topojson.feature) {
+            const geo = topojson.feature(topo, topo.objects.countries);
+            L.geoJSON(geo, {
+              style: {
+                fillColor: '#2b3a5c',
+                fillOpacity: 1,
+                color: '#4a5f8a',
+                weight: 0.6
+              }
+            }).addTo(acgLeafletMap);
+          }
+          // Рисувай линии, зенити, градове след като GeoJSON е добавен
+          drawMapContent();
+          resolve(true);
+        })
+        .catch(err => {
+          console.error('GeoJSON зареждане неудачно:', err);
+          // Пак рисувай, дори без континентите
+          drawMapContent();
+          resolve(true);
+        });
     });
   }
 
