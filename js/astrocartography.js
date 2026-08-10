@@ -1,8 +1,8 @@
-/* Астрокартография — планетни линии върху света */
+/* Астрокартография — планетни линии върху света със Leaflet карта */
 const AstroCarto = (function() {
   'use strict';
 
-  // Дата пикер константи (fallback ако не са изложени от app.js)
+  // Дата пикер константи
   const BG_MONTHS_GEN = (typeof window.BG_MONTHS_GEN !== 'undefined') ? window.BG_MONTHS_GEN : ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
   const BG_MONTHS = (typeof window.BG_MONTHS !== 'undefined') ? window.BG_MONTHS : ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
   const BG_DAYS_ABBR = (typeof window.BG_DAYS_ABBR !== 'undefined') ? window.BG_DAYS_ABBR : ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
@@ -11,7 +11,7 @@ const AstroCarto = (function() {
   // Констани
   const DEG2RAD = Math.PI / 180;
   const RAD2DEG = 180 / Math.PI;
-  const EPSILON = 23.43929111 * DEG2RAD; // Наклон на еклиптиката (за J2000.0)
+  const EPSILON = 23.43929111 * DEG2RAD;
 
   // Планетни данни
   const PLANETS_DATA = [
@@ -27,7 +27,44 @@ const AstroCarto = (function() {
     { name: 'pluto', nameBg: 'Плутон', symbol: '♇', color: '#CE93D8', meaning: 'Трансформация, интензивност, регенерация и власт' }
   ];
 
-  // Преобразуване еклиптични → екваториални координати
+  // Световни градове за анализ
+  const WORLD_CITIES = [
+    ['София',42.70,23.32],['Лондон',51.51,-0.13],['Париж',48.85,2.35],['Берлин',52.52,13.40],
+    ['Мадрид',40.42,-3.70],['Рим',41.90,12.50],['Виена',48.21,16.37],['Амстердам',52.37,4.90],
+    ['Атина',37.98,23.73],['Лисабон',38.72,-9.14],['Дъблин',53.35,-6.26],['Брюксел',50.85,4.35],
+    ['Цюрих',47.37,8.54],['Прага',50.08,14.44],['Варшава',52.23,21.01],['Будапеща',47.50,19.04],
+    ['Букурещ',44.43,26.10],['Белград',44.79,20.45],['Загреб',45.81,15.98],['Копенхаген',55.68,12.57],
+    ['Стокхолм',59.33,18.06],['Осло',59.91,10.75],['Хелзинки',60.17,24.94],['Киев',50.45,30.52],
+    ['Москва',55.75,37.62],['Санкт Петербург',59.93,30.34],['Истанбул',41.01,28.98],['Милано',45.46,9.19],
+    ['Барселона',41.39,2.17],['Мюнхен',48.14,11.58],
+    ['Токио',35.68,139.69],['Пекин',39.90,116.41],['Шанхай',31.23,121.47],['Хонконг',22.32,114.17],
+    ['Сеул',37.57,126.98],['Делхи',28.61,77.21],['Мумбай',19.08,72.88],['Бангалор',12.97,77.59],
+    ['Банкок',13.76,100.50],['Джакарта',-6.21,106.85],['Манила',14.60,120.98],['Куала Лумпур',3.14,101.69],
+    ['Сингапур',1.35,103.82],['Хо Ши Мин',10.82,106.63],['Ханой',21.03,105.85],['Тайпе',25.03,121.57],
+    ['Осака',34.69,135.50],['Карачи',24.86,67.01],['Лахор',31.55,74.34],['Дамаск',33.51,36.29],
+    ['Техеран',35.69,51.39],['Багдад',33.32,44.36],['Рияд',24.71,46.68],['Дубай',25.20,55.27],
+    ['Абу Даби',24.45,54.38],['Доха',25.29,51.53],['Кувейт',29.38,47.99],['Йерусалим',31.77,35.21],
+    ['Тел Авив',32.09,34.78],['Бейрут',33.89,35.50],['Аман',31.95,35.93],['Коломбо',6.93,79.86],
+    ['Дака',23.81,90.41],['Катманду',27.72,85.32],['Ташкент',41.30,69.24],['Алмати',43.24,76.89],
+    ['Улан Батор',47.89,106.91],
+    ['Кайро',30.04,31.24],['Лагос',6.52,3.38],['Кейптаун',-33.92,18.42],['Йоханесбург',-26.20,28.05],
+    ['Найроби',-1.29,36.82],['Казабланка',33.57,-7.59],['Тунис',36.81,10.18],['Алжир',36.75,3.06],
+    ['Акра',5.60,-0.19],['Адис Абеба',9.03,38.74],['Дар ес Салам',-6.79,39.21],['Хартум',15.50,32.56],
+    ['Луанда',-8.84,13.23],['Дакар',14.72,-17.47],['Абиджан',5.36,-4.01],['Триполи',32.89,13.19],
+    ['Ню Йорк',40.71,-74.01],['Лос Анджелис',34.05,-118.24],['Чикаго',41.88,-87.63],['Торонто',43.65,-79.38],
+    ['Мексико Сити',19.43,-99.13],['Хюстън',29.76,-95.37],['Маями',25.76,-80.19],['Ванкувър',49.28,-123.12],
+    ['Монреал',45.50,-73.57],['Вашингтон',38.91,-77.04],['Сан Франциско',37.77,-122.42],['Бостън',42.36,-71.06],
+    ['Сиатъл',47.61,-122.33],['Атланта',33.75,-84.39],['Далас',32.78,-96.80],['Хавана',23.11,-82.37],
+    ['Гватемала',14.63,-90.51],['Панама',8.98,-79.52],
+    ['Сао Пауло',-23.55,-46.63],['Рио де Жанейро',-22.91,-43.17],['Буенос Айрес',-34.60,-58.38],
+    ['Лима',-12.05,-77.04],['Богота',4.71,-74.07],['Сантяго',-33.45,-70.67],['Каракас',10.48,-66.90],
+    ['Кито',-0.18,-78.47],['Монтевидео',-34.90,-56.16],['Ла Пас',-16.50,-68.15],['Асунсион',-25.28,-57.63],
+    ['Бразилия',-15.79,-47.88],['Меделин',6.24,-75.58],
+    ['Сидни',-33.87,151.21],['Мелбърн',-37.81,144.96],['Бризбейн',-27.47,153.03],['Пърт',-31.95,115.86],
+    ['Окланд',-36.85,174.76],['Уелингтън',-41.29,174.78],['Аделаида',-34.93,138.60],['Порт Морсби',-9.44,147.18],
+  ];
+
+  // Преобразуване еклиптични → екваториални координати (ФИКСИРАНО)
   function eclipticToEquatorial(lon, lat) {
     const l = lon * DEG2RAD;
     const b = lat * DEG2RAD;
@@ -38,24 +75,24 @@ const AstroCarto = (function() {
     const cosB = Math.cos(b);
     const sinE = Math.sin(EPSILON);
     const cosE = Math.cos(EPSILON);
+    const tanB = Math.tan(b);
 
-    let ra = Math.atan2(sinL * cosE - Math.tan(b) * sinE, cosL);
+    // Правилна RA формула
+    let ra = Math.atan2(sinL * cosE - tanB * sinE, cosL);
+    // Правилна DEC формула
     let dec = Math.asin(sinB * cosE + cosB * sinE * sinL);
 
-    // Нормализирай RA към 0..2π
     if (ra < 0) ra += 2 * Math.PI;
 
     return { ra: ra * RAD2DEG, dec: dec * RAD2DEG };
   }
 
-  // GST (Гринуичко звездно време) от Julian Day
   function computeGST(jd) {
     const T = (jd - 2451545.0) / 36525.0;
     const GMST = 18.41667684 + 8640184.812866 * T + 0.093104 * T * T - 6.2e-6 * T * T * T;
-    return (GMST % 24 + 24) % 24; // Часове (0..24)
+    return (GMST % 24 + 24) % 24;
   }
 
-  // Нормализирай дължина към −180..180
   function normalizeLongitude(lon) {
     let l = lon;
     while (l > 180) l -= 360;
@@ -63,31 +100,24 @@ const AstroCarto = (function() {
     return l;
   }
 
-  // Изчисли астрокартографските линии за планета
   function computeAcgLines(ra, dec, gst, placeLon, placeLat) {
     ra = ra * DEG2RAD;
     dec = dec * DEG2RAD;
-    const gstRad = gst * 15 * DEG2RAD; // GST в радиани (часове → градуси)
+    const gstRad = gst * 15 * DEG2RAD;
     const lon = placeLon * DEG2RAD;
     const lat = placeLat * DEG2RAD;
 
     const lines = {};
 
-    // MC линия (вертикална): дължина, където планетата е на MC
     const mcLon = normalizeLongitude((ra - gstRad) * RAD2DEG);
     lines.mc = { type: 'MC', lon: mcLon, latRange: [-85, 85] };
 
-    // IC линия (вертикална): противоположната страна
     const icLon = normalizeLongitude(mcLon + 180);
     lines.ic = { type: 'IC', lon: icLon, latRange: [-85, 85] };
 
-    // ASC линия (изгряваща): крива
     lines.asc = { type: 'ASC', points: [], validRanges: [] };
-
-    // DSC линия (залязваща): крива
     lines.dsc = { type: 'DSC', points: [], validRanges: [] };
 
-    // За всяка ширина φ от −85° до +85°
     let ascPoints = [];
     let dscPoints = [];
     let ascRange = [];
@@ -97,22 +127,17 @@ const AstroCarto = (function() {
       const phiRad = phi * DEG2RAD;
       const cosH = -Math.tan(phiRad) * Math.tan(dec);
 
-      // Провери дали планетата изгрява/залязва на тази ширина
       if (Math.abs(cosH) <= 1) {
-        // Планетата изгрява и залязва на тази ширина
         const H = Math.acos(cosH);
 
-        // Изгряваща (ASC): часов ъгъл е отрицателен
         const ascLonRad = ra - gstRad - H;
         const ascLon = normalizeLongitude(ascLonRad * RAD2DEG);
         ascPoints.push({ lat: phi, lon: ascLon });
 
-        // Залязваща (DSC): часов ъгъл е положителен
         const dscLonRad = ra - gstRad + H;
         const dscLon = normalizeLongitude(dscLonRad * RAD2DEG);
         dscPoints.push({ lat: phi, lon: dscLon });
       } else {
-        // Прекъсни линията (планетата не изгрява на тази ширина)
         if (ascPoints.length > 0) {
           ascRange.push(ascPoints);
           ascPoints = [];
@@ -133,101 +158,49 @@ const AstroCarto = (function() {
     return lines;
   }
 
-  // Проект для SVG: equirectangular (plate carrée)
-  function projectCoord(lat, lon, width, height) {
-    const x = ((lon + 180) / 360) * width;
-    const y = ((90 - lat) / 180) * height;
-    return { x, y };
-  }
+  // Намери най-близкия град до линия (меридиан)
+  function findClosestCities(lon, type) {
+    const closestCities = [];
 
-  // Опростена карта на света (вграда контури на континентите)
-  function getWorldMapSvg(width, height) {
-    // Генериране на пълна карта със континенти, мрежа и етикети
-    const gridLon = 30, gridLat = 30; // меридиани и паралели на всеки 30°
+    for (const [cityName, cityLat, cityLon] of WORLD_CITIES) {
+      // Разстояние до меридиан (в км)
+      const dLon = normalizeLongitude(cityLon - lon);
+      const distance = Math.abs(dLon) * Math.cos(cityLat * DEG2RAD) * 111;
 
-    // Основни приблизителни paths на континентите в equirectangular проекция
-    const continents = [
-      // Африка
-      { points: [[35, -15], [35, 50], [-35, 50], [-35, -15]], name: 'Африка' },
-      // Евразия (разбити на части за простота)
-      { points: [[40, 30], [40, 180], [70, 180], [70, 30]], name: 'Азия' },
-      { points: [[45, -30], [45, 40], [65, 40], [65, -30]], name: 'Европа' },
-      // Америки
-      { points: [[10, -130], [10, -50], [60, -50], [60, -130]], name: 'С. Америка' },
-      { points: [[-10, -85], [-10, -35], [-55, -35], [-55, -85]], name: 'Ю. Америка' },
-      // Австралия
-      { points: [[-10, 110], [-10, 160], [-45, 160], [-45, 110]], name: 'Австралия' },
-    ];
-
-    let svg = `<!-- Фон -->
-      <rect width="${width}" height="${height}" fill="#0f0e12"/>
-
-      <!-- Мрежа (меридиани) -->`;
-
-    // Меридиани
-    for (let lon = -180; lon <= 180; lon += gridLon) {
-      const x = ((lon + 180) / 360) * width;
-      const isMain = (lon === 0 || lon === -180 || lon === 180);
-      svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="rgba(182,157,232,${isMain ? 0.2 : 0.08})" stroke-width="${isMain ? 1 : 0.5}"/>`;
-    }
-
-    // Паралели
-    for (let lat = -90; lat <= 90; lat += gridLat) {
-      const y = ((90 - lat) / 180) * height;
-      const isMain = (lat === 0);
-      svg += `<line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="rgba(182,157,232,${isMain ? 0.2 : 0.08})" stroke-width="${isMain ? 1 : 0.5}"/>`;
-    }
-
-    svg += `<!-- Континенти -->
-      <g fill="rgba(182,157,232,0.12)" stroke="rgba(182,157,232,0.25)" stroke-width="0.8">`;
-
-    for (const continent of continents) {
-      let pathD = '';
-      for (let i = 0; i < continent.points.length; i++) {
-        const [lat, lon] = continent.points[i];
-        const proj = projectCoord(lat, lon, width, height);
-        pathD += (i === 0 ? 'M' : 'L') + ` ${proj.x} ${proj.y}`;
+      if (distance < 500) { // Само градове в радиус 500км
+        closestCities.push({ name: cityName, lat: cityLat, lon: cityLon, distance: Math.round(distance) });
       }
-      pathD += ' Z';
-      svg += `<path d="${pathD}"/>`;
     }
 
-    svg += `</g>
-
-      <!-- Етикети на дължини (долу) -->
-      <g font-size="10" fill="rgba(182,157,232,0.5)" text-anchor="middle" font-family="monospace">`;
-
-    for (let lon = -180; lon <= 180; lon += 60) {
-      const x = ((lon + 180) / 360) * width;
-      const label = lon === 0 ? '0°' : (lon > 0 ? lon + '°E' : Math.abs(lon) + '°W');
-      svg += `<text x="${x}" y="${height + 14}">${label}</text>`;
-    }
-
-    svg += `</g>
-
-      <!-- Етикели на ширини (ляво) -->
-      <g font-size="10" fill="rgba(182,157,232,0.5)" text-anchor="end" font-family="monospace">`;
-
-    for (let lat = 60; lat >= -60; lat -= 30) {
-      const y = ((90 - lat) / 180) * height;
-      const label = lat === 0 ? '0°' : (lat > 0 ? lat + '°N' : Math.abs(lat) + '°S');
-      svg += `<text x="-8" y="${y + 4}">${label}</text>`;
-    }
-
-    svg += `</g>
-
-      <!-- Граница на карта -->
-      <rect width="${width}" height="${height}" fill="none" stroke="rgba(182,157,232,0.4)" stroke-width="1"/>`;
-
-    return svg;
+    return closestCities.sort((a, b) => a.distance - b.distance).slice(0, 3);
   }
 
-  // Генериране на SVG линии за всички планети със означения
-  function generateAcgSvg(lines, width, height) {
-    let svg = `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" style="display:block; margin:0 auto; max-width:100%; height:auto;">`;
-    svg += getWorldMapSvg(width, height);
+  let acgLeafletMap = null; // Съхрани Leaflet картата
 
-    // За всяка планета рисувай линиите
+  // Генериране с Leaflet
+  async function renderAcgMapWithLeaflet(mapEl, lines, birthLat, birthLon) {
+    // Унищожи старата карта ако съществува
+    if (acgLeafletMap) {
+      acgLeafletMap.remove();
+      acgLeafletMap = null;
+    }
+
+    // Зареди Leaflet
+    const L = await loadLeaflet();
+    if (!L) throw new Error('Leaflet не може да се зареди');
+
+    // Инициализирай картата
+    acgLeafletMap = L.map(mapEl).setView([20, 0], 2);
+
+    // Dark tile layer
+    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap, © CartoDB',
+      maxZoom: 19
+    }).addTo(acgLeafletMap);
+
+    // Рисувай планетни линии
+    const allCityResults = [];
+
     for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
       const planet = PLANETS_DATA[pIdx];
       const pLines = lines[pIdx];
@@ -235,285 +208,158 @@ const AstroCarto = (function() {
 
       // MC линия
       if (pLines.mc) {
-        const x = projectCoord(0, pLines.mc.lon, width, height).x;
-        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="${planet.color}" stroke-width="2.5" opacity="0.85" data-planet="${planet.nameBg}" data-type="MC"/>`;
-        // Означение за MC (горе)
-        svg += `<g transform="translate(${x},10)" text-anchor="middle">
-          <text font-size="12" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
-          <text font-size="8" fill="${planet.color}" opacity="0.7" y="12">MC</text>
-        </g>`;
+        const lon = pLines.mc.lon;
+        L.polyline([[85, lon], [-85, lon]], {
+          color: planet.color,
+          weight: 2.5,
+          opacity: 0.85,
+          className: 'acg-line'
+        }).bindTooltip(`${planet.symbol} ${planet.nameBg} (MC)`, { permanent: false }).addTo(acgLeafletMap);
+
+        const cities = findClosestCities(lon, 'MC');
+        cities.forEach(city => {
+          allCityResults.push({
+            symbol: planet.symbol,
+            city: city.name,
+            type: 'MC',
+            meaning: planet.meaning,
+            distance: city.distance,
+            lat: city.lat,
+            lon: city.lon,
+            color: planet.color
+          });
+          // Маркер за град
+          L.circleMarker([city.lat, city.lon], {
+            radius: 4,
+            fillColor: planet.color,
+            color: planet.color,
+            weight: 1,
+            opacity: 0.7,
+            fillOpacity: 0.5
+          }).bindTooltip(`${city.name}`).addTo(acgLeafletMap);
+        });
       }
 
       // IC линия
       if (pLines.ic) {
-        const x = projectCoord(0, pLines.ic.lon, width, height).x;
-        svg += `<line x1="${x}" y1="0" x2="${x}" y2="${height}" stroke="${planet.color}" stroke-width="2" opacity="0.6" stroke-dasharray="5,3" data-planet="${planet.nameBg}" data-type="IC"/>`;
-        // Означение за IC (долу)
-        svg += `<g transform="translate(${x},${height - 5})" text-anchor="middle">
-          <text font-size="12" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
-          <text font-size="8" fill="${planet.color}" opacity="0.7" y="-12">IC</text>
-        </g>`;
+        const lon = pLines.ic.lon;
+        L.polyline([[85, lon], [-85, lon]], {
+          color: planet.color,
+          weight: 2,
+          opacity: 0.6,
+          dashArray: '5, 3',
+          className: 'acg-line'
+        }).bindTooltip(`${planet.symbol} ${planet.nameBg} (IC)`, { permanent: false }).addTo(acgLeafletMap);
+
+        const cities = findClosestCities(lon, 'IC');
+        cities.forEach(city => {
+          allCityResults.push({
+            symbol: planet.symbol,
+            city: city.name,
+            type: 'IC',
+            meaning: planet.meaning,
+            distance: city.distance,
+            lat: city.lat,
+            lon: city.lon,
+            color: planet.color
+          });
+        });
       }
 
-      // ASC линия (криви)
+      // ASC криви
       if (pLines.asc && pLines.asc.points.length > 0) {
-        let hasLabel = false;
-        for (let segIdx = 0; segIdx < pLines.asc.points.length; segIdx++) {
-          const segment = pLines.asc.points[segIdx];
+        for (const segment of pLines.asc.points) {
           if (segment.length < 2) continue;
-
-          let pathData = `M ${projectCoord(segment[0].lat, segment[0].lon, width, height).x} ${projectCoord(segment[0].lat, segment[0].lon, width, height).y}`;
-          for (let i = 1; i < segment.length; i++) {
-            const p = projectCoord(segment[i].lat, segment[i].lon, width, height);
-            pathData += ` L ${p.x} ${p.y}`;
-          }
-          svg += `<path d="${pathData}" stroke="${planet.color}" stroke-width="2" fill="none" opacity="0.75" data-planet="${planet.nameBg}" data-type="ASC"/>`;
-
-          // Означение за ASC (на първа точка)
-          if (!hasLabel && segment.length > 0) {
-            const p = projectCoord(segment[0].lat, segment[0].lon, width, height);
-            svg += `<g transform="translate(${p.x},${p.y - 8})" text-anchor="middle" pointer-events="none">
-              <text font-size="11" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
-              <text font-size="7" fill="${planet.color}" opacity="0.7" y="10">ASC</text>
-            </g>`;
-            hasLabel = true;
-          }
+          const latlngs = segment.map(p => [p.lat, p.lon]);
+          L.polyline(latlngs, {
+            color: planet.color,
+            weight: 2,
+            opacity: 0.75,
+            className: 'acg-line'
+          }).bindTooltip(`${planet.symbol} ${planet.nameBg} (ASC)`, { permanent: false }).addTo(acgLeafletMap);
         }
       }
 
-      // DSC линия (криви)
+      // DSC криви
       if (pLines.dsc && pLines.dsc.points.length > 0) {
-        let hasLabel = false;
-        for (let segIdx = 0; segIdx < pLines.dsc.points.length; segIdx++) {
-          const segment = pLines.dsc.points[segIdx];
+        for (const segment of pLines.dsc.points) {
           if (segment.length < 2) continue;
-
-          let pathData = `M ${projectCoord(segment[0].lat, segment[0].lon, width, height).x} ${projectCoord(segment[0].lat, segment[0].lon, width, height).y}`;
-          for (let i = 1; i < segment.length; i++) {
-            const p = projectCoord(segment[i].lat, segment[i].lon, width, height);
-            pathData += ` L ${p.x} ${p.y}`;
-          }
-          svg += `<path d="${pathData}" stroke="${planet.color}" stroke-width="2" fill="none" opacity="0.6" data-planet="${planet.nameBg}" data-type="DSC"/>`;
-
-          // Означение за DSC (на първа точка)
-          if (!hasLabel && segment.length > 0) {
-            const p = projectCoord(segment[0].lat, segment[0].lon, width, height);
-            svg += `<g transform="translate(${p.x},${p.y + 12})" text-anchor="middle" pointer-events="none">
-              <text font-size="11" fill="${planet.color}" font-weight="bold">${planet.symbol}</text>
-              <text font-size="7" fill="${planet.color}" opacity="0.7" y="10">DSC</text>
-            </g>`;
-            hasLabel = true;
-          }
+          const latlngs = segment.map(p => [p.lat, p.lon]);
+          L.polyline(latlngs, {
+            color: planet.color,
+            weight: 2,
+            opacity: 0.6,
+            className: 'acg-line'
+          }).bindTooltip(`${planet.symbol} ${planet.nameBg} (DSC)`, { permanent: false }).addTo(acgLeafletMap);
         }
       }
     }
 
-    svg += `</svg>`;
-    return svg;
-  }
+    // Рендер панел с градове
+    const panelEl = document.getElementById('acg-cities-panel');
+    if (panelEl) {
+      let panelHtml = '<div style="padding:15px; font-size:13px;"><h3 style="margin:0 0 10px 0;">Градове под планетни линии:</h3>';
 
-  // Главна функция: изчисли астрокартография
-  function calculateAstrocartography(chart) {
-    console.log('📍 Calculating astrocartography for:', chart);
-
-    const lines = [];
-    const gst = computeGST(chart.jd);
-    console.log('GST:', gst.toFixed(6), 'hours');
-
-    // За всяка планета изчисли линиите
-    for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
-      const pData = PLANETS_DATA[pIdx];
-      const planetPos = chart.planets[pData.name];
-
-      if (!planetPos) continue;
-
-      console.log(`${pData.nameBg}: ecliptic lon=${planetPos.lon.toFixed(2)}°, lat=${planetPos.lat ? planetPos.lat.toFixed(2) : 0}°`);
-
-      // Преобразуй еклиптични → екваториални координати
-      const eq = eclipticToEquatorial(planetPos.lon, planetPos.lat || 0);
-      console.log(`  RA=${eq.ra.toFixed(4)}°, DEC=${eq.dec.toFixed(4)}°`);
-
-      // Изчисли ACG линиите (използвай място от натална форма)
-      const birthLat = parseFloat(document.getElementById('birthLat')?.value || 0);
-      const birthLon = parseFloat(document.getElementById('birthLon')?.value || 0);
-
-      const acgLines = computeAcgLines(eq.ra, eq.dec, gst, birthLon, birthLat);
-      lines.push(acgLines);
-
-      console.log(`  MC lon=${acgLines.mc.lon.toFixed(2)}°, IC lon=${acgLines.ic.lon.toFixed(2)}°`);
-    }
-
-    return lines;
-  }
-
-  // Генериране на легенда
-  function generateLegendHtml() {
-    let html = '';
-    for (let i = 0; i < PLANETS_DATA.length; i++) {
-      const p = PLANETS_DATA[i];
-      html += `
-        <div class="acg-legend-item">
-          <div class="acg-legend-symbol">${p.symbol}</div>
-          <div>
-            <strong>${p.nameBg}:</strong> ${p.meaning}
-          </div>
-        </div>
-      `;
-    }
-    return html;
-  }
-
-  // Данни за астрокартография форма
-  let acgBirthDate = null;
-  let acgBirthTime = { h: 12, m: 0 };
-  let acgSelectedCity = null;
-
-  // Основен контролен интерфейс
-  function init() {
-    const btnCalc = document.getElementById('acg-calc-btn');
-    const btnPdf = document.getElementById('acg-pdf-btn');
-    const btnFullscreen = document.getElementById('acg-fullscreen-btn');
-    const msgEl = document.getElementById('acg-message');
-    const containerEl = document.getElementById('acg-container');
-    const mapEl = document.getElementById('acg-map');
-    const legendEl = document.getElementById('acg-legend');
-
-    if (!btnCalc) return;
-
-    // Инициализирай пикерите на астрокартография форма
-    initAcgForm();
-
-    // Fullscreen функция
-    if (btnFullscreen) {
-      btnFullscreen.addEventListener('click', (e) => {
-        e.stopPropagation();
-        mapEl.classList.toggle('fullscreen');
-        btnFullscreen.textContent = mapEl.classList.contains('fullscreen') ? '✕' : '⛶';
-
-        // Затвори fullscreen при ESC
-        if (mapEl.classList.contains('fullscreen')) {
-          const closeFullscreen = (e) => {
-            if (e.key === 'Escape') {
-              mapEl.classList.remove('fullscreen');
-              btnFullscreen.textContent = '⛶';
-              document.removeEventListener('keydown', closeFullscreen);
-            }
-          };
-          document.addEventListener('keydown', closeFullscreen);
-        }
+      // Групирай по град
+      const byCity = {};
+      allCityResults.forEach(r => {
+        if (!byCity[r.city]) byCity[r.city] = [];
+        byCity[r.city].push(r);
       });
+
+      const sortedCities = Object.keys(byCity).sort();
+      for (const city of sortedCities) {
+        panelHtml += `<div style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid rgba(182,157,232,0.1);">
+          <strong>${city}</strong><br>`;
+
+        byCity[city].forEach(r => {
+          panelHtml += `<div style="margin-left:10px; font-size:12px; color:${r.color};">
+            ${r.symbol} ${r.type} • ${r.distance} км<br>
+            <span style="font-size:11px; opacity:0.7;">${r.meaning}</span>
+          </div>`;
+        });
+
+        panelHtml += `</div>`;
+      }
+
+      panelHtml += '</div>';
+      panelEl.innerHTML = panelHtml;
+      panelEl.style.display = 'block';
     }
 
-    btnCalc.addEventListener('click', () => {
-      // Провери дали астрокартография формата е попълнена
-      if (!acgBirthDate) {
-        msgEl.className = 'acg-message error';
-        msgEl.textContent = '❌ Избери дата на раждане.';
-        return;
-      }
-
-      if (!acgSelectedCity) {
-        msgEl.className = 'acg-message error';
-        msgEl.textContent = '❌ Избери място на раждане от списъка.';
-        return;
-      }
-
-      console.log('ACG calculation:', { date: acgBirthDate, time: acgBirthTime, city: acgSelectedCity });
-
-      msgEl.textContent = 'Изчислява се…';
-      msgEl.className = '';
-
-      // Изчисли наталната карта за астрокартография
-      try {
-        const opts = {
-          year: acgBirthDate.getFullYear(),
-          month: acgBirthDate.getMonth() + 1,
-          day: acgBirthDate.getDate(),
-          hour: acgBirthTime.h,
-          minute: acgBirthTime.m,
-          second: 0,
-          utcOffset: 2, // Попълни събираемо - за България е UTC+2 летен час
-          lat: acgSelectedCity.lat,
-          lon: acgSelectedCity.lon,
-          name: (document.getElementById('acg-name')?.value || '').trim(),
-          placeName: acgSelectedCity.name
-        };
-
-        // Проверка дали AstroCore е наличен
-        if (typeof AstroCore === 'undefined') {
-          throw new Error('AstroCore библиотека не е заредена.');
-        }
-
-        let chart = AstroCore.computeChart ? AstroCore.computeChart(opts) : recalculateChartFromOpts(opts);
-        if (!chart) {
-          msgEl.className = 'acg-message error';
-          msgEl.textContent = '❌ Грешка при изчисление на наталната карта. Опитай отново.';
-          console.error('Chart is null after calculation');
-          return;
-        }
-
-        console.log('ACG Chart calculated successfully:', chart);
-
-        // Изчисли ACG
-        console.log('Calculating astrocartography...');
-        const acgLines = calculateAstrocartography(chart);
-        console.log('ACG lines calculated:', acgLines.length, 'lines');
-
-        // Генериране на SVG
-        console.log('Generating SVG...');
-        const mapSvg = generateAcgSvg(acgLines, 900, 500);
-
-        if (!mapSvg) {
-          throw new Error('SVG generation returned empty result');
-        }
-
-        mapEl.innerHTML = mapSvg;
-        console.log('SVG rendered to DOM');
-
-        // Генериране на легенда
-        legendEl.innerHTML = generateLegendHtml();
-
-        // Покажи контейнера
-        containerEl.style.display = 'flex';
-        msgEl.className = 'acg-message success';
-        msgEl.textContent = '✅ Астрокартографска карта генерирана успешно!';
-
-        // Активирай PDF бутона
-        btnPdf.onclick = null;
-        btnPdf.addEventListener('click', () => exportToPdf(chart));
-        console.log('Map generation complete');
-
-      } catch (error) {
-        console.error('ACG Error:', error);
-        msgEl.className = 'acg-message error';
-        msgEl.textContent = '❌ Грешка: ' + error.message;
-      }
+    // Изчакай картата да е готова преди да вернеш
+    return new Promise(resolve => {
+      acgLeafletMap.on('load', () => resolve(true));
+      setTimeout(resolve, 500); // Fallback timeout
     });
   }
 
-  // Функция за преизчисление на наталната карта от опции
-  function recalculateChartFromOpts(opts) {
-    try {
-      const jd = AstroCore.julianDay(opts.year, opts.month, opts.day, opts.hour, opts.minute, opts.second);
-      const T = AstroCore.centuriesSinceJ2000(jd);
-      const order = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
-      const planets = {};
-      order.forEach(name => {
-        const pos = AstroCore.planetLongitude(name, T);
-        planets[name] = Object.assign({ name, nameBg: AstroCore.PLANET_NAMES_BG[name] }, pos, AstroCore.longitudeToSign(pos.lon));
-      });
+  // Зареди Leaflet динамично
+  function loadLeaflet() {
+    return new Promise((resolve, reject) => {
+      if (window.L) {
+        resolve(window.L);
+        return;
+      }
 
-      return { jd, T, now: new Date(), planets, order, opts };
-    } catch (e) {
-      console.error('Chart calculation error:', e);
-      return null;
-    }
+      // Зареди CSS
+      const cssLink = document.createElement('link');
+      cssLink.rel = 'stylesheet';
+      cssLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      document.head.appendChild(cssLink);
+
+      // Зареди JS
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      script.onload = () => resolve(window.L);
+      script.onerror = () => reject(new Error('Leaflet JS не може да се зареди'));
+      document.head.appendChild(script);
+    });
   }
 
-  // Помощна функция за форматиране
   function pad2(n) { return String(n).padStart(2, '0'); }
 
-  // Дата пикер за астрокартография (идентичен с наталната форма)
+  // Дата пикер
   function openAcgDatePicker(initial, onConfirm) {
     var today = new Date();
     var sel = initial ? new Date(initial.getFullYear(), initial.getMonth(), initial.getDate()) : null;
@@ -615,7 +461,7 @@ const AstroCarto = (function() {
     render();
   }
 
-  // Час пикер за астрокартография (идентичен с наталната форма)
+  // Час пикер
   function openAcgTimePicker(initial, onConfirm) {
     var hourRaw = initial ? pad2(initial.h) : '';
     var minRaw = initial ? pad2(initial.m) : '';
@@ -682,7 +528,11 @@ const AstroCarto = (function() {
     hInput.focus();
   }
 
-  // Инициализирай астрокартография форма
+  // Инициализирай форма
+  let acgBirthDate = null;
+  let acgBirthTime = { h: 12, m: 0 };
+  let acgSelectedCity = null;
+
   function initAcgForm() {
     const dateBtn = document.getElementById('acg-date-btn');
     const timeBtn = document.getElementById('acg-time-btn');
@@ -690,81 +540,38 @@ const AstroCarto = (function() {
     const cityDropdown = document.getElementById('acg-city-dropdown');
     const cityError = document.getElementById('acg-city-error');
 
-    console.log('✅ [ACG] initAcgForm called');
-    console.log('  dateBtn:', dateBtn ? '✅ found' : '❌ NOT FOUND');
-    console.log('  timeBtn:', timeBtn ? '✅ found' : '❌ NOT FOUND');
-    console.log('  cityInput:', cityInput ? '✅ found' : '❌ NOT FOUND');
-    console.log('  openAcgDatePicker:', typeof openAcgDatePicker);
-    console.log('  openAcgTimePicker:', typeof openAcgTimePicker);
-
-    // Дата пикер
     if (dateBtn) {
-      console.log('📝 Attaching date button listener');
       dateBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('🗓️ [ACG] Date button clicked, opening picker...');
-        console.log('  acgBirthDate:', acgBirthDate);
-        console.log('  openAcgDatePicker type:', typeof openAcgDatePicker);
-        try {
-          openAcgDatePicker(acgBirthDate, (date) => {
-            acgBirthDate = date;
-            const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
-            document.getElementById('acg-date-value').textContent =
-              date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
-            console.log('✅ Date selected:', acgBirthDate);
-          });
-        } catch (err) {
-          console.error('❌ Date picker error:', err.message);
-        }
+        openAcgDatePicker(acgBirthDate, (date) => {
+          acgBirthDate = date;
+          const months = ['Янв','Февр','Март','Апр','Май','Юни','Юли','Авг','Септ','Окт','Ноем','Дек'];
+          document.getElementById('acg-date-value').textContent =
+            date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
+        });
       });
-    } else {
-      console.error('❌ Date button not found in DOM');
     }
 
-    // Час пикер
     if (timeBtn) {
-      console.log('📝 Attaching time button listener');
       timeBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('⏰ [ACG] Time button clicked, opening picker...');
-        console.log('  acgBirthTime:', acgBirthTime);
-        try {
-          openAcgTimePicker(acgBirthTime, (time) => {
-            acgBirthTime = time;
-            document.getElementById('acg-time-value').textContent =
-              String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
-            console.log('✅ Time selected:', acgBirthTime);
-          });
-        } catch (err) {
-          console.error('❌ Time picker error:', err.message);
-        }
+        openAcgTimePicker(acgBirthTime, (time) => {
+          acgBirthTime = time;
+          document.getElementById('acg-time-value').textContent =
+            String(time.h).padStart(2, '0') + ':' + String(time.m).padStart(2, '0');
+        });
       });
-    } else {
-      console.error('❌ Time button not found in DOM');
     }
 
-    // Град автодовършване (опростено - използваме същата логика като наталната форма)
     if (cityInput) {
-      console.log('📝 [ACG] Attaching city input listeners');
-      console.log('  BG_CITIES available:', typeof window.BG_CITIES !== 'undefined' ? '✅' : '❌');
-      if (typeof window.BG_CITIES !== 'undefined') {
-        console.log('  BG_CITIES.places count:', window.BG_CITIES.places ? window.BG_CITIES.places.length : 0);
-      }
-
       function showCityMatches() {
         acgSelectedCity = null;
         cityError.textContent = '';
         const q = cityInput.value.trim().toLowerCase();
 
-        console.log('🏙️ [ACG] showCityMatches called, query:', q);
-
-        // Провери дали window.BG_CITIES е наличен
         if (!window.BG_CITIES || !window.BG_CITIES.places) {
-          console.error('❌ [ACG] BG_CITIES не е наличен!');
-          cityDropdown.innerHTML = '<div style="padding:10px; color:#ef5350;">Няма налични градове</div>';
           return;
         }
-        console.log('  BG_CITIES places found:', window.BG_CITIES.places.length);
 
         if (!q) {
           cityDropdown.innerHTML = '';
@@ -772,7 +579,6 @@ const AstroCarto = (function() {
           return;
         }
 
-        // Prioritize prefix matches like in natal form
         const starts = [], contains = [];
         const limit = 8;
         for (let i = 0; i < window.BG_CITIES.places.length; i++) {
@@ -784,10 +590,7 @@ const AstroCarto = (function() {
         const matches = starts.concat(contains).slice(0, 8);
         cityDropdown.innerHTML = '';
 
-        console.log('  Found', starts.length, 'prefix matches,', contains.length, 'substring matches,', matches.length, 'total');
-
         if (matches.length > 0) {
-          console.log('✅ [ACG] Showing', matches.length, 'city matches');
           cityDropdown.classList.add('open');
           matches.forEach(p => {
             const btn = document.createElement('button');
@@ -807,34 +610,196 @@ const AstroCarto = (function() {
         }
       }
 
-      cityInput.addEventListener('input', () => {
-        console.log('🏙️ [ACG] City input changed');
-        showCityMatches();
-      });
-      cityInput.addEventListener('focus', () => {
-        console.log('🏙️ [ACG] City input focused');
-        showCityMatches();
-      });
+      cityInput.addEventListener('input', showCityMatches);
+      cityInput.addEventListener('focus', showCityMatches);
       cityInput.addEventListener('blur', () => {
-        console.log('🏙️ [ACG] City input blurred, hiding dropdown');
         setTimeout(() => {
           cityDropdown.classList.remove('open');
         }, 100);
       });
-      console.log('📝 [ACG] City input listeners attached ✅');
     }
   }
 
-  // PDF експорт
-  function exportToPdf(chart) {
+  function init() {
+    const btnCalc = document.getElementById('acg-calc-btn');
+    const btnPdf = document.getElementById('acg-pdf-btn');
+    const btnFullscreen = document.getElementById('acg-fullscreen-btn');
+    const msgEl = document.getElementById('acg-message');
+    const containerEl = document.getElementById('acg-container');
     const mapEl = document.getElementById('acg-map');
-    if (!mapEl) return;
+    const legendEl = document.getElementById('acg-legend');
 
-    // Попълни в PDF с html2canvas
-    Promise.all([
-      typeof html2canvas !== 'undefined' ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-      typeof jsPDF !== 'undefined' ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
-    ]).then(() => {
+    if (!btnCalc) return;
+
+    initAcgForm();
+
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mapEl.classList.toggle('fullscreen');
+        btnFullscreen.textContent = mapEl.classList.contains('fullscreen') ? '✕' : '⛶';
+
+        if (mapEl.classList.contains('fullscreen')) {
+          setTimeout(() => {
+            if (acgLeafletMap) acgLeafletMap.invalidateSize();
+          }, 300);
+
+          const closeFullscreen = (e) => {
+            if (e.key === 'Escape') {
+              mapEl.classList.remove('fullscreen');
+              btnFullscreen.textContent = '⛶';
+              setTimeout(() => {
+                if (acgLeafletMap) acgLeafletMap.invalidateSize();
+              }, 300);
+              document.removeEventListener('keydown', closeFullscreen);
+            }
+          };
+          document.addEventListener('keydown', closeFullscreen);
+        } else {
+          setTimeout(() => {
+            if (acgLeafletMap) acgLeafletMap.invalidateSize();
+          }, 300);
+        }
+      });
+    }
+
+    btnCalc.addEventListener('click', async () => {
+      if (!acgBirthDate) {
+        msgEl.className = 'acg-message error';
+        msgEl.textContent = '❌ Избери дата на раждане.';
+        return;
+      }
+
+      if (!acgSelectedCity) {
+        msgEl.className = 'acg-message error';
+        msgEl.textContent = '❌ Избери място на раждане от списъка.';
+        return;
+      }
+
+      msgEl.textContent = 'Изчислява се…';
+      msgEl.className = '';
+
+      try {
+        const opts = {
+          year: acgBirthDate.getFullYear(),
+          month: acgBirthDate.getMonth() + 1,
+          day: acgBirthDate.getDate(),
+          hour: acgBirthTime.h,
+          minute: acgBirthTime.m,
+          second: 0,
+          utcOffset: 2,
+          lat: acgSelectedCity.lat,
+          lon: acgSelectedCity.lon,
+          name: (document.getElementById('acg-name')?.value || '').trim(),
+          placeName: acgSelectedCity.name
+        };
+
+        if (typeof AstroCore === 'undefined') {
+          throw new Error('AstroCore библиотека не е заредена.');
+        }
+
+        let chart = AstroCore.computeChart ? AstroCore.computeChart(opts) : recalculateChartFromOpts(opts);
+        if (!chart) {
+          msgEl.className = 'acg-message error';
+          msgEl.textContent = '❌ Грешка при изчисление на наталната карта.';
+          return;
+        }
+
+        const acgLines = calculateAstrocartography(chart);
+
+        // Рендер с Leaflet
+        await renderAcgMapWithLeaflet(mapEl, acgLines, acgSelectedCity.lat, acgSelectedCity.lon);
+
+        // Генериране на легенда
+        legendEl.innerHTML = generateLegendHtml();
+
+        containerEl.style.display = 'flex';
+        msgEl.className = 'acg-message success';
+        msgEl.textContent = '✅ Астрокартографска карта генерирана!';
+
+        // PDF експорт
+        btnPdf.onclick = null;
+        btnPdf.addEventListener('click', () => exportToPdfAsync(chart));
+
+      } catch (error) {
+        console.error('ACG Error:', error);
+        msgEl.className = 'acg-message error';
+        msgEl.textContent = '❌ Грешка: ' + error.message;
+      }
+    });
+  }
+
+  function calculateAstrocartography(chart) {
+    const lines = [];
+    const gst = computeGST(chart.jd);
+
+    for (let pIdx = 0; pIdx < PLANETS_DATA.length; pIdx++) {
+      const pData = PLANETS_DATA[pIdx];
+      const planetPos = chart.planets[pData.name];
+
+      if (!planetPos) continue;
+
+      const eq = eclipticToEquatorial(planetPos.lon, planetPos.lat || 0);
+      const birthLat = parseFloat(document.getElementById('birthLat')?.value || 0);
+      const birthLon = parseFloat(document.getElementById('birthLon')?.value || 0);
+
+      const acgLines = computeAcgLines(eq.ra, eq.dec, gst, birthLon, birthLat);
+      lines.push(acgLines);
+    }
+
+    return lines;
+  }
+
+  function recalculateChartFromOpts(opts) {
+    try {
+      const jd = AstroCore.julianDay(opts.year, opts.month, opts.day, opts.hour, opts.minute, opts.second);
+      const T = AstroCore.centuriesSinceJ2000(jd);
+      const order = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+      const planets = {};
+      order.forEach(name => {
+        const pos = AstroCore.planetLongitude(name, T);
+        planets[name] = Object.assign({ name, nameBg: AstroCore.PLANET_NAMES_BG[name] }, pos, AstroCore.longitudeToSign(pos.lon));
+      });
+
+      return { jd, T, now: new Date(), planets, order, opts };
+    } catch (e) {
+      console.error('Chart calculation error:', e);
+      return null;
+    }
+  }
+
+  function generateLegendHtml() {
+    let html = '';
+    for (let i = 0; i < PLANETS_DATA.length; i++) {
+      const p = PLANETS_DATA[i];
+      html += `
+        <div class="acg-legend-item">
+          <div class="acg-legend-symbol">${p.symbol}</div>
+          <div>
+            <strong>${p.nameBg}:</strong> ${p.meaning}
+          </div>
+        </div>
+      `;
+    }
+    return html;
+  }
+
+  async function exportToPdfAsync(chart) {
+    const mapEl = document.getElementById('acg-map');
+    if (!mapEl || !acgLeafletMap) return;
+
+    msgEl = document.getElementById('acg-message');
+    msgEl.textContent = 'Подготвя PDF…';
+
+    try {
+      await new Promise(r => setTimeout(r, 800)); // Изчакай картата
+
+      // Зареди библиотеките
+      await Promise.all([
+        typeof html2canvas !== 'undefined' ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+        typeof jsPDF !== 'undefined' ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+      ]);
+
       html2canvas(mapEl, { scale: 2, backgroundColor: '#0f0e12' }).then(canvas => {
         const { jsPDF } = window;
         const pdf = new jsPDF({
@@ -847,31 +812,29 @@ const AstroCarto = (function() {
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
 
-        // Картата е 2:1, така че задай съотношение
         const imgWidth = pageWidth - 20;
         const imgHeight = imgWidth / 2;
         const x = 10;
         const y = 10;
 
         pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-
-        // Добави легенда под картата
-        const legendY = y + imgHeight + 10;
         pdf.setFontSize(10);
-        pdf.text('Астрокартография — планетни линии', x, legendY);
+        pdf.text('Астрокартография — планетни линии', x, y + imgHeight + 10);
 
         pdf.save('астрокартография.pdf');
+        msgEl.textContent = '✅ PDF изтеглен успешно!';
+        msgEl.className = 'acg-message success';
       }).catch(err => {
-        console.error('Грешка при конвертирането на картата:', err);
-        alert('Грешка при изтегляне на PDF-а.');
+        console.error('PDF Error:', err);
+        msgEl.textContent = '❌ Грешка при генериране на PDF.';
+        msgEl.className = 'acg-message error';
       });
-    }).catch(err => {
-      console.error('Грешка при зареждането на библиотеките:', err);
-      alert('Грешка при зареждането на PDF библиотеките.');
-    });
+    } catch (err) {
+      msgEl.textContent = '❌ ' + err.message;
+      msgEl.className = 'acg-message error';
+    }
   }
 
-  // Помощна функция за зареждане на скрипти
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
@@ -885,9 +848,6 @@ const AstroCarto = (function() {
   return {
     init,
     calculateAstrocartography,
-    generateAcgSvg,
-    eclipticToEquatorial,
-    computeGST,
     openAcgDatePicker,
     openAcgTimePicker
   };
@@ -897,11 +857,9 @@ const AstroCarto = (function() {
 function initializeIfReady() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('✅ [ACG] DOMContentLoaded fired, initializing...');
       AstroCarto.init();
     });
   } else {
-    console.log('✅ [ACG] DOM already loaded, initializing immediately...');
     AstroCarto.init();
   }
 }
