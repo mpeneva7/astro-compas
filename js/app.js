@@ -1263,38 +1263,55 @@
 
   /* ───────────────────────── Инициализация ───────────────────────── */
 
-  document.addEventListener('DOMContentLoaded', function () {
-    console.log('✅ DOMContentLoaded fired');
-    initChrome();
+  function initializeWhenReady() {
+    var readyFired = false;
 
-    function updateMoonAndHoroscope() {
-      console.log('⏲️ updateMoonAndHoroscope called at ' + new Date().toLocaleTimeString());
-      try {
-        var nowChart = getNowChart();
-        console.log('✅ getNowChart returned:', nowChart ? 'object' : 'null/undefined');
-        if (!nowChart) {
-          console.error('❌ getNowChart returned null!');
-          return;
+    function doInitialization() {
+      if (readyFired) return;
+      readyFired = true;
+
+      console.log('✅ Initialization starting (DOM ready)');
+      initChrome();
+
+      function updateMoonAndHoroscope() {
+        console.log('⏲️ updateMoonAndHoroscope called at ' + new Date().toLocaleTimeString());
+        try {
+          var nowChart = getNowChart();
+          console.log('✅ getNowChart returned:', nowChart ? 'object' : 'null/undefined');
+          if (!nowChart) {
+            console.error('❌ getNowChart returned null!');
+            return;
+          }
+          console.log('  Moon longitude:', nowChart.planets.moon.lon, '° Sign:', nowChart.planets.moon.sign);
+          console.log('  Sun longitude:', nowChart.planets.sun.lon, '°');
+
+          renderMoon(nowChart);
+          console.log('✅ renderMoon completed');
+
+          renderHoroscope(nowChart);
+          console.log('✅ renderHoroscope completed');
+        } catch (err) {
+          console.error('❌ Error in updateMoonAndHoroscope:', err.message, err.stack);
         }
-        console.log('  Moon longitude:', nowChart.planets.moon.lon, '° Sign:', nowChart.planets.moon.sign);
-        console.log('  Sun longitude:', nowChart.planets.sun.lon, '°');
-
-        renderMoon(nowChart);
-        console.log('✅ renderMoon completed');
-
-        renderHoroscope(nowChart);
-        console.log('✅ renderHoroscope completed');
-      } catch (err) {
-        console.error('❌ Error in updateMoonAndHoroscope:', err.message, err.stack);
       }
+
+      updateMoonAndHoroscope();
+      setInterval(updateMoonAndHoroscope, 60000);
+      console.log('✅ Moon auto-update enabled (every 60 seconds)');
+
+      initNatalForm();
     }
 
-    updateMoonAndHoroscope();
-    setInterval(updateMoonAndHoroscope, 60000);
-    console.log('✅ Moon auto-update enabled (every 60 seconds)');
+    if (document.readyState === 'loading') {
+      console.log('✅ app.js: DOM loading, waiting for DOMContentLoaded...');
+      document.addEventListener('DOMContentLoaded', doInitialization);
+    } else {
+      console.log('✅ app.js: DOM already loaded, initializing immediately...');
+      doInitialization();
+    }
+  }
 
-    initNatalForm();
-  });
+  initializeWhenReady();
 
   // Expose date picker constants globally for astrocartography.js
   window.BG_MONTHS_GEN = BG_MONTHS_GEN;

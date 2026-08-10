@@ -873,6 +873,15 @@ const AstroCarto = (function() {
 })();
 
 // Инициализирай при зареждане
-document.addEventListener('DOMContentLoaded', () => {
-  AstroCarto.init();
-});
+function initializeIfReady() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('✅ [ACG] DOMContentLoaded fired, initializing...');
+      AstroCarto.init();
+    });
+  } else {
+    console.log('✅ [ACG] DOM already loaded, initializing immediately...');
+    AstroCarto.init();
+  }
+}
+initializeIfReady();
