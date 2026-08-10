@@ -129,49 +129,40 @@
   /* ───────────────────────── Луна ───────────────────────── */
 
   function moonIllustrationSVG(phaseAngleDeg, illumination) {
-    // Normalize phase to 0-1
     var phase = (phaseAngleDeg % 360) / 360;
     var illum = illumination || (1 - Math.cos(phaseAngleDeg * Math.PI / 180)) / 2;
 
-    // Moon geometry
     var cx = 100, cy = 100, r = 74;
+    var waxing = phase < 0.5;
 
-    // Determine if waxing or waning
-    var isWaxing = phase < 0.5;
+    // Терминаторът е елипса. rx зависи от косинуса на фазовия ъгъл
+    var phaseAngle = Math.acos(2 * illum - 1);  // 0..π радиани
+    var termRx = r * Math.cos(phaseAngle);       // -r..+r
+    var absRx = Math.abs(termRx);
 
-    // Calculate ellipse width proportional to illumination
-    // Illumination ranges from 0 to 1, so rx maps directly
-    // At new moon (illum=0): rx ≈ 0
-    // At quarter moon (illum=0.5): rx = r/2
-    // At full moon (illum=1): rx = r
-    var rx = r * Math.max(0.01, illum);
-
-    // Clamp rx to reasonable values for visual accuracy
-    rx = Math.min(r, Math.max(0, rx));
-
-    // Determine sweep directions based on waxing/waning
-    // Waxing (0-180°): sun to the right, outer arc goes clockwise, inner arc counter-clockwise
-    // Waning (180-360°): sun to the left, outer arc goes counter-clockwise, inner arc clockwise
     var sweepOuter, sweepInner;
-    if (phase < 0.5) {
-      sweepOuter = 1;
-      sweepInner = 0;  // Counter-clockwise inner arc traces right side for waxing
+
+    // Определяме позицията на осветената част (дясна или лява)
+    if (waxing) {
+      sweepOuter = 1;  // дясна половина
+      sweepInner = (termRx >= 0) ? 1 : 0;
     } else {
-      sweepOuter = 0;
-      sweepInner = 1;  // Clockwise inner arc traces left side for waning
+      sweepOuter = 0;  // лява половина
+      sweepInner = (termRx >= 0) ? 0 : 1;
     }
 
-    // Build the lit portion path using arc commands
-    var top = cx + ',' + (cy - r);
-    var bottom = cx + ',' + (cy + r);
-    var litPath = 'M ' + top + ' A ' + r + ',' + r + ' 0 0 ' + sweepOuter + ' ' + bottom +
-      ' A ' + rx + ',' + r + ' 0 0 ' + sweepInner + ' ' + top + ' Z';
+    var top = cy - r;
+    var bottom = cy + r;
+    var litPath = 'M ' + cx + ' ' + top +
+      ' A ' + r + ' ' + r + ' 0 0 ' + sweepOuter + ' ' + cx + ' ' + bottom +
+      ' A ' + absRx + ' ' + r + ' 0 0 ' + sweepInner + ' ' + cx + ' ' + top +
+      ' Z';
 
     var uid = Math.round(Math.random() * 100000);
     var glowId = 'mglow' + uid;
     var litId = 'mlit' + uid;
 
-    console.log('  SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' rx=' + rx.toFixed(1) + ' path generated');
+    console.log('🌙 SVG: angle=' + phaseAngleDeg.toFixed(1) + '° illum=' + illum.toFixed(3) + ' termRx=' + termRx.toFixed(1) + ' absRx=' + absRx.toFixed(1));
 
     return '<svg viewBox="0 0 200 200" width="140" height="140" style="filter:drop-shadow(0 0 28px rgba(182,157,232,0.45))">' +
       '<defs>' +
