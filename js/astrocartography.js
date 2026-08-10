@@ -177,6 +177,9 @@ const AstroCarto = (function() {
           const distance = Math.abs(dLon) * Math.cos(cityLat * DEG2RAD) * 111;
 
           if (distance < 300) { // Орбис до 300км
+            let pLat = cityLat, pLon = lineLon;
+            // Валидирай координатите — ако lat > 90, разменя ги
+            if (Math.abs(pLat) > 90) { const t = pLat; pLat = pLon; pLon = t; }
             matches.push({
               planet: planet,
               city: cityName,
@@ -184,8 +187,8 @@ const AstroCarto = (function() {
               city_lon: cityLon,
               type: 'MC',
               distance: distance,
-              point_lat: cityLat,
-              point_lon: lineLon,
+              point_lat: pLat,
+              point_lon: pLon,
               strength: distance < 150 ? 1 : 2 // 1 = силно (< 150км), 2 = слабо (150-300км)
             });
           }
@@ -198,6 +201,9 @@ const AstroCarto = (function() {
           const distance = Math.abs(dLon) * Math.cos(cityLat * DEG2RAD) * 111;
 
           if (distance < 300) {
+            let pLat = cityLat, pLon = lineLon;
+            // Валидирай координатите — ако lat > 90, разменя ги
+            if (Math.abs(pLat) > 90) { const t = pLat; pLat = pLon; pLon = t; }
             matches.push({
               planet: planet,
               city: cityName,
@@ -205,8 +211,8 @@ const AstroCarto = (function() {
               city_lon: cityLon,
               type: 'IC',
               distance: distance,
-              point_lat: cityLat,
-              point_lon: lineLon,
+              point_lat: pLat,
+              point_lon: pLon,
               strength: distance < 150 ? 1 : 2
             });
           }
@@ -231,6 +237,9 @@ const AstroCarto = (function() {
             }
 
             if (minDist < 300 && closestPoint) {
+              let pLat = closestPoint.lat, pLon = closestPoint.lon;
+              // Валидирай координатите — ако lat > 90, разменя ги
+              if (Math.abs(pLat) > 90) { const t = pLat; pLat = pLon; pLon = t; }
               matches.push({
                 planet: planet,
                 city: cityName,
@@ -238,8 +247,8 @@ const AstroCarto = (function() {
                 city_lon: cityLon,
                 type: 'ASC',
                 distance: minDist,
-                point_lat: closestPoint.lat,
-                point_lon: closestPoint.lon,
+                point_lat: pLat,
+                point_lon: pLon,
                 strength: minDist < 150 ? 1 : 2
               });
             }
@@ -264,6 +273,9 @@ const AstroCarto = (function() {
             }
 
             if (minDist < 300 && closestPoint) {
+              let pLat = closestPoint.lat, pLon = closestPoint.lon;
+              // Валидирай координатите — ако lat > 90, разменя ги
+              if (Math.abs(pLat) > 90) { const t = pLat; pLat = pLon; pLon = t; }
               matches.push({
                 planet: planet,
                 city: cityName,
@@ -271,8 +283,8 @@ const AstroCarto = (function() {
                 city_lon: cityLon,
                 type: 'DSC',
                 distance: minDist,
-                point_lat: closestPoint.lat,
-                point_lon: closestPoint.lon,
+                point_lat: pLat,
+                point_lon: pLon,
                 strength: minDist < 150 ? 1 : 2
               });
             }
@@ -915,8 +927,10 @@ const AstroCarto = (function() {
       lines.push(acgLines);
 
       // Смятане на зенитната точка: [dec, normalizeLongitude(ra - gst*15)]
-      const zenithLat = eq.dec;
-      const zenithLon = normalizeLongitude(eq.ra - gst * 15);
+      let zenithLat = eq.dec;
+      let zenithLon = normalizeLongitude(eq.ra - gst * 15);
+      // Валидирай координатите — ако lat > 90, разменя ги
+      if (Math.abs(zenithLat) > 90) { const t = zenithLat; zenithLat = zenithLon; zenithLon = t; }
       planets.push({
         index: pIdx,
         name: pData.name,
