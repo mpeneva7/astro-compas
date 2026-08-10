@@ -745,16 +745,26 @@ const AstroCarto = (function() {
 
     // Град автодовършване (опростено - използваме същата логика като наталната форма)
     if (cityInput) {
+      console.log('📝 [ACG] Attaching city input listeners');
+      console.log('  BG_CITIES available:', typeof window.BG_CITIES !== 'undefined' ? '✅' : '❌');
+      if (typeof window.BG_CITIES !== 'undefined') {
+        console.log('  BG_CITIES.places count:', window.BG_CITIES.places ? window.BG_CITIES.places.length : 0);
+      }
+
       function showCityMatches() {
         acgSelectedCity = null;
         cityError.textContent = '';
         const q = cityInput.value.trim().toLowerCase();
 
+        console.log('🏙️ [ACG] showCityMatches called, query:', q);
+
         // Провери дали window.BG_CITIES е наличен
         if (!window.BG_CITIES || !window.BG_CITIES.places) {
-          console.warn('BG_CITIES не е наличен');
+          console.error('❌ [ACG] BG_CITIES не е наличен!');
+          cityDropdown.innerHTML = '<div style="padding:10px; color:#ef5350;">Няма налични градове</div>';
           return;
         }
+        console.log('  BG_CITIES places found:', window.BG_CITIES.places.length);
 
         if (!q) {
           cityDropdown.innerHTML = '';
@@ -774,7 +784,10 @@ const AstroCarto = (function() {
         const matches = starts.concat(contains).slice(0, 8);
         cityDropdown.innerHTML = '';
 
+        console.log('  Found', starts.length, 'prefix matches,', contains.length, 'substring matches,', matches.length, 'total');
+
         if (matches.length > 0) {
+          console.log('✅ [ACG] Showing', matches.length, 'city matches');
           cityDropdown.classList.add('open');
           matches.forEach(p => {
             const btn = document.createElement('button');
@@ -794,13 +807,21 @@ const AstroCarto = (function() {
         }
       }
 
-      cityInput.addEventListener('input', showCityMatches);
-      cityInput.addEventListener('focus', showCityMatches);
+      cityInput.addEventListener('input', () => {
+        console.log('🏙️ [ACG] City input changed');
+        showCityMatches();
+      });
+      cityInput.addEventListener('focus', () => {
+        console.log('🏙️ [ACG] City input focused');
+        showCityMatches();
+      });
       cityInput.addEventListener('blur', () => {
+        console.log('🏙️ [ACG] City input blurred, hiding dropdown');
         setTimeout(() => {
           cityDropdown.classList.remove('open');
         }, 100);
       });
+      console.log('📝 [ACG] City input listeners attached ✅');
     }
   }
 
