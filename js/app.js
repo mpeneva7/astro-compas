@@ -1221,7 +1221,7 @@
         console.log('Formspree status:', response.status, response.statusText);
         showThankYouScreen();
         setTimeout(function () {
-          window.location.href = 'https://stankova767.gumroad.com/l/dwwuw';
+          openGumroadOverlay(name, email);
         }, 2500);
       }).catch(function (err) {
         btn.disabled = false;
@@ -1229,10 +1229,39 @@
         console.error('Network error:', err);
         showThankYouScreen();
         setTimeout(function () {
-          window.location.href = 'https://stankova767.gumroad.com/l/dwwuw';
+          openGumroadOverlay(name, email);
         }, 2500);
       });
     });
+  }
+
+  // Отвори Gumroad Overlay вместо redirect
+  function openGumroadOverlay(name, email) {
+    var trigger = document.getElementById('gumroadTrigger');
+    if (!trigger) {
+      console.error('Gumroad trigger link not found');
+      return;
+    }
+
+    // Обнови href с автозаълняне параметри
+    var baseUrl = 'https://stankova767.gumroad.com/l/dwwuw?wanted=true';
+    var params = [];
+
+    if (name) {
+      params.push('name=' + encodeURIComponent(name));
+    }
+    if (email) {
+      params.push('email=' + encodeURIComponent(email));
+    }
+
+    if (params.length > 0) {
+      trigger.href = baseUrl + '&' + params.join('&');
+    } else {
+      trigger.href = baseUrl;
+    }
+
+    // Симулирај клик за да отвориш overlay-а
+    trigger.click();
   }
 
   function showThankYouScreen() {
