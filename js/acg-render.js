@@ -97,6 +97,9 @@
     await ensureDeps();
     const L = global.L;
 
+    console.log('1. Leaflet loaded?', typeof L);
+    console.log('2. topojson loaded?', typeof window.topojson);
+
     if(_map){ _map.remove(); _map = null; }
     mapEl.innerHTML = '';
     mapEl.style.background = '#0f1424';
@@ -108,15 +111,23 @@
     }).setView([20,10], 1);
     global._acgMap = _map;
 
+    console.log('3. map created?', _map);
+
     let geo;
     try{
-      const topo = await fetch(GEOJSON_URL).then(r=>r.json());
-      geo = global.topojson.feature(topo, topo.objects.countries);
-    }catch(e){ console.error('GeoJSON load failed:', e); }
+      const resp = await fetch(GEOJSON_URL);
+      console.log('4. GeoJSON fetch status:', resp.status);
+      const topo = await resp.json();
+      console.log('5. topo objects:', Object.keys(topo.objects || {}));
+      geo = window.topojson.feature(topo, topo.objects.countries);
+      console.log('6. geo features:', geo.features.length);
+    }catch(e){ console.error('GeoJSON FAILED:', e); }
 
     if(geo){
       L.geoJSON(geo, { style:{ fillColor:'#2b3a5c', fillOpacity:1, color:'#4a5f8a', weight:0.6 } }).addTo(_map);
     }
+
+    console.log('7. lines array:', lines ? lines.length : 'NULL', lines);
 
     const hits = [];
     planets.forEach((p, idx)=>{
