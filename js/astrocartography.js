@@ -3,10 +3,10 @@ const AstroCarto = (function() {
   'use strict';
 
   // Дата пикер константи (fallback ако не са изложени от app.js)
-  const BG_MONTHS_GEN = BG_MONTHS_GEN || ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-  const BG_MONTHS = window.BG_MONTHS || ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
-  const BG_DAYS_ABBR = BG_DAYS_ABBR || ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-  const BG_DAYS_SHORT = BG_DAYS_SHORT || ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+  const BG_MONTHS_GEN = (typeof window.BG_MONTHS_GEN !== 'undefined') ? window.BG_MONTHS_GEN : ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+  const BG_MONTHS = (typeof window.BG_MONTHS !== 'undefined') ? window.BG_MONTHS : ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
+  const BG_DAYS_ABBR = (typeof window.BG_DAYS_ABBR !== 'undefined') ? window.BG_DAYS_ABBR : ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  const BG_DAYS_SHORT = (typeof window.BG_DAYS_SHORT !== 'undefined') ? window.BG_DAYS_SHORT : ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
 
   // Констани
   const DEG2RAD = Math.PI / 180;
