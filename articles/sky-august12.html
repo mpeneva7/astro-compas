@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Небето на 12 август: нощ на затъмнение и падащи звезди</title>
+<style>
+  :root{
+    --sky:#0d0e1f;            /* дълбок нощен фон */
+    --sky-2:#141633;          /* по-светъл градиент */
+    --star:#f4f6ff;           /* цвят на звездите */
+    --gold:#f5c451;           /* златист акцент (като етикетите) */
+    --gold-soft:#e9b04a;
+    --amber:#ffd27a;
+    --ink:#e8e9f5;            /* основен текст */
+    --ink-dim:#a7a9c4;        /* приглушен текст */
+    --line:rgba(180,190,240,.55);
+    --card:rgba(24,27,54,.55);
+    --border:rgba(150,160,220,.14);
+    --font-body:'Georgia','Times New Roman',serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 70% -10%, #1b1e42 0%, transparent 60%),
+      radial-gradient(900px 600px at 10% 20%, #191a38 0%, transparent 55%),
+      linear-gradient(180deg, var(--sky) 0%, #0a0b18 100%);
+    background-attachment:fixed;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ——— фонови звезди на цялата страница ——— */
+  .page-stars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.7}
+
+  .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:72px 22px 120px}
+
+  .eyebrow{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    letter-spacing:.32em;text-transform:uppercase;
+    font-size:12px;color:var(--gold);opacity:.9;margin:0 0 18px;font-weight:600;
+  }
+  h1{
+    font-size:clamp(30px,6vw,50px);line-height:1.12;margin:0 0 10px;font-weight:600;
+    letter-spacing:-.01em;
+    background:linear-gradient(180deg,#fff 0%,#c9cdf0 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .dateline{color:var(--ink-dim);font-size:15px;font-style:italic;margin:0 0 46px}
+  .lede{font-size:20px;color:#dfe1f4;margin:0 0 40px}
+  p{margin:0 0 26px;font-size:17.5px;color:#d5d7ee}
+  .fig-caption{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:13px;color:var(--ink-dim);text-align:center;margin:14px 0 0;letter-spacing:.02em;
+  }
+
+  /* ——— контейнер за всяка илюстрация ——— */
+  figure{margin:52px 0;padding:0}
+  .scene{
+    position:relative;width:100%;aspect-ratio:16/10;border-radius:20px;overflow:hidden;
+    background:radial-gradient(120% 120% at 50% 30%, #171a3a 0%, #0c0d1e 70%, #080910 100%);
+    border:1px solid var(--border);
+    box-shadow:0 30px 80px -40px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.04);
+    cursor:pointer;
+  }
+  .scene svg{display:block;width:100%;height:100%}
+
+  /* интерактивни звезди */
+  .star-hit{cursor:pointer}
+  .star-core{transition:r .25s ease, opacity .25s ease}
+  .star-glow{transition:opacity .3s ease, transform .3s ease;transform-origin:center;transform-box:fill-box}
+  .star-hit:hover .star-glow{opacity:1;transform:scale(1.35)}
+  .star-hit:hover .star-core{r:6}
+
+  .label{
+    font-family:var(--font-body);fill:var(--gold);font-size:15px;font-style:italic;
+    paint-order:stroke;stroke:rgba(8,9,20,.85);stroke-width:3px;
+    opacity:0;transition:opacity .35s ease;pointer-events:none;
+  }
+  .label.show{opacity:1}
+
+  /* tooltip */
+  .tip{
+    position:absolute;pointer-events:none;z-index:5;
+    background:rgba(16,18,40,.94);border:1px solid var(--border);
+    border-radius:10px;padding:9px 12px;max-width:220px;
+    font-family:'Helvetica Neue',Arial,sans-serif;font-size:12.5px;color:var(--ink);
+    box-shadow:0 12px 30px -10px rgba(0,0,0,.7);
+    opacity:0;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease;
+  }
+  .tip.show{opacity:1;transform:translateY(0)}
+  .tip strong{color:var(--gold);display:block;margin-bottom:2px;font-size:13px}
+
+  /* инфо панел (клик) */
+  .info{
+    position:absolute;left:14px;right:14px;bottom:14px;z-index:4;
+    background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--border);border-radius:14px;padding:16px 18px;
+    transform:translateY(calc(100% + 20px));opacity:0;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .4s ease;
+  }
+  .info.open{transform:translateY(0);opacity:1}
+  .info h3{margin:0 0 6px;font-size:16px;color:#fff;font-weight:600}
+  .info p{margin:0;font-size:14px;color:var(--ink-dim);font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.6}
+  .info .hint{
+    font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--gold);opacity:.75;margin-bottom:8px
+  }
+  .tap-cue{
+    position:absolute;top:12px;right:14px;z-index:4;
+    font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:.08em;
+    color:var(--ink-dim);background:rgba(16,18,40,.6);border:1px solid var(--border);
+    padding:5px 10px;border-radius:20px;transition:opacity .3s ease
+  }
+  .scene.open .tap-cue{opacity:0}
+
+  /* анимации */
+  @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:.9}}
+  .twinkle{animation:twinkle 3.5s ease-in-out infinite}
+
+  .meteor-path{
+    stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+    animation:shoot var(--dur) ease-in var(--delay) infinite;
+  }
+  @keyframes shoot{
+    0%{stroke-dashoffset:var(--len);opacity:0}
+    8%{opacity:1}
+    38%{stroke-dashoffset:0;opacity:1}
+    55%{opacity:0}
+    100%{opacity:0}
+  }
+
+  /* corona pulse за затъмнението */
+  @keyframes coronaPulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+  .corona{transform-origin:center;transform-box:fill-box;animation:coronaPulse 6s ease-in-out infinite}
+
+  /* orbit drift за планетите */
+  @keyframes drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .planet-float{transform-box:fill-box;animation:drift 7s ease-in-out infinite}
+
+  .disclaimer{
+    margin-top:70px;padding-top:24px;border-top:1px solid var(--border);
+    font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--ink-dim);
+  }
+  @media (max-width:520px){
+    .wrap{padding:52px 16px 90px}
+    p,.lede{font-size:16.5px}
+    .info h3{font-size:15px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .twinkle,.meteor-path,.corona,.planet-float{animation:none}
+    .meteor-path{stroke-dashoffset:0;opacity:.8}
+  }
+</style>
+</head>
+<body>
+
+<svg class="page-stars" id="pageStars" preserveAspectRatio="none"></svg>
+
+<main class="wrap">
+  <p class="eyebrow">Небето днес · 12 август 2026</p>
+  <h1>Нощ на затъмнение<br>и падащи звезди</h1>
+  <p class="dateline">Затъмнение, максимум на Персеидите и новолуние — в един и същи ден</p>
+
+  <p class="lede">12 август 2026 г. е един от най-впечатляващите дни за любителите на астрономията. Днес небето събира няколко редки явления — пълно слънчево затъмнение, максимумът на метеорния поток Персеиди и новолуние.</p>
+
+  <!-- 1. ЗАТЪМНЕНИЕ -->
+  <figure>
+    <div class="scene" data-scene="eclipse">
+      <div class="tap-cue">Докосни за детайли</div>
+      <!-- SVG се вгражда от JS -->
+    </div>
+    <figcaption class="fig-caption">Пълно слънчево затъмнение — Луната покрива слънчевия диск, короната сияе</figcaption>
+  </figure>
+
+  <p>През деня Луната ще премине пред Слънцето и ще създаде пълно слънчево затъмнение в определени части на Земята. От България пълната фаза няма да се наблюдава, но събитието е част от голямата небесна картина на деня.</p>
+
+  <!-- 2. ПЕРСЕИДИ -->
+  <figure>
+    <div class="scene" data-scene="perseids">
+      <div class="tap-cue">Докосни за детайли</div>
+    </div>
+    <figcaption class="fig-caption">Максимум на Персеидите — метеорите сякаш излизат от една точка в небето</figcaption>
+  </figure>
+
+  <p>След залез вниманието се прехвърля към Персеидите. В нощта на 12 срещу 13 август метеорният поток достига своя максимум. Благодарение на почти невидимата Луна небето ще остане тъмно, което създава отлични условия за наблюдение на падащите метеори.</p>
+
+  <!-- 3. НОВОЛУНИЕ -->
+  <figure>
+    <div class="scene" data-scene="newmoon">
+      <div class="tap-cue">Докосни за детайли</div>
+    </div>
+    <figcaption class="fig-caption">Новолуние — тъмната Луна, издадена само от тънък светлинен ръб</figcaption>
+  </figure>
+
+  <p>В същото време на небето могат да се открият няколко планети, разположени приблизително по линията на еклиптиката. Част от тях могат да се наблюдават с просто око, а за по-далечните ще е необходим телескоп или бинокъл.</p>
+
+  <!-- 4. ПЛАНЕТИ -->
+  <figure>
+    <div class="scene" data-scene="planets">
+      <div class="tap-cue">Докосни планета</div>
+    </div>
+    <figcaption class="fig-caption">Планетите по еклиптиката — докосни всяка, за да видиш коя е</figcaption>
+  </figure>
+
+  <!-- 5. НЕБЕТО НАД БЪЛГАРИЯ -->
+  <figure>
+    <div class="scene" data-scene="bulgaria">
+      <div class="tap-cue">Докосни за детайли</div>
+    </div>
+    <figcaption class="fig-caption">Августовска нощ над България — хоризонт, планети ниско и метеори горе</figcaption>
+  </figure>
+
+  <p>Тази нощ просто погледнете нагоре. Не е необходима сложна техника — тъмно място, малко търпение и широко открито небе са достатъчни, за да видите едно от най-красивите небесни представления на годината.</p>
+
+  <!-- 6. НЕБЕСНАТА НОЩ (обща) -->
+  <figure>
+    <div class="scene" data-scene="overview">
+      <div class="tap-cue">Докосни за детайли</div>
+    </div>
+    <figcaption class="fig-caption">Небесната нощ — новолуние, Персеиди и планети в една картина</figcaption>
+  </figure>
+
+  <p class="disclaimer">Наблюдавайте безопасно: никога не гледайте директно към Слънцето по време на затъмнение без специални слънчеви филтри. За Персеидите не е нужна техника — само тъмно небе и търпение.</p>
+</main>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+/* ——— фонови звезди на страницата ——— */
+(function(){
+  const svg=document.getElementById('pageStars');
+  const W=window.innerWidth,H=window.innerHeight;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  for(let i=0;i<140;i++){
+    const s=el('circle',{cx:rnd(0,W),cy:rnd(0,H),r:rnd(.4,1.4),fill:'#dfe3ff'});
+    s.style.opacity=rnd(.15,.7);
+    if(Math.random()<.4){s.classList.add('twinkle');s.style.animationDelay=rnd(0,4)+'s';}
+    svg.appendChild(s);
+  }
+})();
+
+/* ——— помощни: звезда с ореол и кръстовиден блясък (както в съзвездията) ——— */
+function makeStar(g,x,y,{r=3,bright=false,name=null,tip=null,color='#f4f6ff'}={}){
+  const hit=el('g',{class:'star-hit'});
+  hit.setAttribute('tabindex','0');
+
+  // ореол (glow)
+  const glowR=bright?34:16;
+  const gradId='g'+Math.random().toString(36).slice(2,8);
+  const defs=g.ownerSVGElement.querySelector('defs')||g.ownerSVGElement.insertBefore(el('defs',{}),g.ownerSVGElement.firstChild);
+  const rg=el('radialGradient',{id:gradId});
+  rg.appendChild(el('stop',{offset:'0%','stop-color':bright?'#ffdf8f':'#cfd6ff','stop-opacity':bright?'.95':'.6'}));
+  rg.appendChild(el('stop',{offset:'100%','stop-color':bright?'#f5c451':'#cfd6ff','stop-opacity':'0'}));
+  defs.appendChild(rg);
+  const glow=el('circle',{cx:x,cy:y,r:glowR,fill:`url(#${gradId})`,class:'star-glow'});
+  glow.style.opacity=bright?'.9':'.5';
+  hit.appendChild(glow);
+
+  // кръстовиден блясък само за ярки звезди
+  if(bright){
+    const flare=el('g',{stroke:'#ffe6a3','stroke-width':'1.4','stroke-linecap':'round',opacity:'.9'});
+    const L=30;
+    flare.appendChild(el('line',{x1:x-L,y1:y,x2:x+L,y2:y}));
+    flare.appendChild(el('line',{x1:x,y1:y-L,x2:x,y2:y+L}));
+    flare.appendChild(el('line',{x1:x-L*.55,y1:y-L*.55,x2:x+L*.55,y2:y+L*.55,'stroke-width':'.8',opacity:'.5'}));
+    flare.appendChild(el('line',{x1:x-L*.55,y1:y+L*.55,x2:x+L*.55,y2:y-L*.55,'stroke-width':'.8',opacity:'.5'}));
+    hit.appendChild(flare);
+  }
+
+  // ядро
+  const core=el('circle',{cx:x,cy:y,r:r,fill:bright?'#fff7e0':color,class:'star-core'});
+  hit.appendChild(core);
+
+  // етикет
+  if(name){
+    const lbl=el('text',{x:x-8,y:y+r+22,class:'label','text-anchor':'end'});
+    lbl.textContent=name;
+    hit.appendChild(lbl);
+    if(bright)setTimeout(()=>lbl.classList.add('show'),900);
+    hit.addEventListener('mouseenter',()=>lbl.classList.add('show'));
+  }
+
+  if(tip){hit.dataset.tip=tip.t;hit.dataset.tipd=tip.d;}
+  g.appendChild(hit);
+  return hit;
+}
+
+/* ——— tooltip система ——— */
+function attachTips(scene){
+  let tip=scene.querySelector('.tip');
+  if(!tip){tip=document.createElement('div');tip.className='tip';scene.appendChild(tip);}
+  scene.querySelectorAll('.star-hit').forEach(h=>{
+    if(!h.dataset.tip)return;
+    const show=(ev)=>{
+      tip.innerHTML='<strong>'+h.dataset.tip+'</strong>'+(h.dataset.tipd||'');
+      tip.classList.add('show');
+      const rect=scene.getBoundingClientRect();
+      const pt=(ev.touches?ev.touches[0]:ev);
+      let x=(pt.clientX-rect.left)+12, y=(pt.clientY-rect.top)+12;
+      if(x+230>rect.width)x-=250;
+      if(y+90>rect.height)y-=110;
+      tip.style.left=x+'px';tip.style.top=y+'px';
+    };
+    const hide=()=>tip.classList.remove('show');
+    h.addEventListener('mouseenter',show);
+    h.addEventListener('mousemove',show);
+    h.addEventListener('mouseleave',hide);
+    h.addEventListener('focus',show);
+    h.addEventListener('blur',hide);
+  });
+}
+
+/* ——— инфо панел при клик върху сцената ——— */
+const SCENE_INFO={
+  eclipse:{h:'Пълно слънчево затъмнение',p:'Луната минава точно пред Слънцето и за кратко го скрива напълно. Около тъмния диск се показва слънчевата корона — външната атмосфера на Слънцето. От България пълната фаза не се вижда.'},
+  perseids:{h:'Максимум на Персеидите',p:'Един от най-обилните метеорни потоци. Метеорите изглеждат така, сякаш излитат от една точка в съзвездието Персей — радиантът. При максимум може да се видят десетки на час.'},
+  newmoon:{h:'Новолуние',p:'Луната е между Земята и Слънцето и обърнатата към нас страна остава тъмна. Точно затова небето е изключително тъмно — идеално за наблюдение на метеорите.'},
+  planets:{h:'Планетите по еклиптиката',p:'Планетите се движат приблизително по една линия — еклиптиката. Тази нощ няколко от тях са видими: някои с просто око, по-далечните — с бинокъл или телескоп.'},
+  bulgaria:{h:'Августовска нощ над България',p:'Ниско над хоризонта — планети; високо горе — падащи Персеиди. Достатъчно е тъмно място, широко открито небе и малко търпение.'},
+  overview:{h:'Небесната нощ',p:'Трите събития заедно: тъмно новолуние, падащи Персеиди и планети, подредени по еклиптиката. Рядко съчетание в една и съща нощ.'}
+};
+function attachInfo(scene){
+  const key=scene.dataset.scene;
+  const data=SCENE_INFO[key];
+  const info=document.createElement('div');
+  info.className='info';
+  info.innerHTML='<div class="hint">Явлението</div><h3>'+data.h+'</h3><p>'+data.p+'</p>';
+  scene.appendChild(info);
+  scene.addEventListener('click',(e)=>{
+    if(e.target.closest('.star-hit'))return; // клик върху звезда не отваря панела
+    const open=scene.classList.toggle('open');
+    info.classList.toggle('open',open);
+  });
+}
+
+/* ============ СЦЕНИ ============ */
+function buildScene(scene){
+  const key=scene.dataset.scene;
+  const svg=el('svg',{viewBox:'0 0 800 500',preserveAspectRatio:'xMidYMid slice'});
+  svg.appendChild(el('defs',{}));
+  scene.insertBefore(svg,scene.firstChild);
+
+  // локални фонови звезди за всяка сцена
+  const bg=el('g',{});
+  for(let i=0;i<70;i++){
+    const c=el('circle',{cx:rnd(0,800),cy:rnd(0,500),r:rnd(.4,1.5),fill:'#cfd6ff'});
+    c.style.opacity=rnd(.1,.55);
+    if(Math.random()<.4){c.classList.add('twinkle');c.style.animationDelay=rnd(0,4)+'s';}
+    bg.appendChild(c);
+  }
+  svg.appendChild(bg);
+  const g=el('g',{});svg.appendChild(g);
+
+  if(key==='eclipse'){
+    // корона
+    const cx=400,cy=240;
+    const cg=el('radialGradient',{id:'corona'});
+    cg.appendChild(el('stop',{offset:'30%','stop-color':'#fff','stop-opacity':'0'}));
+    cg.appendChild(el('stop',{offset:'55%','stop-color':'#ffe6a3','stop-opacity':'.5'}));
+    cg.appendChild(el('stop',{offset:'75%','stop-color':'#f5c451','stop-opacity':'.25'}));
+    cg.appendChild(el('stop',{offset:'100%','stop-color':'#f5c451','stop-opacity':'0'}));
+    svg.querySelector('defs').appendChild(cg);
+    g.appendChild(el('circle',{cx,cy,r:150,fill:'url(#corona)',class:'corona'}));
+    // светли лъчи на короната
+    const rays=el('g',{stroke:'#ffe6a3','stroke-width':'1',opacity:'.35','stroke-linecap':'round'});
+    for(let a=0;a<360;a+=18){const r1=88,r2=rnd(120,160);const rad=a*Math.PI/180;
+      rays.appendChild(el('line',{x1:cx+Math.cos(rad)*r1,y1:cy+Math.sin(rad)*r1,x2:cx+Math.cos(rad)*r2,y2:cy+Math.sin(rad)*r2}));}
+    g.appendChild(rays);
+    // слънчев ръб (bright ring)
+    g.appendChild(el('circle',{cx,cy,r:82,fill:'none',stroke:'#ffd27a','stroke-width':'4',opacity:'.9'}));
+    // тъмен диск на Луната
+    g.appendChild(el('circle',{cx,cy,r:80,fill:'#0a0b16'}));
+    // диамантен пръстен
+    makeStar(g,cx+58,cy-56,{r:4,bright:true,tip:{t:'Диамантеният пръстен',d:'Последният лъч слънчева светлина преди пълната фаза.'}});
+  }
+
+  if(key==='perseids'){
+    // радиант (точка на произход) горе вляво
+    const rx=180,ry=110;
+    const meteors=el('g',{});
+    const defs=svg.querySelector('defs');
+    for(let i=0;i<11;i++){
+      const ang=rnd(20,70)*Math.PI/180;
+      const len=rnd(120,260);
+      const sx=rx+rnd(-40,40), sy=ry+rnd(-30,30);
+      const ex=sx+Math.cos(ang)*len, ey=sy+Math.sin(ang)*len;
+      const id='m'+i;
+      const lg=el('linearGradient',{id,x1:sx,y1:sy,x2:ex,y2:ey,gradientUnits:'userSpaceOnUse'});
+      lg.appendChild(el('stop',{offset:'0%','stop-color':'#fff','stop-opacity':'0'}));
+      lg.appendChild(el('stop',{offset:'70%','stop-color':'#eaf0ff','stop-opacity':'.9'}));
+      lg.appendChild(el('stop',{offset:'100%','stop-color':'#fff','stop-opacity':'1'}));
+      defs.appendChild(lg);
+      const path=el('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:`url(#${id})`,'stroke-width':rnd(1,2.4),'stroke-linecap':'round',class:'meteor-path'});
+      path.style.setProperty('--len',len+40);
+      path.style.setProperty('--dur',rnd(2.4,4.2)+'s');
+      path.style.setProperty('--delay',rnd(0,5)+'s');
+      meteors.appendChild(path);
+    }
+    g.appendChild(meteors);
+    // радиант звезда
+    makeStar(g,rx,ry,{r:3,bright:true,name:'Радиант',tip:{t:'Радиантът в Персей',d:'Точката, от която сякаш излизат всички метеори.'}});
+  }
+
+  if(key==='newmoon'){
+    const cx=400,cy=240,r=95;
+    // едва видим диск
+    g.appendChild(el('circle',{cx,cy,r,fill:'#101223'}));
+    // тънък светлинен ръб (earthshine rim)
+    const rimId='rim';
+    const rg=el('linearGradient',{id:rimId,x1:cx-r,y1:cy,x2:cx+r,y2:cy,gradientUnits:'userSpaceOnUse'});
+    rg.appendChild(el('stop',{offset:'0%','stop-color':'#aeb6e6','stop-opacity':'.8'}));
+    rg.appendChild(el('stop',{offset:'20%','stop-color':'#aeb6e6','stop-opacity':'0'}));
+    svg.querySelector('defs').appendChild(rg);
+    g.appendChild(el('circle',{cx,cy,r,fill:'none',stroke:`url(#${rimId})`,'stroke-width':'2.5'}));
+    // невидимата луна е интерактивна
+    const hit=el('circle',{cx,cy,r,fill:'transparent',class:'star-hit'});
+    hit.setAttribute('tabindex','0');
+    hit.dataset.tip='Новолуние';hit.dataset.tipd='Обърнатата към нас страна е тъмна — Луната е почти невидима.';
+    g.appendChild(hit);
+  }
+
+  if(key==='planets'){
+    // еклиптика (лека дъга)
+    const path=el('path',{d:'M 40 330 Q 400 220 760 320',fill:'none',stroke:'rgba(180,190,240,.25)','stroke-width':'1','stroke-dasharray':'2 6'});
+    g.appendChild(path);
+    const P=[
+      {x:120,y:312,c:'#9fb4ff',n:'Меркурий',d:'Най-близо до Слънцето, труден за виждане.',r:3.5},
+      {x:250,y:280,c:'#ffd27a',n:'Венера',d:'Най-ярката „звезда" на небето.',r:5},
+      {x:400,y:248,c:'#ff8a6b',n:'Марс',d:'Червеникав оттенък с просто око.',r:4},
+      {x:545,y:270,c:'#ffe0a3',n:'Юпитер',d:'Огромен, с ярки луни в бинокъл.',r:6},
+      {x:660,y:300,c:'#f3d9a0',n:'Сатурн',d:'Пръстените се виждат с телескоп.',r:5,ring:true}
+    ];
+    P.forEach(p=>{
+      if(p.ring){
+        g.appendChild(el('ellipse',{cx:p.x,cy:p.y,rx:p.r+7,ry:2.4,fill:'none',stroke:'#f3d9a0','stroke-width':'1.4',opacity:'.8',transform:`rotate(-18 ${p.x} ${p.y})`}));
+      }
+      const s=makeStar(g,p.x,p.y,{r:p.r,color:p.c,name:p.n,tip:{t:p.n,d:p.d}});
+      s.classList.add('planet-float');
+      s.style.animationDelay=rnd(0,4)+'s';
+    });
+  }
+
+  if(key==='bulgaria'){
+    // хоризонт силует
+    const horizon=el('path',{d:'M0 500 L0 400 Q 120 380 220 395 Q 320 408 420 380 Q 540 350 660 385 Q 740 405 800 392 L800 500 Z',fill:'#07080f'});
+    g.appendChild(horizon);
+    g.appendChild(el('path',{d:'M0 500 L0 415 Q 200 400 400 410 Q 600 420 800 405 L800 500 Z',fill:'#04050a'}));
+    // няколко метеора горе
+    const defs=svg.querySelector('defs');
+    for(let i=0;i<5;i++){
+      const sx=rnd(200,700),sy=rnd(40,140),len=rnd(90,170),ang=rnd(25,55)*Math.PI/180;
+      const ex=sx+Math.cos(ang)*len,ey=sy+Math.sin(ang)*len;const id='bm'+i;
+      const lg=el('linearGradient',{id,x1:sx,y1:sy,x2:ex,y2:ey,gradientUnits:'userSpaceOnUse'});
+      lg.appendChild(el('stop',{offset:'0%','stop-color':'#fff','stop-opacity':'0'}));
+      lg.appendChild(el('stop',{offset:'100%','stop-color':'#fff','stop-opacity':'1'}));
+      defs.appendChild(lg);
+      const m=el('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:`url(#${id})`,'stroke-width':'1.6','stroke-linecap':'round',class:'meteor-path'});
+      m.style.setProperty('--len',len+30);m.style.setProperty('--dur',rnd(3,5)+'s');m.style.setProperty('--delay',rnd(0,6)+'s');
+      g.appendChild(m);
+    }
+    // планети ниско над хоризонта
+    makeStar(g,240,360,{r:5,color:'#ffd27a',name:'Венера',tip:{t:'Венера',d:'Ярка, ниско над хоризонта след залез.'}});
+    makeStar(g,560,352,{r:5,color:'#ffe0a3',name:'Юпитер',tip:{t:'Юпитер',d:'Виждаш го лесно с просто око.'}});
+  }
+
+  if(key==='overview'){
+    // новолуние горе вдясно
+    const cx=640,cy=130,r=48;
+    g.appendChild(el('circle',{cx,cy,r,fill:'#101223'}));
+    const rg=el('linearGradient',{id:'ovrim',x1:cx-r,y1:cy,x2:cx+r,y2:cy,gradientUnits:'userSpaceOnUse'});
+    rg.appendChild(el('stop',{offset:'0%','stop-color':'#aeb6e6','stop-opacity':'.7'}));
+    rg.appendChild(el('stop',{offset:'22%','stop-color':'#aeb6e6','stop-opacity':'0'}));
+    svg.querySelector('defs').appendChild(rg);
+    g.appendChild(el('circle',{cx,cy,r,fill:'none',stroke:'url(#ovrim)','stroke-width':'2'}));
+    // еклиптика с планети
+    g.appendChild(el('path',{d:'M 40 380 Q 400 300 760 360',fill:'none',stroke:'rgba(180,190,240,.2)','stroke-width':'1','stroke-dasharray':'2 6'}));
+    makeStar(g,160,362,{r:3.5,color:'#9fb4ff',name:'Меркурий',tip:{t:'Меркурий',d:'Ниско, близо до хоризонта.'}});
+    makeStar(g,320,336,{r:5,color:'#ffd27a',name:'Венера',tip:{t:'Венера',d:'Най-ярката точка.'}});
+    makeStar(g,480,322,{r:4,color:'#ff8a6b',name:'Марс',tip:{t:'Марс',d:'Червеникав оттенък.'}});
+    // метеори
+    const defs=svg.querySelector('defs');
+    for(let i=0;i<6;i++){
+      const sx=rnd(120,560),sy=rnd(50,180),len=rnd(100,200),ang=rnd(20,55)*Math.PI/180;
+      const ex=sx+Math.cos(ang)*len,ey=sy+Math.sin(ang)*len;const id='om'+i;
+      const lg=el('linearGradient',{id,x1:sx,y1:sy,x2:ex,y2:ey,gradientUnits:'userSpaceOnUse'});
+      lg.appendChild(el('stop',{offset:'0%','stop-color':'#fff','stop-opacity':'0'}));
+      lg.appendChild(el('stop',{offset:'100%','stop-color':'#eaf0ff','stop-opacity':'1'}));
+      defs.appendChild(lg);
+      const m=el('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:`url(#${id})`,'stroke-width':rnd(1.2,2),'stroke-linecap':'round',class:'meteor-path'});
+      m.style.setProperty('--len',len+30);m.style.setProperty('--dur',rnd(2.6,4.4)+'s');m.style.setProperty('--delay',rnd(0,5)+'s');
+      g.appendChild(m);
+    }
+    // хоризонт силует
+    g.appendChild(el('path',{d:'M0 500 L0 430 Q 200 415 400 425 Q 600 435 800 420 L800 500 Z',fill:'#06070d'}));
+  }
+
+  attachTips(scene);
+  attachInfo(scene);
+}
+
+document.querySelectorAll('.scene').forEach(buildScene);
+</script>
+</body>
+</html>
