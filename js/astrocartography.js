@@ -509,7 +509,7 @@ const AstroCarto = (function() {
 
         const acgData = calculateAstrocartography(chart);
 
-        await ACGRender.render({
+        ACGSvg.render({
           mapEl: mapEl,
           hitsEl: document.getElementById('acg-hits'),
           legendEl: document.getElementById('acg-legend'),
@@ -593,7 +593,7 @@ const AstroCarto = (function() {
 
   async function exportToPdfAsync(chart) {
     const mapEl = document.getElementById('acg-map');
-    if (!mapEl || !window._acgMap) return;
+    if (!mapEl || !mapEl.innerHTML) return;
 
     msgEl = document.getElementById('acg-message');
     msgEl.textContent = 'Подготвя PDF…';
