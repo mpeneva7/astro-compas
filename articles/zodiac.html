@@ -6,7 +6,14 @@
     <title>Съзвездията на зодиака — АстроКомпас</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        body { padding: 20px; }
+        :root {
+            --font-body: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+        }
+        body {
+            padding: 20px;
+            font-family: var(--font-body);
+        }
         .article-container { max-width: 1152px; margin: 0 auto; }
         .article-header-section { text-align: center; margin-bottom: 48px; }
         .article-header-section h1 {
@@ -76,7 +83,7 @@
             font-weight: 700;
             color: #F4C95D;
             margin: 0 0 8px;
-            font-family: var(--font-body);
+            font-family: var(--font-display);
         }
 
         .zodiac-dates {
