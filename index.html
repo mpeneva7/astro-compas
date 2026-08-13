@@ -326,9 +326,29 @@
       </div>
       <div class="articles-grid">
         <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/sky-august12.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/sky-august12.html', '_blank'); return false; }">
-          <div class="article-cover" style="background: linear-gradient(135deg, #0f1626 0%, #1a0f2e 40%, #2d1b4e 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
-            <div style="font-size: 64px; text-align: center; line-height: 1;">🌑✨</div>
-            <div style="font-size: 32px;">🌠</div>
+          <div class="article-cover" style="background: radial-gradient(1200px 700px at 70% -10%, #1b1e42 0%, transparent 60%), radial-gradient(900px 600px at 10% 20%, #191a38 0%, transparent 55%), linear-gradient(180deg, #0d0e1f 0%, #0a0b18 100%); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 280px; height: 280px; position: relative; z-index: 2;">
+              <defs>
+                <radialGradient id="cardCorona" cx="50%" cy="50%" r="50%">
+                  <stop offset="30%" stop-color="#fff" stop-opacity="0"/>
+                  <stop offset="50%" stop-color="#ffe6a3" stop-opacity="0.5"/>
+                  <stop offset="70%" stop-color="#f5c451" stop-opacity="0.26"/>
+                  <stop offset="100%" stop-color="#f5c451" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="cardInnerGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="60%" stop-color="#ffd27a" stop-opacity="0"/>
+                  <stop offset="82%" stop-color="#ffe6a3" stop-opacity="0.55"/>
+                  <stop offset="100%" stop-color="#ffd27a" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <g transform="translate(200,200)">
+                <circle r="80" fill="url(#cardCorona)"/>
+                <circle r="70" fill="url(#cardCorona)"/>
+                <circle r="60" fill="url(#cardInnerGlow)"/>
+                <circle r="55" fill="none" stroke="#ffd27a" stroke-width="2.5" opacity="0.92"/>
+                <circle r="53" fill="#0a0b18"/>
+              </g>
+            </svg>
           </div>
           <div class="article-header">
             <h3 class="article-title">Небето на август 12, 2026</h3>
