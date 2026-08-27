@@ -43,7 +43,7 @@
       <a href="#moon">Луна</a>
       <a href="#horoscope">Хороскоп</a>
       <a href="#natal">Натална карта</a>
-      <a href="#astrocartography">Астрокартография</a>
+      <a href="#astrocartography" style="display: none;">Астрокартография</a>
       <a href="#articles">Статии</a>
     </nav>
   </div>
@@ -325,6 +325,17 @@
         <h2>Вдъхновение от звездите</h2>
       </div>
       <div class="articles-grid">
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/crystals-zodiac.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/crystals-zodiac.html', '_blank'); return false; }">
+          <div class="article-cover">
+            <img src="assets/constellations/kristalite-i-zodiite-external.svg" alt="Кристали и зодиакални знаци" data-cover="true">
+          </div>
+          <div class="article-header">
+            <h3 class="article-title">Кристалите и Зодиите</h3>
+            <div class="article-footer" style="margin-top: auto;">
+              <span class="article-cta">Прочети →</span>
+            </div>
+          </div>
+        </article>
         <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/sky-august12.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/sky-august12.html', '_blank'); return false; }">
           <div class="article-cover" style="background: radial-gradient(1200px 700px at 70% -10%, #1b1e42 0%, transparent 60%), radial-gradient(900px 600px at 10% 20%, #191a38 0%, transparent 55%), linear-gradient(180deg, #0d0e1f 0%, #0a0b18 100%); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
             <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 280px; height: 280px; position: relative; z-index: 2;">
