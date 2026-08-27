@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кристалите и Зодиите — АстроКомпас</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        :root {
+            --font-body: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+        }
+        body {
+            padding: 20px;
+            font-family: var(--font-body);
+        }
+        .article-container { max-width: 1152px; margin: 0 auto; }
+
+        .article-hero {
+            width: 100%;
+            margin-bottom: 48px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #0d0b18;
+            border: 1px solid rgba(182,157,232,0.2);
+        }
+
+        .article-hero img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .article-header-section { text-align: center; margin-bottom: 48px; }
+        .article-header-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px;
+            line-height: 1.2;
+            font-family: var(--font-display);
+        }
+        .article-header-section .subtitle {
+            font-size: 1.05rem;
+            color: var(--muted-foreground);
+            margin: 0;
+        }
+
+        .article-intro { margin-bottom: 48px; }
+        .article-intro p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--foreground);
+            margin: 0 0 16px;
+            text-align: justify;
+        }
+        .article-intro p:last-child { margin-bottom: 0; }
+
+        .article-section h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 24px;
+            font-family: var(--font-display);
+        }
+
+        .article-section { margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid rgba(182,157,232,0.1); }
+        .article-section:last-of-type { border-bottom: none; }
+
+        .article-section p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--muted-foreground);
+            margin: 0 0 16px;
+            text-align: justify;
+        }
+
+        .article-section p:last-child { margin-bottom: 0; }
+
+        /* Таблица */
+        .crystals-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            background: rgba(24,27,54,0.4);
+            border: 1px solid rgba(182,157,232,0.2);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .crystals-table thead {
+            background: rgba(182,157,232,0.08);
+        }
+
+        .crystals-table th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 1px solid rgba(182,157,232,0.2);
+            font-size: 0.95rem;
+            font-family: var(--font-display);
+        }
+
+        .crystals-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(182,157,232,0.1);
+            color: var(--foreground);
+            font-size: 0.95rem;
+        }
+
+        .crystals-table tbody tr:hover {
+            background: rgba(182,157,232,0.04);
+        }
+
+        .crystals-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .zodiac-sign {
+            font-weight: 600;
+            color: #F4C95D;
+        }
+
+        .crystal-name {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .article-outro { margin-top: 48px; text-align: center; }
+        .article-outro p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--muted-foreground);
+            margin: 0 0 20px;
+        }
+        .article-outro p:last-child { margin-bottom: 0; }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .article-container { margin: 0 auto; }
+            .article-header-section h1 { font-size: 1.8rem; }
+
+            .crystals-table {
+                font-size: 0.85rem;
+            }
+
+            .crystals-table th,
+            .crystals-table td {
+                padding: 10px 8px;
+            }
+
+            .article-intro p,
+            .article-section p {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body style="background: var(--background); color: var(--foreground);">
+    <!-- Navigation header with Material Design icons -->
+    <header style="position: fixed; top: 0; right: 0; z-index: 100; background: transparent; padding: 16px 22px;">
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+        <button id="shareBtn" style="background: none; border: none; cursor: pointer; color: var(--primary); padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;" title="Копирай линка">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </button>
+        <button onclick="window.open('/', '_self');" style="background: none; border: none; cursor: pointer; color: var(--primary); padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;" title="Затвори">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="article-container" style="padding-top: 80px;">
+
+        <!-- Hero image -->
+        <div class="article-hero">
+            <img src="../assets/constellations/kristalite-i-zodiite-external.svg" alt="Кристали и зодиакални знаци">
+        </div>
+
+        <div class="article-header-section">
+            <h1>Кристалите и Зодиите</h1>
+            <p class="subtitle">От Нагръдника на Аарон до модерната астрология</p>
+        </div>
+
+        <div class="article-intro">
+            <p>Връзката между астрологията и минералите не е съвременна Ню Ейдж измислица, а практическо и символично съчетание с хилядолетна история. Свързването на определени скъпоценни камъни със зодиакалните знаци обединява естествените свойства на минералите с астрологичния символизъм.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>Откъде води началото си тази връзка?</h2>
+            <p>Историческите корени на зодиакалните камъни датират още от античността. Основен исторически източник е описанието на Нагръдника на Аарон в библейската книга „Изход". Този свещенически атрибут е съдържал 12 различни скъпоценни камъка, представляващи 12-те израилски племена.</p>
+
+            <p>През I век историкът Йосиф Флавий, а по-късно и свети Йероним (V век), правят пряка връзка между тези 12 камъка, 12-те месеца в годината и 12-те зодиакални съзвездия. В древността хората не са притежавали един статичен камък за цял живот, а са носели съответния кристал според периода от годината. Традицията всеки човек да има определен камък според рождената си дата се оформя много по-късно — през XVIII век в Полша, благодарение на навлизането на европейското бижутерийно изкуство.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>Каква е логиката зад тази съвместимост?</h2>
+            <p>В класическата и модерната астрология всеки знак се свързва с конкретни архетипи, стихии (Огън, Земя, Въздух, Вода) и характерни качества. Минералите от своя страна притежават уникален химичен състав, цвят и кристална структура. Свързването им разчита на психологически и символичен механизъм:</p>
+
+            <p><strong>Акцентиране на силните страни:</strong> използване на камък, който символизира водещите свойства на знака (например карнеол за енергията на Овена или цитрин за фокуса на Близнаците).</p>
+
+            <p><strong>Балансиране на крайностите:</strong> избор на кристал, чиято символика носи спокойствие в области, където знакът е склонен към пренапрежение.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>Основни зодиакални камъни и тяхното значение</h2>
+            <p>Ето кои са традиционно приетите минерали за всеки зодиакален знак и тяхната символика:</p>
+
+            <table class="crystals-table">
+                <thead>
+                    <tr>
+                        <th>Знак</th>
+                        <th>Основен кристал</th>
+                        <th>Символично значение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="zodiac-sign">♈ Овен</td>
+                        <td class="crystal-name">Карнеол</td>
+                        <td>Смелост, действие, жизненост</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♉ Телец</td>
+                        <td class="crystal-name">Розов кварц</td>
+                        <td>Любов, красота, стабилност</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♊ Близнаци</td>
+                        <td class="crystal-name">Цитрин</td>
+                        <td>Яснота, комуникация, ментална енергия</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♋ Рак</td>
+                        <td class="crystal-name">Лунен камък</td>
+                        <td>Интуиция, емоции, лунна енергия</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♌ Лъв</td>
+                        <td class="crystal-name">Слънчев камък</td>
+                        <td>Увереност, сияние, творчество</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♍ Дева</td>
+                        <td class="crystal-name">Амазонит</td>
+                        <td>Яснота, спокойствие, баланс</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♎ Везни</td>
+                        <td class="crystal-name">Лапис лазули</td>
+                        <td>Хармония, истина, общуване</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♏ Скорпион</td>
+                        <td class="crystal-name">Черен обсидиан</td>
+                        <td>Трансформация, защита, дълбочина</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♐ Стрелец</td>
+                        <td class="crystal-name">Тюркоаз</td>
+                        <td>Свобода, приключение, истина</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♑ Козирог</td>
+                        <td class="crystal-name">Гранат</td>
+                        <td>Издръжливост, воля, устойчивост</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♒ Водолей</td>
+                        <td class="crystal-name">Аметист</td>
+                        <td>Оригиналност, интуиция, духовност</td>
+                    </tr>
+                    <tr>
+                        <td class="zodiac-sign">♓ Риби</td>
+                        <td class="crystal-name">Аквамарин</td>
+                        <td>Чувствителност, интуиция, спокойствие</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="article-outro">
+            <p>Свързването на кристалите със зодиака е само началото на тяхното практическо приложение. Извън символиката и астрологичните асоциации съществуват структурирани методи за поддръжка, почистване и фокусирана работа с минерали — тема, позната като кристалотерапия, върху която ще подготвим отделен подробен материал.</p>
+        </div>
+    </div>
+
+<script>
+// Share button functionality
+document.getElementById('shareBtn').addEventListener('click', function() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('shareBtn');
+    const svg = btn.querySelector('svg');
+    if (svg) svg.style.display = 'none';
+    btn.textContent = '✓';
+    setTimeout(() => {
+      btn.textContent = '';
+      if (svg) svg.style.display = 'block';
+    }, 2000);
+  });
+});
+</script>
+</body>
+</html>
