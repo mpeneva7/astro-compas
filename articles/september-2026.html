@@ -9,7 +9,7 @@
     <meta property="og:description" content="Пълен астрологичен преглед на септември 2026 с ключови дати и препоръки за всеки период на месеца.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://mpeneva7.github.io/astro-compas/articles/september-2026.html">
-    <meta property="og:image" content="https://mpeneva7.github.io/astro-compas/img/og-september-2026.png">
+    <meta property="og:image" content="https://mpeneva7.github.io/astro-compas/assets/constellations/zodiac-wheel.png">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
     <link rel="stylesheet" href="../css/style.css">
     <style>
@@ -37,29 +37,12 @@
             justify-content: center;
         }
 
-        .article-hero-content {
-            background: linear-gradient(135deg, #1a2942 0%, #2d1b4e 50%, #1a0f2e 100%);
+        .article-hero img {
             width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .article-hero-icon {
-            font-size: 64px;
-            line-height: 1;
-        }
-
-        .article-hero-text {
-            font-size: 24px;
-            color: #F4C95D;
-            font-weight: 600;
-            font-family: var(--font-display);
+            height: auto;
+            display: block;
+            max-height: 600px;
+            object-fit: contain;
         }
 
         .article-header-section { text-align: center; margin-bottom: 48px; }
@@ -164,28 +147,9 @@
 
     <div class="article-container" style="padding-top: 80px;">
 
-        <!-- Hero section with zodiac wheel -->
+        <!-- Hero image -->
         <div class="article-hero">
-            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 500px;">
-                <defs>
-                    <radialGradient id="zodiacBg" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#1a2942"/>
-                        <stop offset="100%" stop-color="#0a0b18"/>
-                    </radialGradient>
-                    <radialGradient id="wheelGlow" cx="50%" cy="50%" r="45%">
-                        <stop offset="30%" stop-color="#b69de8" stop-opacity="0.3"/>
-                        <stop offset="100%" stop-color="#b69de8" stop-opacity="0"/>
-                    </radialGradient>
-                </defs>
-                <rect width="400" height="400" fill="url(#zodiacBg)"/>
-                <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(182,157,232,0.3)" stroke-width="2"/>
-                <circle cx="200" cy="200" r="160" fill="none" stroke="rgba(182,157,232,0.2)" stroke-width="1"/>
-                <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(182,157,232,0.15)" stroke-width="1"/>
-                <circle cx="200" cy="200" r="100" fill="url(#wheelGlow)"/>
-                <circle cx="200" cy="200" r="95" fill="none" stroke="rgba(244,201,93,0.4)" stroke-width="2"/>
-                <text x="200" y="215" font-size="48" text-anchor="middle" fill="rgba(244,201,93,0.9)" font-weight="bold">♎</text>
-                <text x="200" y="260" font-size="20" text-anchor="middle" fill="rgba(244,201,93,0.8)" font-family="sans-serif">СЕПТЕМВРИ</text>
-            </svg>
+            <img src="../assets/constellations/zodiac-wheel.png" alt="Зодиакален кръг — септември 2026">
         </div>
 
         <div class="article-header-section">
