@@ -191,8 +191,20 @@
 
       </form>
 
-      <!-- Hidden Gumroad overlay trigger link -->
-      <a id="gumroadTrigger" class="gumroad-button" href="https://stankova767.gumroad.com/l/dwwuw?wanted=true" data-gumroad-overlay-checkout="true" data-gumroad-single-product="true" style="display:none;">Заяви разчитане</a>
+      <!-- Gumroad product configuration -->
+      <script>
+        window.GUMROAD_PRODUCT = {
+          url: 'https://stankova767.gumroad.com/l/dwwuw',
+          id: 'dwwuw'
+        };
+
+        function openGumroadCheckout(e) {
+          if (e) e.preventDefault();
+          const checkoutUrl = window.GUMROAD_PRODUCT.url + '?wanted=true';
+          window.location.href = checkoutUrl;
+          return false;
+        }
+      </script>
 
       <div id="natal-results">
 
@@ -237,7 +249,7 @@
         <h2>Продукти и услуги</h2>
       </div>
       <div class="articles-grid" style="margin-top: 32px;">
-        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="document.getElementById('gumroadTrigger').click(); return false;" onkeypress="if(event.key==='Enter') { document.getElementById('gumroadTrigger').click(); return false; }">
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="openGumroadCheckout(event); return false;" onkeypress="if(event.key==='Enter') { openGumroadCheckout(event); return false; }">
           <div class="article-cover" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 40%, #0f1626 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
             <div style="font-size: 48px;">✦</div>
             <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Натална карта</div>
