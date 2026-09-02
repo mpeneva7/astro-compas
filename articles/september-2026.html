@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Септември 2026 — АстроКомпас</title>
+    <title>Звездите в Септември '26 — АстроКомпас</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
         :root {
@@ -157,16 +157,32 @@
 
     <div class="article-container" style="padding-top: 80px;">
 
-        <!-- Hero section -->
+        <!-- Hero section with zodiac wheel -->
         <div class="article-hero">
-            <div class="article-hero-content">
-                <div class="article-hero-icon">♎✨</div>
-                <div class="article-hero-text">Септември 2026</div>
-            </div>
+            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 500px;">
+                <defs>
+                    <radialGradient id="zodiacBg" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#1a2942"/>
+                        <stop offset="100%" stop-color="#0a0b18"/>
+                    </radialGradient>
+                    <radialGradient id="wheelGlow" cx="50%" cy="50%" r="45%">
+                        <stop offset="30%" stop-color="#b69de8" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#b69de8" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <rect width="400" height="400" fill="url(#zodiacBg)"/>
+                <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(182,157,232,0.3)" stroke-width="2"/>
+                <circle cx="200" cy="200" r="160" fill="none" stroke="rgba(182,157,232,0.2)" stroke-width="1"/>
+                <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(182,157,232,0.15)" stroke-width="1"/>
+                <circle cx="200" cy="200" r="100" fill="url(#wheelGlow)"/>
+                <circle cx="200" cy="200" r="95" fill="none" stroke="rgba(244,201,93,0.4)" stroke-width="2"/>
+                <text x="200" y="215" font-size="48" text-anchor="middle" fill="rgba(244,201,93,0.9)" font-weight="bold">♎</text>
+                <text x="200" y="260" font-size="20" text-anchor="middle" fill="rgba(244,201,93,0.8)" font-family="sans-serif">СЕПТЕМВРИ</text>
+            </svg>
         </div>
 
         <div class="article-header-section">
-            <h1>Септември 2026: подреди си живота</h1>
+            <h1>Звездите в Септември '26</h1>
             <p class="subtitle">Месецът, в който звездите казват „добре, а сега какво ще правим с всичко това?"</p>
         </div>
 

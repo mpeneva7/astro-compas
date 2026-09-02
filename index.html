@@ -219,23 +219,39 @@
           if (!cityInput) errors.push('Място на раждане');
 
           if (errors.length > 0) {
-            alert('Моля попълнете следните полета:\n• ' + errors.join('\n• '));
+            showFormError('Моля попълнете следните полета:\n• ' + errors.join('\n• '));
             return false;
           }
           return true;
         }
 
-        function openGumroadCheckout(e) {
+        function showFormError(message) {
+          alert(message);
+        }
+
+        function startNatalReading(e) {
           if (e) e.preventDefault();
 
           // Validate form before opening Gumroad
           if (!validateNatalForm()) {
+            const natalForm = document.getElementById('natal-form');
+            if (natalForm) {
+              natalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
             return false;
           }
 
+          // Open Gumroad overlay for natal reading
+          openGumroadProduct(window.GUMROAD_PRODUCT.url, e);
+          return false;
+        }
+
+        function openGumroadProduct(productUrl, e) {
+          if (e) e.preventDefault();
+
           // Create a temporary link element with Gumroad's expected attributes
           const link = document.createElement('a');
-          link.href = window.GUMROAD_PRODUCT.url + '?wanted=true';
+          link.href = productUrl + '?wanted=true';
           link.className = 'gumroad-button';
           link.setAttribute('data-gumroad-overlay-checkout', 'true');
           link.setAttribute('data-gumroad-single-product', 'true');
@@ -254,6 +270,23 @@
             }
           }, 100);
 
+          return false;
+        }
+
+        function openGumroadCheckout(e) {
+          if (e) e.preventDefault();
+
+          // Validate form before opening Gumroad
+          if (!validateNatalForm()) {
+            const natalForm = document.getElementById('natal-form');
+            if (natalForm) {
+              natalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            return false;
+          }
+
+          // Open Gumroad overlay
+          openGumroadProduct(window.GUMROAD_PRODUCT.url, e);
           return false;
         }
 
@@ -314,7 +347,7 @@
         <h2>Продукти и услуги</h2>
       </div>
       <div class="articles-grid" style="margin-top: 32px;">
-        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="scrollToNatalForm(event); return false;" onkeypress="if(event.key==='Enter') { scrollToNatalForm(event); return false; }">
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="startNatalReading(event); return false;" onkeypress="if(event.key==='Enter') { startNatalReading(event); return false; }">
           <div class="article-cover" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 40%, #0f1626 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
             <div style="font-size: 48px;">✦</div>
             <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Натална карта</div>
@@ -323,7 +356,33 @@
             <h3 class="article-title">Заяви разчитане</h3>
             <p style="font-size: 0.9rem; color: var(--muted-foreground); margin: 8px 0; line-height: 1.5;">Подробен анализ на личността, отношенията, работата и финансите. Персонално разчитане с прогноза за годината.</p>
             <div class="article-footer" style="margin-top: auto;">
-              <span class="article-cta">Поръчай за €50 →</span>
+              <span class="article-cta">Поръчай →</span>
+            </div>
+          </div>
+        </article>
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="openGumroadProduct('https://stankova767.gumroad.com/l/mzayeo', event); return false;" onkeypress="if(event.key==='Enter') { openGumroadProduct('https://stankova767.gumroad.com/l/mzayeo', event); return false; }">
+          <div class="article-cover" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 40%, #0f1626 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
+            <div style="font-size: 48px;">📅</div>
+            <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Септември '26</div>
+          </div>
+          <div class="article-header">
+            <h3 class="article-title">Астро календар</h3>
+            <p style="font-size: 0.9rem; color: var(--muted-foreground); margin: 8px 0; line-height: 1.5;">Пълен астрологичен календар за септември с ключови моменти и препоръки.</p>
+            <div class="article-footer" style="margin-top: auto;">
+              <span class="article-cta">Вземи →</span>
+            </div>
+          </div>
+        </article>
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="openGumroadProduct('https://stankova767.gumroad.com/l/wifvx', event); return false;" onkeypress="if(event.key==='Enter') { openGumroadProduct('https://stankova767.gumroad.com/l/wifvx', event); return false; }">
+          <div class="article-cover" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 40%, #0f1626 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
+            <div style="font-size: 48px;">🌙</div>
+            <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Септември '26</div>
+          </div>
+          <div class="article-header">
+            <h3 class="article-title">Лунен календар</h3>
+            <p style="font-size: 0.9rem; color: var(--muted-foreground); margin: 8px 0; line-height: 1.5;">Лунни фази и препоръки за всеки ден от месеца.</p>
+            <div class="article-footer" style="margin-top: auto;">
+              <span class="article-cta">Вземи →</span>
             </div>
           </div>
         </article>
@@ -452,12 +511,23 @@
           </div>
         </article>
         <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/september-2026.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/september-2026.html', '_blank'); return false; }">
-          <div class="article-cover" style="background: linear-gradient(135deg, #1a2942 0%, #2d1b4e 50%, #1a0f2e 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
-            <div style="font-size: 48px; line-height: 1;">♎✨</div>
-            <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Септември 2026</div>
+          <div class="article-cover" style="background: radial-gradient(circle at 50% 50%, #1a2942 0%, #0a0b18 100%); display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%; max-width: 250px;">
+              <defs>
+                <radialGradient id="cardZodiac" cx="50%" cy="50%" r="45%">
+                  <stop offset="30%" stop-color="#b69de8" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#b69de8" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(182,157,232,0.3)" stroke-width="1.5"/>
+              <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(182,157,232,0.2)" stroke-width="1"/>
+              <circle cx="150" cy="150" r="80" fill="url(#cardZodiac)"/>
+              <circle cx="150" cy="150" r="78" fill="none" stroke="rgba(244,201,93,0.3)" stroke-width="1.5"/>
+              <text x="150" y="165" font-size="40" text-anchor="middle" fill="rgba(244,201,93,0.9)" font-weight="bold">♎</text>
+            </svg>
           </div>
           <div class="article-header">
-            <h3 class="article-title">Подреди си живота</h3>
+            <h3 class="article-title">Звездите в Септември '26</h3>
             <div class="article-footer" style="margin-top: auto;">
               <span class="article-cta">Прочети →</span>
             </div>
