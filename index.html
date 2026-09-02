@@ -208,8 +208,30 @@
           id: 'dwwuw'
         };
 
+        function validateNatalForm() {
+          const birthDate = document.getElementById('birth-date').value;
+          const birthTime = document.getElementById('birth-time').value;
+          const cityInput = document.getElementById('city-input').value;
+          const errors = [];
+
+          if (!birthDate) errors.push('Дата на раждане');
+          if (!birthTime) errors.push('Час на раждане');
+          if (!cityInput) errors.push('Място на раждане');
+
+          if (errors.length > 0) {
+            alert('Моля попълнете следните полета:\n• ' + errors.join('\n• '));
+            return false;
+          }
+          return true;
+        }
+
         function openGumroadCheckout(e) {
           if (e) e.preventDefault();
+
+          // Validate form before opening Gumroad
+          if (!validateNatalForm()) {
+            return false;
+          }
 
           // Create a temporary link element with Gumroad's expected attributes
           const link = document.createElement('a');
