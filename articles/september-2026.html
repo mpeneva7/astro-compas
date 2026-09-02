@@ -37,12 +37,29 @@
             justify-content: center;
         }
 
-        .article-hero img {
+        .article-hero-content {
+            background: linear-gradient(135deg, #1a2942 0%, #2d1b4e 50%, #1a0f2e 100%);
             width: 100%;
-            height: auto;
-            display: block;
-            max-height: 600px;
-            object-fit: contain;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .article-hero-icon {
+            font-size: 64px;
+            line-height: 1;
+        }
+
+        .article-hero-text {
+            font-size: 24px;
+            color: #F4C95D;
+            font-weight: 600;
+            font-family: var(--font-display);
         }
 
         .article-header-section { text-align: center; margin-bottom: 48px; }
@@ -149,7 +166,10 @@
 
         <!-- Hero image -->
         <div class="article-hero">
-            <img src="../assets/constellations/zodiac_crystals_orbit_color.svg" alt="Зодиакален кръг — септември 2026">
+            <div class="article-hero-content">
+                <div class="article-hero-icon">♎✨</div>
+                <div class="article-hero-text">Септември 2026</div>
+            </div>
         </div>
 
         <div class="article-header-section">
