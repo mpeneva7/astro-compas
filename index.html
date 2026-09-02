@@ -234,6 +234,19 @@
 
           return false;
         }
+
+        function scrollToNatalForm(e) {
+          if (e) e.preventDefault();
+          const natalForm = document.getElementById('natal-form');
+          if (natalForm) {
+            natalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+              const firstField = natalForm.querySelector('input, button[type="button"]');
+              if (firstField) firstField.focus();
+            }, 500);
+          }
+          return false;
+        }
       </script>
 
       <div id="natal-results">
@@ -279,7 +292,7 @@
         <h2>Продукти и услуги</h2>
       </div>
       <div class="articles-grid" style="margin-top: 32px;">
-        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="openGumroadCheckout(event); return false;" onkeypress="if(event.key==='Enter') { openGumroadCheckout(event); return false; }">
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="scrollToNatalForm(event); return false;" onkeypress="if(event.key==='Enter') { scrollToNatalForm(event); return false; }">
           <div class="article-cover" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 40%, #0f1626 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
             <div style="font-size: 48px;">✦</div>
             <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Натална карта</div>
