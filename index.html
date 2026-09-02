@@ -193,7 +193,7 @@
           <div class="service-description">
             <p>Заяви разчитане на наталната си карта и разбери какво ти вещае годината напред. Ще получиш подробен анализ на личността, отношенията, работата и финансите ти, заедно с прогноза за важните периоди в годината. Работя лично по всяка карта и до 12 часа след заплащане ще получиш готовото разчитане на посочения имейл. Приемам ограничен брой заявки на ден, за да работя внимателно по всяка. Цена: 50 евро.</p>
           </div>
-          <button type="button" class="btn btn-filled" id="full-reading-btn">
+          <button type="button" class="btn btn-filled" id="full-reading-btn" onclick="openGumroadCheckout(event); return false;" onkeypress="if(event.key==='Enter') { openGumroadCheckout(event); return false; }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
             <span>Заяви</span>
           </button>
@@ -201,8 +201,40 @@
         </div>
       </form>
 
-      <!-- Hidden Gumroad overlay trigger link -->
-      <a id="gumroadTrigger" class="gumroad-button" href="https://stankova767.gumroad.com/l/dwwuw?wanted=true" data-gumroad-overlay-checkout="true" data-gumroad-single-product="true" style="display:none;">Заяви разчитане</a>
+      <!-- Gumroad Overlay configuration -->
+      <script>
+        window.GUMROAD_PRODUCT = {
+          url: 'https://stankova767.gumroad.com/l/dwwuw',
+          id: 'dwwuw'
+        };
+
+        function openGumroadCheckout(e) {
+          if (e) e.preventDefault();
+
+          // Create a temporary link element with Gumroad's expected attributes
+          const link = document.createElement('a');
+          link.href = window.GUMROAD_PRODUCT.url + '?wanted=true';
+          link.className = 'gumroad-button';
+          link.setAttribute('data-gumroad-overlay-checkout', 'true');
+          link.setAttribute('data-gumroad-single-product', 'true');
+          link.style.display = 'none';
+
+          // Append to DOM temporarily so Gumroad's script can find it
+          document.body.appendChild(link);
+
+          // Dispatch click event for Gumroad's overlay handler
+          link.click();
+
+          // Clean up after a short delay
+          setTimeout(() => {
+            if (link.parentNode) {
+              link.parentNode.removeChild(link);
+            }
+          }, 100);
+
+          return false;
+        }
+      </script>
 
       <div id="natal-results">
 
