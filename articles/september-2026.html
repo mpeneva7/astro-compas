@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Септември 2026 — АстроКомпас</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        :root {
+            --font-body: 'Manrope', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
+        }
+        body {
+            padding: 20px;
+            font-family: var(--font-body);
+        }
+        .article-container { max-width: 1152px; margin: 0 auto; }
+
+        .article-hero {
+            width: 100%;
+            margin-bottom: 48px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: #0d0b18;
+            border: 1px solid rgba(182,157,232,0.2);
+            box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .article-hero-content {
+            background: linear-gradient(135deg, #1a2942 0%, #2d1b4e 50%, #1a0f2e 100%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .article-hero-icon {
+            font-size: 64px;
+            line-height: 1;
+        }
+
+        .article-hero-text {
+            font-size: 24px;
+            color: #F4C95D;
+            font-weight: 600;
+            font-family: var(--font-display);
+        }
+
+        .article-header-section { text-align: center; margin-bottom: 48px; }
+        .article-header-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px;
+            line-height: 1.2;
+            font-family: var(--font-display);
+        }
+        .article-header-section .subtitle {
+            font-size: 1.05rem;
+            color: var(--muted-foreground);
+            margin: 0;
+        }
+
+        .article-intro { margin-bottom: 48px; }
+        .article-intro p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--foreground);
+            margin: 0 0 16px;
+            text-align: justify;
+        }
+        .article-intro p:last-child { margin-bottom: 0; }
+
+        .article-section h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 24px;
+            font-family: var(--font-display);
+        }
+
+        .article-section { margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid rgba(182,157,232,0.1); }
+        .article-section:last-of-type { border-bottom: none; }
+
+        .article-section p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--muted-foreground);
+            margin: 0 0 16px;
+            text-align: justify;
+        }
+
+        .article-section ul {
+            margin: 16px 0;
+            padding-left: 24px;
+            color: var(--muted-foreground);
+        }
+
+        .article-section li {
+            margin: 8px 0;
+            line-height: 1.8;
+        }
+
+        .article-section p:last-child { margin-bottom: 0; }
+
+        .article-outro { margin-top: 48px; text-align: center; }
+        .article-outro p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--muted-foreground);
+            margin: 0 0 20px;
+        }
+        .article-outro p:last-child { margin-bottom: 0; }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .article-container { margin: 0 auto; }
+            .article-header-section h1 { font-size: 1.8rem; }
+
+            .article-intro p,
+            .article-section p {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body style="background: var(--background); color: var(--foreground);">
+    <!-- Navigation header with Material Design icons -->
+    <header style="position: fixed; top: 0; right: 0; z-index: 100; background: transparent; padding: 16px 22px;">
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
+        <button id="shareBtn" style="background: none; border: none; cursor: pointer; color: var(--primary); padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;" title="Копирай линка">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </button>
+        <button onclick="window.open('/', '_self');" style="background: none; border: none; cursor: pointer; color: var(--primary); padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;" title="Затвори">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="article-container" style="padding-top: 80px;">
+
+        <!-- Hero section -->
+        <div class="article-hero">
+            <div class="article-hero-content">
+                <div class="article-hero-icon">♎✨</div>
+                <div class="article-hero-text">Септември 2026</div>
+            </div>
+        </div>
+
+        <div class="article-header-section">
+            <h1>Септември 2026: подреди си живота</h1>
+            <p class="subtitle">Месецът, в който звездите казват „добре, а сега какво ще правим с всичко това?"</p>
+        </div>
+
+        <div class="article-intro">
+            <p>Ако август беше месец за големи емоции и малко повече космически хаос, септември идва с доста по-практичен въпрос: „Добре, а сега какво ще правим с всичко това?"</p>
+            <p>Месецът започва с енергията на Дева — ред, навици, работа, здраве, списъци и онова прекрасно усещане, че ако само подредиш всички шкафове, живота ти автоматично ще се подреди. Спойлер: не винаги, но все пак е добър старт.</p>
+            <p>Астрологично септември има няколко особено важни момента, които си струва да отбележиш в календара.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>🌑 10 септември: Новолуние в Дева — време за reset</h2>
+            <p>На 10 септември е Новолунието в Дева — един от най-подходящите моменти през месеца да започнеш нещо ново, но не непременно грандиозно.</p>
+            <p>Това е новолуние за системи, навици и реални действия. Ако отдавна си казваш „от понеделник започвам", този път звездите действително са на твоя страна.</p>
+            <p><strong>Добър момент за:</strong></p>
+            <ul>
+                <li>нов режим или по-добра рутина;</li>
+                <li>организация на работа и задачи;</li>
+                <li>започване на проект;</li>
+                <li>грижа за тялото и ежедневните навици;</li>
+                <li>разчистване на всичко, което вече не ти върши работа.</li>
+            </ul>
+            <p>И още нещо интересно: същия ден Меркурий влиза във Везни, Венера влиза в Скорпион, а Уран започва ретроградното си движение в Близнаци. Тоест космосът явно е решил да не прави само по едно нещо наведнъж.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>💬 10–12 септември: разговори, които отлагаш</h2>
+            <p>С Меркурий във Везни фокусът се измества към отношения, договорки, партньорства и решения. Ще търсим баланса, ще претегляме плюсове и минуси и вероятно ще кажем „нека го обсъдим" поне три пъти.</p>
+            <p>Но Венера в Скорпион добавя съвсем друга нотка. В любовта вече няма особено желание за small talk. Искаме дълбочина, честност и истинска близост.</p>
+            <p>Около 12 септември Меркурий прави едновременно хармонична връзка с Плутон и напрегната с Нептун — комбинация, която може да донесе силни прозрения, но и риск да прочетем между редовете нещо, което всъщност не е написано там.</p>
+            <p><strong>Практичен съвет:</strong> ако разговорът е важен, не разчитай само на интуицията. Питай.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>🪐 10 септември нататък: Уран ретрограден в Близнаци</h2>
+            <p>Уран започва ретроградното си движение в Близнаци на 10 септември. Това може да върне стари идеи, разговори, планове или теми, които си смятала за приключени.</p>
+            <p>Не е задължително да ги възобновиш. Понякога ретроградният Уран просто ни показва какво сме пропуснали първия път.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>⚖️ 22 септември: Слънцето влиза във Везни</h2>
+            <p>Тук атмосферата се променя.</p>
+            <p>След практичната Дева идва сезонът на Везните — отношения, баланс, красота, социален живот и вечният въпрос: „Ама какво всъщност иска другият?"</p>
+            <p>Това е добър момент да прегледаш партньорствата си — лични и професионални. Къде има взаимност? Къде правиш твърде много компромиси? И къде просто си забравила да кажеш какво искаш?</p>
+        </div>
+
+        <div class="article-section">
+            <h2>🌕 26 септември: Пълнолуние в Овен</h2>
+            <p>Краят на месеца идва с Пълнолуние в Овен, което носи много по-директна енергия. Ако началото на септември е било за подреждане, краят му е за решение и действие.</p>
+            <p>Темите могат да бъдат свързани с лични граници, независимост, отношения и смелостта да поставиш себе си на първо място.</p>
+            <p>Не е моментът за „ще видим". По-скоро за „ето какво решавам".</p>
+        </div>
+
+        <div class="article-section">
+            <h2>🔥 Последните дни: повече смелост, повече интензитет</h2>
+            <p>На 27 септември Марс влиза в Лъв, което добавя увереност, творчество и желание да бъдем видими. Ако си чакала подходящ момент да покажеш проект, идея или талант — това е добър период да спреш да го полираш до безкрайност и просто да го покажеш.</p>
+            <p>А на 30 септември Меркурий влиза в Скорпион. Разговорите стават по-дълбоки, директни и интуитивни. Повърхностните отговори няма да ни вършат особена работа.</p>
+        </div>
+
+        <div class="article-section">
+            <h2>✨ Как да използваш септември?</h2>
+            <ul>
+                <li><strong>1–9 септември:</strong> довършвай, организирай, изчисти.</li>
+                <li><strong>10 септември:</strong> постави ново начало.</li>
+                <li><strong>11–20 септември:</strong> говори, преговаряй и преразгледай стари идеи.</li>
+                <li><strong>22–25 септември:</strong> обърни внимание на отношенията и баланса.</li>
+                <li><strong>26 септември:</strong> вземи решение и постави граница.</li>
+                <li><strong>27–30 септември:</strong> действай по-смело и казвай нещата директно.</li>
+            </ul>
+        </div>
+
+        <div class="article-outro">
+            <p>Ако трябва да събера септември в едно изречение, то би било:</p>
+            <p><strong>Първо подреди системата. После провери отношенията. Накрая избери себе си.</strong></p>
+            <p>И да — можеш да започнеш с чеклиста. Дева ще оцени жеста. ✨</p>
+        </div>
+    </div>
+
+<script>
+document.getElementById('shareBtn').addEventListener('click', function() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('shareBtn');
+    const svg = btn.querySelector('svg');
+    if (svg) svg.style.display = 'none';
+    btn.textContent = '✓';
+    setTimeout(() => {
+      btn.textContent = '';
+      if (svg) svg.style.display = 'block';
+    }, 2000);
+  });
+});
+</script>
+</body>
+</html>

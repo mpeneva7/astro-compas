@@ -189,19 +189,84 @@
           </button>
         </div>
 
+        <div class="natal-service-box">
+          <div class="service-description">
+            <p>Заяви разчитане на наталната си карта и разбери какво ти вещае годината напред. Ще получиш подробен анализ на личността, отношенията, работата и финансите ти, заедно с прогноза за важните периоди в годината. Работя лично по всяка карта и до 12 часа след заплащане ще получиш готовото разчитане на посочения имейл. Приемам ограничен брой заявки на ден, за да работя внимателно по всяка. Цена: 50 евро.</p>
+          </div>
+          <button type="button" class="btn btn-filled" id="full-reading-btn" onclick="openGumroadCheckout(event); return false;" onkeypress="if(event.key==='Enter') { openGumroadCheckout(event); return false; }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>
+            <span>Заяви</span>
+          </button>
+          <p class="service-price" id="price-note" style="display:none;">€30</p>
+        </div>
       </form>
 
-      <!-- Gumroad product configuration -->
+      <!-- Gumroad Overlay configuration -->
       <script>
         window.GUMROAD_PRODUCT = {
           url: 'https://stankova767.gumroad.com/l/dwwuw',
           id: 'dwwuw'
         };
 
+        function validateNatalForm() {
+          const birthDate = document.getElementById('birth-date').value;
+          const birthTime = document.getElementById('birth-time').value;
+          const cityInput = document.getElementById('city-input').value;
+          const errors = [];
+
+          if (!birthDate) errors.push('Дата на раждане');
+          if (!birthTime) errors.push('Час на раждане');
+          if (!cityInput) errors.push('Място на раждане');
+
+          if (errors.length > 0) {
+            alert('Моля попълнете следните полета:\n• ' + errors.join('\n• '));
+            return false;
+          }
+          return true;
+        }
+
         function openGumroadCheckout(e) {
           if (e) e.preventDefault();
-          const checkoutUrl = window.GUMROAD_PRODUCT.url + '?wanted=true';
-          window.location.href = checkoutUrl;
+
+          // Validate form before opening Gumroad
+          if (!validateNatalForm()) {
+            return false;
+          }
+
+          // Create a temporary link element with Gumroad's expected attributes
+          const link = document.createElement('a');
+          link.href = window.GUMROAD_PRODUCT.url + '?wanted=true';
+          link.className = 'gumroad-button';
+          link.setAttribute('data-gumroad-overlay-checkout', 'true');
+          link.setAttribute('data-gumroad-single-product', 'true');
+          link.style.display = 'none';
+
+          // Append to DOM temporarily so Gumroad's script can find it
+          document.body.appendChild(link);
+
+          // Dispatch click event for Gumroad's overlay handler
+          link.click();
+
+          // Clean up after a short delay
+          setTimeout(() => {
+            if (link.parentNode) {
+              link.parentNode.removeChild(link);
+            }
+          }, 100);
+
+          return false;
+        }
+
+        function scrollToNatalForm(e) {
+          if (e) e.preventDefault();
+          const natalForm = document.getElementById('natal-form');
+          if (natalForm) {
+            natalForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => {
+              const firstField = natalForm.querySelector('input, button[type="button"]');
+              if (firstField) firstField.focus();
+            }, 500);
+          }
           return false;
         }
       </script>
@@ -249,7 +314,7 @@
         <h2>Продукти и услуги</h2>
       </div>
       <div class="articles-grid" style="margin-top: 32px;">
-        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="openGumroadCheckout(event); return false;" onkeypress="if(event.key==='Enter') { openGumroadCheckout(event); return false; }">
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="scrollToNatalForm(event); return false;" onkeypress="if(event.key==='Enter') { scrollToNatalForm(event); return false; }">
           <div class="article-cover" style="background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 40%, #0f1626 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
             <div style="font-size: 48px;">✦</div>
             <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Натална карта</div>
@@ -354,7 +419,7 @@
       <div class="articles-grid">
         <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/crystals-zodiac.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/crystals-zodiac.html', '_blank'); return false; }">
           <div class="article-cover">
-            <img src="assets/constellations/kristalite-i-zodiite.svg" alt="Кристали и зодиакални знаци" data-cover="true">
+            <img src="assets/constellations/kristalite-i-zodiite-external.svg" alt="Кристали и зодиакални знаци" data-cover="true">
           </div>
           <div class="article-header">
             <h3 class="article-title">Кристалите и Зодиите</h3>
@@ -364,29 +429,9 @@
           </div>
         </article>
         <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/sky-august12.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/sky-august12.html', '_blank'); return false; }">
-          <div class="article-cover" style="background: radial-gradient(1200px 700px at 70% -10%, #1b1e42 0%, transparent 60%), radial-gradient(900px 600px at 10% 20%, #191a38 0%, transparent 55%), linear-gradient(180deg, #0d0e1f 0%, #0a0b18 100%); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-            <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 280px; height: 280px; position: relative; z-index: 2;">
-              <defs>
-                <radialGradient id="cardCorona" cx="50%" cy="50%" r="50%">
-                  <stop offset="30%" stop-color="#fff" stop-opacity="0"/>
-                  <stop offset="50%" stop-color="#ffe6a3" stop-opacity="0.5"/>
-                  <stop offset="70%" stop-color="#f5c451" stop-opacity="0.26"/>
-                  <stop offset="100%" stop-color="#f5c451" stop-opacity="0"/>
-                </radialGradient>
-                <radialGradient id="cardInnerGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="60%" stop-color="#ffd27a" stop-opacity="0"/>
-                  <stop offset="82%" stop-color="#ffe6a3" stop-opacity="0.55"/>
-                  <stop offset="100%" stop-color="#ffd27a" stop-opacity="0"/>
-                </radialGradient>
-              </defs>
-              <g transform="translate(200,200)">
-                <circle r="80" fill="url(#cardCorona)"/>
-                <circle r="70" fill="url(#cardCorona)"/>
-                <circle r="60" fill="url(#cardInnerGlow)"/>
-                <circle r="55" fill="none" stroke="#ffd27a" stroke-width="2.5" opacity="0.92"/>
-                <circle r="53" fill="#0a0b18"/>
-              </g>
-            </svg>
+          <div class="article-cover" style="background: linear-gradient(135deg, #0f1626 0%, #1a0f2e 40%, #2d1b4e 70%, #1a2942 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
+            <div style="font-size: 64px; text-align: center; line-height: 1;">🌑✨</div>
+            <div style="font-size: 32px;">🌠</div>
           </div>
           <div class="article-header">
             <h3 class="article-title">Небето на август 12, 2026</h3>
@@ -402,6 +447,18 @@
           <div class="article-header">
             <h3 class="article-title">Съзвездията на зодиака</h3>
             <div class="article-footer" style="margin-top: 12px;">
+              <span class="article-cta">Прочети →</span>
+            </div>
+          </div>
+        </article>
+        <article class="article-card" style="cursor: pointer;" role="button" tabindex="0" onclick="window.open('articles/september-2026.html', '_blank'); return false;" onkeypress="if(event.key==='Enter') { window.open('articles/september-2026.html', '_blank'); return false; }">
+          <div class="article-cover" style="background: linear-gradient(135deg, #1a2942 0%, #2d1b4e 50%, #1a0f2e 100%); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px;">
+            <div style="font-size: 48px; line-height: 1;">♎✨</div>
+            <div style="font-size: 18px; color: #F4C95D; font-weight: 600;">Септември 2026</div>
+          </div>
+          <div class="article-header">
+            <h3 class="article-title">Подреди си живота</h3>
+            <div class="article-footer" style="margin-top: auto;">
               <span class="article-cta">Прочети →</span>
             </div>
           </div>
