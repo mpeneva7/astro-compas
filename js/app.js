@@ -109,38 +109,39 @@
       }
     });
 
-    // Dropdown меню навигация
-    var dropdownBtn = $('nav-dropdown-btn');
-    var dropdownMenu = $('nav-dropdown-menu');
+    // "Още" странично меню
+    var navMoreBtn = $('nav-more-btn');
+    var navMoreOverlay = $('nav-more-overlay');
 
-    if (dropdownBtn) {
-      dropdownBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle('open');
-        dropdownBtn.setAttribute('aria-expanded', dropdownMenu.classList.contains('open'));
-      });
+    if (navMoreBtn && navMoreOverlay) {
+      var closeNavMore = function () {
+        navMoreOverlay.classList.remove('open');
+        navMoreBtn.setAttribute('aria-expanded', 'false');
+      };
 
-      // Затваря dropdown при клик на линк
-      dropdownMenu.querySelectorAll('a').forEach(function (link) {
-        link.addEventListener('click', function () {
-          dropdownMenu.classList.remove('open');
-          dropdownBtn.setAttribute('aria-expanded', 'false');
-        });
-      });
+      var openNavMore = function () {
+        navMoreOverlay.classList.add('open');
+        navMoreBtn.setAttribute('aria-expanded', 'true');
+      };
 
-      // Затваря dropdown при клик отвън
-      document.addEventListener('click', function (e) {
-        if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-          dropdownMenu.classList.remove('open');
-          dropdownBtn.setAttribute('aria-expanded', 'false');
+      navMoreBtn.addEventListener('click', function () {
+        if (navMoreOverlay.classList.contains('open')) {
+          closeNavMore();
+        } else {
+          openNavMore();
         }
       });
 
-      // Escape затваря dropdown
+      $('nav-more-close').addEventListener('click', closeNavMore);
+      $('nav-more-scrim').addEventListener('click', closeNavMore);
+
+      navMoreOverlay.querySelectorAll('.drawer-nav a').forEach(function (a) {
+        a.addEventListener('click', function () { closeNavMore(); });
+      });
+
       document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && dropdownMenu.classList.contains('open')) {
-          dropdownMenu.classList.remove('open');
-          dropdownBtn.setAttribute('aria-expanded', 'false');
+        if (e.key === 'Escape' && navMoreOverlay.classList.contains('open')) {
+          closeNavMore();
         }
       });
     }

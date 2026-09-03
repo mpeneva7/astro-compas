@@ -22,17 +22,10 @@
       <a href="#moon" class="nav-item nav-primary">Луна</a>
       <a href="#horoscope" class="nav-item nav-primary">Хороскоп</a>
       <a href="#natal" class="nav-item nav-primary">Натална карта</a>
-      <div class="nav-dropdown-wrapper">
-        <button class="nav-dropdown-btn" id="nav-dropdown-btn" aria-label="Още" aria-expanded="false">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <div class="nav-dropdown-menu" id="nav-dropdown-menu">
-          <a href="#tarot-section" class="nav-dropdown-item">Таро</a>
-          <a href="#products" class="nav-dropdown-item">Продукти</a>
-          <a href="#articles" class="nav-dropdown-item">Статии</a>
-        </div>
-      </div>
     </nav>
+    <button class="nav-more-btn" id="nav-more-btn" aria-label="Още" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <button class="menu-btn" id="menu-open-btn" aria-label="Меню" aria-expanded="false">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
@@ -55,6 +48,23 @@
       <a href="#horoscope">Хороскоп</a>
       <a href="#natal">Натална карта</a>
       <a href="#astrocartography" style="display: none;">Астрокартография</a>
+      <a href="#products">Продукти</a>
+      <a href="#articles">Статии</a>
+    </nav>
+  </div>
+</div>
+
+<div class="drawer-overlay" id="nav-more-overlay">
+  <div class="drawer-scrim" id="nav-more-scrim"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <span class="brand-name">Още</span>
+      <button class="drawer-close" id="nav-more-close" aria-label="Затвори">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      <a href="#tarot-section">Таро</a>
       <a href="#products">Продукти</a>
       <a href="#articles">Статии</a>
     </nav>
