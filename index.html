@@ -628,10 +628,15 @@
 <script src="js/acg-svg.js"></script>
 <script src="js/astrocartography.js?v=10"></script>
 <script src="js/app.js?v=7"></script>
-<script src="js/tarot.js"></script>
+<script src="js/tarot.js?v=2"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    window.initTarot();
+    console.log('DOMContentLoaded fired, calling initTarot');
+    if (window.initTarot) {
+      window.initTarot();
+    } else {
+      console.error('initTarot not found on window');
+    }
   });
 </script>
 </body>
