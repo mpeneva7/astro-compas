@@ -330,16 +330,17 @@ section { padding: 40px 20px; }
 }
 
 .tarot {
-  display: flex; flex-direction: column; gap: 40px; align-items: center;
+  display: flex; flex-direction: column; gap: 40px; align-items: stretch;
 }
 
 .tarot-draw-btn {
   order: -1;
+  align-self: center;
 }
 
 .tarot-columns-header {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  width: 100%; max-width: 900px; padding: 0 16px; margin-bottom: 16px;
+  width: 100%; max-width: 900px; padding: 0 16px; margin: 0 auto 16px;
   text-align: center;
 }
 
@@ -351,6 +352,7 @@ section { padding: 40px 20px; }
 .tarot-cards {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
   width: 100%; max-width: 900px; padding: 0 16px;
+  margin: 0 auto;
   align-items: stretch;
 }
 
