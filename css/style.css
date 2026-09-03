@@ -340,7 +340,7 @@ section { padding: 40px 20px; }
 
 .tarot-columns-header {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  width: 100%; max-width: 900px; padding: 0 16px; margin: 0 auto 0;
+  width: 100%; max-width: 900px; padding: 0 16px; margin: 20px auto 0;
   text-align: center;
 }
 
