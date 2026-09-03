@@ -124,21 +124,26 @@ function drawThreeCards() {
   }));
 }
 
-async function revealCard(cardElement, card) {
+function revealCard(cardElement, card) {
   const cardFront = cardElement.querySelector('.card__front');
   const img = document.createElement('img');
   img.src = IMAGE_BASE + card.filename;
   img.alt = card.nameBg + (card.reversed ? ' обърната' : '');
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'cover';
+  img.style.display = 'block';
 
-  try {
-    await img.decode();
+  function displayImage() {
     cardFront.innerHTML = '';
     cardFront.appendChild(img);
-
     if (card.reversed) {
       img.style.transform = 'rotate(180deg)';
     }
-  } catch (err) {
+    cardElement.classList.add('is-revealed');
+  }
+
+  function showFallback() {
     console.log(`Failed to load ${card.filename}`);
     cardFront.innerHTML = '';
     const text = document.createElement('div');
@@ -147,12 +152,23 @@ async function revealCard(cardElement, card) {
     text.style.color = 'var(--muted-foreground)';
     text.textContent = card.nameBg;
     cardFront.appendChild(text);
+    cardElement.classList.add('is-revealed');
   }
 
-  cardElement.classList.add('is-revealed');
+  if (img.complete && img.naturalHeight !== 0) {
+    displayImage();
+  } else {
+    img.onload = displayImage;
+    img.onerror = showFallback;
+    setTimeout(() => {
+      if (!cardElement.classList.contains('is-revealed')) {
+        showFallback();
+      }
+    }, 3000);
+  }
 }
 
-async function showSpread() {
+function showSpread() {
   const cards = drawThreeCards();
   const cardElements = document.querySelectorAll('.tarot .card');
 
@@ -162,8 +178,8 @@ async function showSpread() {
 
     cardElement.classList.remove('is-revealed');
 
-    setTimeout(async () => {
-      await revealCard(cardElement, card);
+    setTimeout(() => {
+      revealCard(cardElement, card);
 
       const nameEl = document.getElementById(`card-name-${i + 1}`);
       const statusEl = document.getElementById(`card-status-${i + 1}`);
