@@ -446,6 +446,7 @@ section { padding: 40px 20px; }
   background: #1a1428;
   border-radius: 16px;
   border: none;
+  min-height: 420px;
 }
 
 .card__front {
