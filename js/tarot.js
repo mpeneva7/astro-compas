@@ -128,70 +128,42 @@ function revealCard(cardElement, card) {
   const cardFront = cardElement.querySelector('.card__front');
   cardFront.innerHTML = '';
 
-  const img = new Image();
   const imagePath = IMAGE_BASE + card.filename;
+  const img = document.createElement('img');
 
-  let imageLoaded = false;
-
-  function displayImage() {
-    if (imageLoaded) return;
-    imageLoaded = true;
-
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'cover';
-    img.style.display = 'block';
-
-    if (card.reversed) {
-      img.style.transform = 'rotate(180deg)';
-    }
-
+  img.onload = function() {
+    console.log('✓ Image loaded:', imagePath);
     cardFront.innerHTML = '';
     cardFront.appendChild(img);
     cardElement.classList.add('is-revealed');
-  }
+  };
 
-  function showFallback() {
-    if (imageLoaded) return;
-    imageLoaded = true;
-
-    cardFront.innerHTML = '';
-    const fallbackDiv = document.createElement('div');
-    fallbackDiv.style.width = '100%';
-    fallbackDiv.style.height = '100%';
-    fallbackDiv.style.display = 'flex';
-    fallbackDiv.style.alignItems = 'center';
-    fallbackDiv.style.justifyContent = 'center';
-    fallbackDiv.style.padding = '20px';
-    fallbackDiv.style.textAlign = 'center';
-    fallbackDiv.style.color = 'var(--muted-foreground)';
-    fallbackDiv.style.background = 'rgba(74, 63, 84, 0.2)';
-    fallbackDiv.textContent = card.nameBg;
-
-    cardFront.appendChild(fallbackDiv);
-    cardElement.classList.add('is-revealed');
-  }
-
-  // Set handlers before setting src
-  img.onload = displayImage;
   img.onerror = function() {
-    console.warn(`Failed to load image: ${imagePath}`);
-    showFallback();
+    console.warn('✗ Image failed to load:', imagePath);
+    cardFront.innerHTML = '';
+    const text = document.createElement('div');
+    text.style.display = 'flex';
+    text.style.alignItems = 'center';
+    text.style.justifyContent = 'center';
+    text.style.height = '100%';
+    text.style.color = 'var(--muted-foreground)';
+    text.textContent = card.nameBg;
+    cardFront.appendChild(text);
+    cardElement.classList.add('is-revealed');
   };
 
-  // Set timeout as safety net
-  const timeoutId = setTimeout(showFallback, 5000);
+  // Apply styles before setting src
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'cover';
+  img.style.display = 'block';
 
-  // Attach cleanup to image load
-  const originalOnload = img.onload;
-  img.onload = function() {
-    clearTimeout(timeoutId);
-    originalOnload.call(this);
-  };
+  if (card.reversed) {
+    img.style.transform = 'rotate(180deg)';
+  }
 
-  // Start loading
-  img.src = imagePath;
   img.alt = card.nameBg + (card.reversed ? ' обърната' : '');
+  img.src = imagePath;
 }
 
 function showSpread() {
