@@ -340,13 +340,13 @@ section { padding: 40px 20px; }
 
 .tarot-columns-header {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  width: 100%; max-width: 900px; padding: 0 16px; margin: 0 auto 2px;
+  width: 100%; max-width: 900px; padding: 0 16px; margin: 0 auto 0;
   text-align: center;
 }
 
 .column-title {
   font-size: 0.95rem; font-weight: 600; color: var(--primary);
-  padding-bottom: 12px; letter-spacing: 0.3px;
+  padding-bottom: 2px; letter-spacing: 0.3px;
 }
 
 .tarot-cards {
@@ -373,7 +373,7 @@ section { padding: 40px 20px; }
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     max-width: 100%;
-    margin-bottom: 2px;
+    margin-bottom: 0;
   }
 
   .column-title:nth-child(3) {
@@ -402,12 +402,13 @@ section { padding: 40px 20px; }
     grid-template-columns: 1fr;
     gap: 12px;
     max-width: 100%;
-    margin-bottom: 2px;
+    margin-bottom: 0;
     padding: 0 12px;
   }
 
   .column-title {
     font-size: 0.85rem;
+    padding-bottom: 2px;
   }
 
   .column-title:nth-child(2),
