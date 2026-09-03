@@ -283,6 +283,137 @@ section { padding: 40px 20px; }
 .moon-guidance p:last-child { margin-bottom: 0; }
 .moon-meta { margin-top: 20px; font-size: 0.8rem; color: var(--outline); }
 
+/* ── Tarot section ────────────────────────────────────────────────── */
+#tarot-section { background: linear-gradient(180deg, #1E1428 0%, #251A32 100%); padding: 60px 0; }
+
+.tarot-header {
+  position: relative; margin-bottom: 48px; text-align: center;
+}
+
+.tarot-badge {
+  display: inline-block; position: relative;
+  padding: 6px 12px; border-radius: var(--radius-pill);
+  background: rgba(182,157,232,0.15); border: 1px solid rgba(182,157,232,0.3);
+  font-size: 0.75rem; font-weight: 700; color: var(--primary);
+  margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.tarot-header h2 {
+  font-size: 2rem; font-weight: 700; color: var(--primary);
+  margin: 0;
+}
+
+.tarot {
+  display: flex; flex-direction: column; gap: 40px; align-items: center;
+}
+
+.tarot-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  width: 100%; max-width: 600px; perspective: 1000px;
+}
+
+.card {
+  aspect-ratio: 2 / 3; border-radius: var(--radius-md);
+  background: var(--card); border: 1px solid var(--border);
+  overflow: hidden; cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.card:hover {
+  border-color: rgba(182,157,232,0.35);
+  box-shadow: 0 8px 24px rgba(182,157,232,0.15);
+}
+
+.card__front {
+  width: 100%; height: 100%; display: flex; align-items: center;
+  justify-content: center; background: linear-gradient(135deg, #2A1F40 0%, #1E1428 100%);
+  font-size: 2.4rem; color: rgba(182,157,232,0.3);
+  position: relative; overflow: hidden;
+}
+
+.card__front img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+}
+
+.card__emblem {
+  width: 100%; height: 100%; display: flex; align-items: center;
+  justify-content: center; color: var(--primary);
+  opacity: 0.6;
+}
+
+.card__emblem svg {
+  width: 60%; height: 60%;
+}
+
+.card.is-revealed .card__front {
+  animation: cardReveal 0.6s ease forwards;
+}
+
+@keyframes cardReveal {
+  0% { opacity: 0; transform: rotateY(180deg); }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; transform: rotateY(0deg); }
+}
+
+.tarot-draw-btn {
+  padding: 14px 40px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary), #9A86C0);
+  color: white; border: none; cursor: pointer;
+  font-size: 0.95rem; font-weight: 600; letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(182,157,232,0.25);
+}
+
+.tarot-draw-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(182,157,232,0.35);
+}
+
+.tarot-draw-btn:active {
+  transform: translateY(0);
+}
+
+.tarot-meanings {
+  width: 100%; max-width: 600px; margin-top: 32px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+
+.tarot-meaning {
+  text-align: center; padding: 20px 16px;
+  background: rgba(182,157,232,0.08); border: 1px solid rgba(182,157,232,0.15);
+  border-radius: var(--radius-md);
+  opacity: 0; animation: fadeInUp 0.6s ease forwards;
+}
+
+.tarot-meaning:nth-child(1) { animation-delay: 0.14s; }
+.tarot-meaning:nth-child(2) { animation-delay: 0.28s; }
+.tarot-meaning:nth-child(3) { animation-delay: 0.42s; }
+
+.tarot-meaning h4 {
+  font-size: 0.9rem; font-weight: 600; color: var(--primary);
+  margin: 0 0 8px; line-height: 1.4;
+}
+
+.tarot-meaning p {
+  font-size: 0.8rem; color: var(--muted-foreground);
+  margin: 0;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 540px) {
+  .tarot-cards { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card { aspect-ratio: auto; min-height: 240px; }
+  .tarot-header h2 { font-size: 1.6rem; }
+  .tarot-meanings { grid-template-columns: 1fr; }
+  .tarot-draw-btn { width: 100%; }
+}
+
 /* ── Horoscope grid ───────────────────────────────────────────────── */
 .horoscope-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 .sign-card {
