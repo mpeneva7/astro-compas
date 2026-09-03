@@ -154,7 +154,11 @@ function revealCard(cardElement, card) {
     text.style.alignItems = 'center';
     text.style.justifyContent = 'center';
     text.style.height = '100%';
+    text.style.width = '100%';
     text.style.color = 'var(--muted-foreground)';
+    text.style.fontSize = '0.9rem';
+    text.style.padding = '12px';
+    text.style.boxSizing = 'border-box';
     text.textContent = card.nameBg;
     cardFront.appendChild(text);
     cardElement.classList.add('is-revealed');
