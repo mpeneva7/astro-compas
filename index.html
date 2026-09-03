@@ -41,6 +41,7 @@
     <nav class="drawer-nav">
       <a href="#hero">Начало</a>
       <a href="#moon">Луна</a>
+      <a href="#tarot-section">Таро</a>
       <a href="#horoscope">Хороскоп</a>
       <a href="#natal">Натална карта</a>
       <a href="#astrocartography" style="display: none;">Астрокартография</a>
@@ -89,6 +90,34 @@
         <p class="moon-sign-line" id="moon-sign-line"></p>
         <div class="moon-guidance" id="moon-guidance"></div>
         <p class="moon-meta" id="moon-meta"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ TAROT ═══════════════════════ -->
+  <section id="tarot-section" class="tarot-section">
+    <div class="container-narrow reveal" data-reveal>
+      <div class="tarot-header">
+        <div class="tarot-badge">Ново</div>
+        <h2>Таро</h2>
+      </div>
+
+      <div class="tarot">
+        <div class="tarot-cards">
+          <div class="card card-1">
+            <div class="card__front"></div>
+          </div>
+          <div class="card card-2">
+            <div class="card__front"></div>
+          </div>
+          <div class="card card-3">
+            <div class="card__front"></div>
+          </div>
+        </div>
+
+        <button id="tarot-draw-btn" class="tarot-draw-btn">Извлечи карти</button>
+
+        <div id="tarot-meanings" class="tarot-meanings"></div>
       </div>
     </div>
   </section>
@@ -484,6 +513,7 @@
       <nav class="footer-nav">
         <a href="#hero">Начало</a>
         <a href="#moon">Луна</a>
+        <a href="#tarot-section">Таро</a>
         <a href="#horoscope">Хороскоп</a>
         <a href="#natal">Натална карта</a>
       </nav>
@@ -507,5 +537,11 @@
 <script src="js/acg-svg.js"></script>
 <script src="js/astrocartography.js?v=10"></script>
 <script src="js/app.js?v=7"></script>
+<script src="js/tarot.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    window.initTarot();
+  });
+</script>
 </body>
 </html>
