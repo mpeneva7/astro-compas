@@ -321,8 +321,8 @@ section { padding: 40px 20px; }
 }
 
 .tarot-header h2 {
-  font-size: 2rem; font-weight: 700; color: var(--primary);
-  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.4rem); font-weight: 700; color: var(--foreground);
+  margin: 0; font-family: var(--font-display);
 }
 
 .tarot {
