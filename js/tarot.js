@@ -192,6 +192,8 @@ function showSpread() {
 
       const nameEl = document.getElementById(`card-name-${i + 1}`);
       const statusEl = document.getElementById(`card-status-${i + 1}`);
+      const meaningEl = document.getElementById(`card-meaning-${i + 1}`);
+
       if (nameEl) {
         nameEl.textContent = card.nameBg;
         console.log(`Set card-name-${i + 1} to:`, card.nameBg);
@@ -200,18 +202,12 @@ function showSpread() {
         statusEl.textContent = card.reversed ? 'Обърната' : 'Изправена';
         console.log(`Set card-status-${i + 1} to:`, card.reversed ? 'Обърната' : 'Изправена');
       }
+      if (meaningEl) {
+        meaningEl.textContent = card.reversed ? card.reversedBg : card.uprightBg;
+        console.log(`Set card-meaning-${i + 1}`);
+      }
     }, i * 140);
   }
-
-  setTimeout(() => {
-    document.getElementById('tarot-meanings').innerHTML = cards.map((card) => `
-      <div class="tarot-meaning">
-        <h4>${card.nameBg}</h4>
-        <p style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.5rem;">${card.reversed ? 'Обърната' : 'Изправена'}</p>
-        <p style="font-size: 0.875rem; line-height: 1.5;">${card.reversed ? card.reversedBg : card.uprightBg}</p>
-      </div>
-    `).join('');
-  }, 500);
 }
 
 window.initTarot = function() {

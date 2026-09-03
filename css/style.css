@@ -345,13 +345,18 @@ section { padding: 40px 20px; }
 .card__front {
   width: 100%; aspect-ratio: var(--card-ratio);
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden; background: transparent;
-  position: relative;
+  overflow: hidden; background: linear-gradient(135deg, #2a1f3d 0%, #1a0f2e 100%);
+  position: relative; border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border: 1px solid rgba(182, 157, 232, 0.2);
 }
 
 .card__front img {
   width: 100%; height: 100%; object-fit: cover;
-  display: block;
+  display: block; border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.card-placeholder {
+  opacity: 0.5; pointer-events: none;
 }
 
 .card__emblem {
@@ -378,6 +383,11 @@ section { padding: 40px 20px; }
 .card-status {
   font-size: 0.8rem; color: var(--muted-foreground);
   margin: 4px 0 0 0;
+}
+
+.card-meaning {
+  font-size: 0.75rem; color: var(--muted-foreground);
+  margin: 8px 0 0 0; line-height: 1.4;
 }
 
 .tarot-draw-btn {
