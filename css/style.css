@@ -444,6 +444,7 @@ section { padding: 40px 20px; }
   display: flex; flex-direction: column; height: 100%;
   overflow: hidden;
   background: #1a1428;
+  border-radius: 16px;
 }
 
 .card__front {
