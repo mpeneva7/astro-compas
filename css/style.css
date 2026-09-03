@@ -136,7 +136,7 @@ button { font-family: var(--font-body); }
 .brand:hover .brand-mark { transform: scale(1.1); }
 .brand-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; color: var(--foreground); }
 
-.appbar-nav { display: none; align-items: center; gap: 2px; }
+.appbar-nav { display: none; align-items: center; gap: 1px; margin-left: auto; }
 .appbar-nav a {
   padding: 7px 14px; border-radius: var(--radius-pill);
   font-size: 0.9rem; font-weight: 500; color: var(--muted-foreground);
@@ -145,19 +145,18 @@ button { font-family: var(--font-body); }
 .appbar-nav a:hover { background: rgba(182,157,232,0.1); color: var(--foreground); }
 
 .nav-more-btn {
-  display: none; background: none; border: none; cursor: pointer;
-  width: 40px; height: 40px; border-radius: 8px;
-  color: var(--muted-foreground); padding: 8px;
-  transition: background 0.2s ease, color 0.2s ease;
+  display: none; background: transparent; border: none; cursor: pointer;
+  width: 32px; height: 32px; padding: 4px;
+  color: var(--muted-foreground);
+  transition: color 0.2s ease;
+  flex-shrink: 0;
 }
 
 .nav-more-btn:hover {
-  background: rgba(182,157,232,0.1);
   color: var(--foreground);
 }
 
 .nav-more-btn[aria-expanded="true"] {
-  background: rgba(182,157,232,0.15);
   color: var(--primary);
 }
 
