@@ -126,56 +126,85 @@ function drawThreeCards() {
 
 function revealCard(cardElement, card) {
   const cardFront = cardElement.querySelector('.card__front');
-  const img = document.createElement('img');
-  img.src = IMAGE_BASE + card.filename;
-  img.alt = card.nameBg + (card.reversed ? ' обърната' : '');
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.objectFit = 'cover';
-  img.style.display = 'block';
+  cardFront.innerHTML = '';
+
+  const img = new Image();
+  const imagePath = IMAGE_BASE + card.filename;
+
+  let imageLoaded = false;
 
   function displayImage() {
-    cardFront.innerHTML = '';
-    cardFront.appendChild(img);
+    if (imageLoaded) return;
+    imageLoaded = true;
+
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.display = 'block';
+
     if (card.reversed) {
       img.style.transform = 'rotate(180deg)';
     }
+
+    cardFront.innerHTML = '';
+    cardFront.appendChild(img);
     cardElement.classList.add('is-revealed');
   }
 
   function showFallback() {
-    console.log(`Failed to load ${card.filename}`);
+    if (imageLoaded) return;
+    imageLoaded = true;
+
     cardFront.innerHTML = '';
-    const text = document.createElement('div');
-    text.style.padding = '20px';
-    text.style.textAlign = 'center';
-    text.style.color = 'var(--muted-foreground)';
-    text.textContent = card.nameBg;
-    cardFront.appendChild(text);
+    const fallbackDiv = document.createElement('div');
+    fallbackDiv.style.width = '100%';
+    fallbackDiv.style.height = '100%';
+    fallbackDiv.style.display = 'flex';
+    fallbackDiv.style.alignItems = 'center';
+    fallbackDiv.style.justifyContent = 'center';
+    fallbackDiv.style.padding = '20px';
+    fallbackDiv.style.textAlign = 'center';
+    fallbackDiv.style.color = 'var(--muted-foreground)';
+    fallbackDiv.style.background = 'rgba(74, 63, 84, 0.2)';
+    fallbackDiv.textContent = card.nameBg;
+
+    cardFront.appendChild(fallbackDiv);
     cardElement.classList.add('is-revealed');
   }
 
-  if (img.complete && img.naturalHeight !== 0) {
-    displayImage();
-  } else {
-    img.onload = displayImage;
-    img.onerror = showFallback;
-    setTimeout(() => {
-      if (!cardElement.classList.contains('is-revealed')) {
-        showFallback();
-      }
-    }, 3000);
-  }
+  // Set handlers before setting src
+  img.onload = displayImage;
+  img.onerror = function() {
+    console.warn(`Failed to load image: ${imagePath}`);
+    showFallback();
+  };
+
+  // Set timeout as safety net
+  const timeoutId = setTimeout(showFallback, 5000);
+
+  // Attach cleanup to image load
+  const originalOnload = img.onload;
+  img.onload = function() {
+    clearTimeout(timeoutId);
+    originalOnload.call(this);
+  };
+
+  // Start loading
+  img.src = imagePath;
+  img.alt = card.nameBg + (card.reversed ? ' обърната' : '');
 }
 
 function showSpread() {
   const cards = drawThreeCards();
   const cardElements = document.querySelectorAll('.tarot .card');
 
+  console.log('Drawing tarot spread:', cards);
+
   for (let i = 0; i < 3; i++) {
     const cardElement = cardElements[i];
     const card = cards[i];
 
+    console.log(`Loading card ${i + 1}:`, card);
     cardElement.classList.remove('is-revealed');
 
     setTimeout(() => {
@@ -183,8 +212,14 @@ function showSpread() {
 
       const nameEl = document.getElementById(`card-name-${i + 1}`);
       const statusEl = document.getElementById(`card-status-${i + 1}`);
-      if (nameEl) nameEl.textContent = card.nameBg;
-      if (statusEl) statusEl.textContent = card.reversed ? 'Обърната' : 'Изправена';
+      if (nameEl) {
+        nameEl.textContent = card.nameBg;
+        console.log(`Set card-name-${i + 1} to:`, card.nameBg);
+      }
+      if (statusEl) {
+        statusEl.textContent = card.reversed ? 'Обърната' : 'Изправена';
+        console.log(`Set card-status-${i + 1} to:`, card.reversed ? 'Обърната' : 'Изправена');
+      }
     }, i * 140);
   }
 
