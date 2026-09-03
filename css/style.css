@@ -340,6 +340,7 @@ section { padding: 40px 20px; }
 .tarot-cards {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
   width: 100%; max-width: 900px; padding: 0 16px;
+  align-items: stretch;
 }
 
 /* Tablet and below */
@@ -385,8 +386,7 @@ section { padding: 40px 20px; }
   }
 
   .card-info {
-    min-height: 80px;
-    padding: 10px 8px;
+    padding: 12px 10px;
   }
 
   .card-name {
@@ -399,20 +399,20 @@ section { padding: 40px 20px; }
 }
 
 .card {
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; height: 100%; border-radius: var(--radius-md);
+  background: var(--surface); overflow: hidden; border: 1px solid rgba(182, 157, 232, 0.2);
 }
 
 .card__front {
   width: 100%; aspect-ratio: var(--card-ratio);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; background: linear-gradient(135deg, #2a1f3d 0%, #1a0f2e 100%);
-  position: relative; border-radius: var(--radius-md) var(--radius-md) 0 0;
-  border: 1px solid rgba(182, 157, 232, 0.2);
+  position: relative; flex-shrink: 0;
 }
 
 .card__front img {
   width: 100%; height: 100%; object-fit: cover;
-  display: block; border-radius: var(--radius-md) var(--radius-md) 0 0;
+  display: block;
 }
 
 .card-placeholder {
@@ -431,10 +431,9 @@ section { padding: 40px 20px; }
 }
 
 .card-info {
-  min-height: 100px; display: flex; flex-direction: column;
-  justify-content: flex-start; text-align: center; padding: 12px 10px;
-  background: var(--input-bg); border-radius: 0 0 var(--radius-md) var(--radius-md);
-  border: 1px solid var(--border); border-top: none;
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; text-align: center; padding: 16px 12px;
+  background: var(--input-bg);
 }
 
 .card-name {
@@ -444,12 +443,12 @@ section { padding: 40px 20px; }
 
 .card-status {
   font-size: 0.75rem; color: var(--muted-foreground);
-  margin: 0 0 6px 0; font-weight: 500;
+  margin: 0 0 8px 0; font-weight: 500;
 }
 
 .card-meaning {
   font-size: 0.8rem; color: var(--muted-foreground);
-  margin: 0; line-height: 1.5; flex: 1; display: flex; align-items: center; justify-content: center;
+  margin: 0; line-height: 1.6;
 }
 
 .tarot-draw-btn {
