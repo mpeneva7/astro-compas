@@ -1201,8 +1201,50 @@
     }, 500);
   }
 
+  function initGenderDropdown() {
+    var btn = $('gender-btn');
+    var menu = $('gender-menu');
+    var input = $('gender-input');
+    var value = $('gender-value');
+    var label = $('gender-label');
+
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var isOpen = menu.classList.contains('open');
+      menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', !isOpen);
+    });
+
+    Array.from(menu.querySelectorAll('.gender-option')).forEach(function (option) {
+      option.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        var selectedValue = option.getAttribute('data-value');
+        input.value = selectedValue;
+        var selectedText = option.textContent;
+        value.textContent = selectedText;
+        value.classList.toggle('filled', !!selectedValue);
+        label.classList.toggle('filled', !!selectedValue);
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        clearGenderError();
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function clearGenderError() {
+    $('gender-error').classList.remove('show');
+  }
+
   function initNatalForm() {
     initCityAutocomplete();
+    initGenderDropdown();
     updateDateField();
     updateTimeField();
 
