@@ -165,6 +165,7 @@ function revealCard(cardElement, card) {
   img.style.height = '100%';
   img.style.objectFit = 'cover';
   img.style.display = 'block';
+  img.style.borderRadius = '16px 16px 0 0';
 
   if (card.reversed) {
     img.style.transform = 'rotate(180deg)';
