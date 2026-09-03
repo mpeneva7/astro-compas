@@ -339,22 +339,62 @@ section { padding: 40px 20px; }
 
 .tarot-cards {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  width: 100%; max-width: 900px;
+  width: 100%; max-width: 900px; padding: 0 16px;
 }
 
-@media (max-width: 768px) {
+/* Tablet and below */
+@media (max-width: 900px) {
+  .tarot-cards {
+    max-width: 100%;
+  }
+}
+
+/* Mobile - 2 columns */
+@media (max-width: 640px) {
   .tarot {
-    gap: 24px;
+    gap: 24px; padding: 0 16px;
   }
 
   .tarot-cards {
-    grid-template-columns: 1fr;
-    max-width: 400px;
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+    max-width: 100%;
   }
 
   .tarot-draw-btn {
     width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Mobile small - 1 column */
+@media (max-width: 480px) {
+  .tarot {
+    gap: 20px; padding: 0 12px;
+  }
+
+  .tarot-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 100%;
+  }
+
+  .tarot-draw-btn {
+    width: 100%;
+    padding: 12px 24px;
+  }
+
+  .card-info {
+    min-height: 80px;
+    padding: 10px 8px;
+  }
+
+  .card-name {
+    font-size: 0.85rem;
+  }
+
+  .card-meaning {
+    font-size: 0.75rem;
   }
 }
 
