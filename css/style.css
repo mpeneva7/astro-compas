@@ -376,6 +376,10 @@ section { padding: 40px 20px; }
     margin-bottom: 2px;
   }
 
+  .column-title:nth-child(3) {
+    display: none;
+  }
+
   .tarot-cards {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -404,6 +408,11 @@ section { padding: 40px 20px; }
 
   .column-title {
     font-size: 0.85rem;
+  }
+
+  .column-title:nth-child(2),
+  .column-title:nth-child(3) {
+    display: none;
   }
 
   .tarot-cards {
