@@ -333,9 +333,29 @@ section { padding: 40px 20px; }
   display: flex; flex-direction: column; gap: 40px; align-items: center;
 }
 
+.tarot-draw-btn {
+  order: -1;
+}
+
 .tarot-cards {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
   width: 100%; max-width: 900px;
+}
+
+@media (max-width: 768px) {
+  .tarot {
+    gap: 24px;
+  }
+
+  .tarot-cards {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    gap: 16px;
+  }
+
+  .tarot-draw-btn {
+    width: 100%;
+  }
 }
 
 .card {
