@@ -125,10 +125,18 @@ function drawThreeCards() {
 }
 
 function revealCard(cardElement, card) {
+  console.log('revealCard called for:', card.nameBg);
   const cardFront = cardElement.querySelector('.card__front');
+
+  if (!cardFront) {
+    console.error('✗ card__front not found in:', cardElement);
+    return;
+  }
+
   cardFront.innerHTML = '';
 
   const imagePath = IMAGE_BASE + card.filename;
+  console.log('Loading image from:', imagePath);
   const img = document.createElement('img');
 
   img.onload = function() {
@@ -207,8 +215,18 @@ function showSpread() {
 }
 
 window.initTarot = function() {
+  console.log('✓ initTarot called');
   const drawBtn = document.getElementById('tarot-draw-btn');
+  console.log('drawBtn:', drawBtn);
+
   if (drawBtn) {
-    drawBtn.addEventListener('click', showSpread);
+    drawBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('✓ Draw button clicked');
+      showSpread();
+    });
+    console.log('✓ Click handler attached to draw button');
+  } else {
+    console.error('✗ Draw button not found');
   }
 };
