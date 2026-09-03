@@ -153,6 +153,19 @@ button { font-family: var(--font-body); }
 .nav-dropdown-btn {
   background: none; border: none; cursor: pointer; display: flex;
   align-items: center; justify-content: center; font-family: var(--font-body);
+  width: 40px; height: 40px; border-radius: 8px;
+  color: var(--muted-foreground);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-dropdown-btn:hover {
+  background: rgba(182,157,232,0.1);
+  color: var(--foreground);
+}
+
+.nav-dropdown-btn[aria-expanded="true"] {
+  background: rgba(182,157,232,0.15);
+  color: var(--primary);
 }
 
 .nav-dropdown-menu {
