@@ -164,6 +164,11 @@ async function showSpread() {
 
     setTimeout(async () => {
       await revealCard(cardElement, card);
+
+      const nameEl = document.getElementById(`card-name-${i + 1}`);
+      const statusEl = document.getElementById(`card-status-${i + 1}`);
+      if (nameEl) nameEl.textContent = card.nameBg;
+      if (statusEl) statusEl.textContent = card.reversed ? 'Обърната' : 'Изправена';
     }, i * 140);
   }
 
