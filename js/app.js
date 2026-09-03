@@ -109,6 +109,42 @@
       }
     });
 
+    // Dropdown меню навигация
+    var dropdownBtn = $('nav-dropdown-btn');
+    var dropdownMenu = $('nav-dropdown-menu');
+
+    if (dropdownBtn) {
+      dropdownBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('open');
+        dropdownBtn.setAttribute('aria-expanded', dropdownMenu.classList.contains('open'));
+      });
+
+      // Затваря dropdown при клик на линк
+      dropdownMenu.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          dropdownMenu.classList.remove('open');
+          dropdownBtn.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      // Затваря dropdown при клик отвън
+      document.addEventListener('click', function (e) {
+        if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.remove('open');
+          dropdownBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Escape затваря dropdown
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && dropdownMenu.classList.contains('open')) {
+          dropdownMenu.classList.remove('open');
+          dropdownBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }

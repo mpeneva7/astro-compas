@@ -18,10 +18,20 @@
       <span class="brand-name">АстроКомпас</span>
     </a>
     <nav class="appbar-nav">
-      <a href="#hero">Начало</a>
-      <a href="#moon">Луна</a>
-      <a href="#horoscope">Хороскоп</a>
-      <a href="#natal">Натална карта</a>
+      <a href="#hero" class="nav-item nav-primary">Начало</a>
+      <a href="#moon" class="nav-item nav-primary">Луна</a>
+      <a href="#horoscope" class="nav-item nav-primary">Хороскоп</a>
+      <a href="#natal" class="nav-item nav-primary">Натална карта</a>
+      <div class="nav-dropdown-wrapper">
+        <button class="nav-dropdown-btn" id="nav-dropdown-btn" aria-label="Още" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-dropdown-menu">
+          <a href="#tarot-section" class="nav-dropdown-item">Таро</a>
+          <a href="#products" class="nav-dropdown-item">Продукти</a>
+          <a href="#articles" class="nav-dropdown-item">Статии</a>
+        </div>
+      </div>
     </nav>
     <button class="menu-btn" id="menu-open-btn" aria-label="Меню" aria-expanded="false">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>

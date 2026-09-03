@@ -136,13 +136,44 @@ button { font-family: var(--font-body); }
 .brand:hover .brand-mark { transform: scale(1.1); }
 .brand-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; color: var(--foreground); }
 
-.appbar-nav { display: none; align-items: center; gap: 2px; }
-.appbar-nav a {
+.appbar-nav { display: none; align-items: center; gap: 2px; flex-wrap: wrap; }
+.appbar-nav a, .nav-dropdown-btn {
   padding: 7px 14px; border-radius: var(--radius-pill);
   font-size: 0.9rem; font-weight: 500; color: var(--muted-foreground);
   transition: background 0.15s ease, color 0.15s ease;
 }
-.appbar-nav a:hover { background: rgba(182,157,232,0.1); color: var(--foreground); }
+.appbar-nav a:hover, .nav-dropdown-btn:hover { background: rgba(182,157,232,0.1); color: var(--foreground); }
+
+.nav-item { display: inline-block; }
+
+.nav-dropdown-wrapper {
+  position: relative; display: inline-block;
+}
+
+.nav-dropdown-btn {
+  background: none; border: none; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; font-family: var(--font-body);
+}
+
+.nav-dropdown-menu {
+  position: absolute; top: 100%; right: 0; display: none;
+  background: var(--popover); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  min-width: 160px; z-index: 100; overflow: hidden;
+  animation: fadeUp 0.2s ease;
+}
+
+.nav-dropdown-menu.open { display: flex; flex-direction: column; }
+
+.nav-dropdown-item {
+  display: block; padding: 12px 16px; font-size: 0.9rem;
+  color: var(--foreground); text-decoration: none;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.nav-dropdown-item:last-child { border-bottom: none; }
+.nav-dropdown-item:hover { background: rgba(182,157,232,0.1); color: var(--primary); }
 
 .menu-btn {
   display: flex; background: none; border: none; color: var(--muted-foreground);
@@ -152,6 +183,17 @@ button { font-family: var(--font-body); }
 @media (min-width: 860px) {
   .appbar-nav { display: flex; }
   .menu-btn { display: none; }
+}
+
+@media (min-width: 860px) and (max-width: 1080px) {
+  .nav-item.nav-primary:nth-child(n+3) { display: none; }
+  .nav-item.nav-primary:nth-child(1),
+  .nav-item.nav-primary:nth-child(2) { display: inline-block; }
+}
+
+@media (min-width: 860px) and (max-width: 920px) {
+  .nav-item.nav-primary:nth-child(n+2) { display: none; }
+  .nav-item.nav-primary:nth-child(1) { display: inline-block; }
 }
 
 /* Mobile drawer */
