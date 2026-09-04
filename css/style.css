@@ -605,7 +605,7 @@ section { padding: 40px 20px; }
 @media (min-width: 640px) { .natal-form-grid { grid-template-columns: repeat(3, 1fr); } }
 .natal-form-grid:last-of-type { margin-bottom: 0; }
 
-.m3-field { position: relative; overflow: visible; }
+.m3-field { position: relative; overflow: visible; min-width: 0; }
 .m3-field-label {
   position: absolute; z-index: 2; top: 0; left: 46px; transform: translateY(-50%);
   font-size: 0.72rem; font-weight: 500; color: var(--primary);
@@ -750,7 +750,7 @@ section { padding: 40px 20px; }
 .gender-dropdown-btn:not(:focus-visible) { outline: none; }
 .gender-dropdown-menu {
   position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
-  margin-top: 8px; border-radius: var(--radius-md); background: var(--surface);
+  margin-top: 8px; border-radius: var(--radius-md); background: var(--card-2);
   border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   max-height: 0; overflow: hidden; opacity: 0; pointer-events: none;
   transition: max-height 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
