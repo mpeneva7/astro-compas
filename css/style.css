@@ -622,7 +622,26 @@ section { padding: 40px 20px; }
 .m3-field-box input, .m3-field-box select {
   flex: 1; border: none; background: transparent; outline: none;
   font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
-  min-width: 0; color-scheme: dark;
+  min-width: 0; color-scheme: dark; width: 100%;
+}
+
+.m3-field-box select {
+  padding: 8px 0;
+  background-color: transparent;
+  cursor: pointer;
+  width: 100%;
+  flex: 1;
+}
+
+.m3-field-box select option {
+  background: var(--card-2) !important;
+  color: var(--foreground) !important;
+  padding: 8px 12px;
+}
+
+#gender-input {
+  width: 100% !important;
+  flex: 1 !important;
 }
 .m3-field-box input::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
 
