@@ -433,6 +433,11 @@
     $('city-field-box').classList.remove('error');
   }
 
+  function clearGenderError() {
+    var err = $('gender-error');
+    if (err) { err.classList.remove('show'); err.textContent = ''; }
+  }
+
   /* ───────────────────────── Натална карта — колело (SVG) ───────────────────────── */
 
   function buildWheelSVG(chart) {
@@ -1164,10 +1169,57 @@
     }, 500);
   }
 
+  function initGenderDropdown() {
+    var trigger = $('gender-dropdown-trigger');
+    var menu = $('gender-dropdown-menu');
+    var input = $('gender-input');
+    var selectedText = $('gender-selected-text');
+    var options = menu.querySelectorAll('.gender-option');
+
+    function closeDropdown() {
+      menu.classList.remove('open');
+    }
+
+    function updateSelected(value, text) {
+      input.value = value;
+      selectedText.textContent = text;
+      selectedText.style.color = value ? 'var(--foreground)' : 'var(--outline)';
+      closeDropdown();
+      clearGenderError();
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.preventDefault();
+      menu.classList.toggle('open');
+    });
+
+    options.forEach(function (option) {
+      option.addEventListener('click', function (e) {
+        e.preventDefault();
+        var value = option.getAttribute('data-value');
+        var text = option.textContent;
+        updateSelected(value, text);
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.m3-field')) {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+  }
+
   function initNatalForm() {
     initCityAutocomplete();
     updateDateField();
     updateTimeField();
+    initGenderDropdown();
 
     $('date-field-btn').addEventListener('click', function () {
       openDatePicker(selectedBirthDate, function (d) { selectedBirthDate = d; updateDateField(); });

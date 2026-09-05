@@ -158,15 +158,19 @@
         </div>
 
         <div class="natal-form-grid">
-          <div class="m3-field">
+          <div class="m3-field" style="position: relative;">
             <span class="m3-field-label">Пол</span>
             <div class="m3-field-box">
               <span class="m3-field-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg></span>
-              <select id="gender-input">
-                <option value="">Избери пол</option>
-                <option value="female">Жена</option>
-                <option value="male">Мъж</option>
-              </select>
+              <button type="button" class="gender-dropdown-btn" id="gender-dropdown-trigger" style="flex: 1; background: transparent; border: none; text-align: left; cursor: pointer; font-family: var(--font-body); font-size: 0.92rem; color: var(--outline); padding: 0;">
+                <span id="gender-selected-text">Избери пол</span>
+              </button>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: var(--outline);"><polyline points="6 9 12 15 18 9"/></svg>
+              <input type="hidden" id="gender-input" value="">
+            </div>
+            <div class="gender-dropdown-menu" id="gender-dropdown-menu">
+              <button type="button" class="gender-option" data-value="female">Жена</button>
+              <button type="button" class="gender-option" data-value="male">Мъж</button>
             </div>
             <p class="field-error" id="gender-error"></p>
           </div>
