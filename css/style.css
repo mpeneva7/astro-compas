@@ -626,26 +626,27 @@ section { padding: 40px 20px; }
 }
 
 .m3-field-box select {
-  padding: 8px 12px;
-  background-color: var(--input-bg);
+  padding: 8px 12px !important;
+  background-color: var(--input-bg) !important;
+  background: var(--input-bg) !important;
   cursor: pointer;
-  width: 100%;
-  flex: 1;
-  border: none;
-  outline: none;
-  font-family: var(--font-body);
-  font-size: 0.92rem;
-  color: var(--foreground);
-  color-scheme: dark;
-  min-width: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B69DE8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 20px;
-  padding-right: 40px;
+  width: 100% !important;
+  flex: 1 !important;
+  border: none !important;
+  outline: none !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.92rem !important;
+  color: var(--foreground) !important;
+  color-scheme: dark !important;
+  min-width: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B69DE8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 20px !important;
+  padding-right: 40px !important;
 }
 
 .m3-field-box select option {
