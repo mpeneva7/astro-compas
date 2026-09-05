@@ -619,27 +619,23 @@ section { padding: 40px 20px; }
 }
 .m3-field-box:focus-within { border-color: var(--primary); }
 .m3-field-icon { color: var(--primary); flex-shrink: 0; display: flex; }
-.m3-field-box input, .m3-field-box select {
+.m3-field-box input {
   flex: 1; border: none; background: transparent; outline: none;
+  font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
+  min-width: 0; color-scheme: dark; width: 100%;
+}
+.m3-field-box select {
+  flex: 1; border: none; outline: none;
   font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
   min-width: 0; color-scheme: dark; width: 100%;
 }
 
 .m3-field-box select {
-  width: 100% !important;
-  flex: 1 !important;
-  min-width: 0 !important;
-  border: none !important;
-  outline: none !important;
-  background-color: var(--input-bg) !important;
-  background: var(--input-bg) !important;
-  color: var(--foreground) !important;
-  font-family: var(--font-body) !important;
-  font-size: 0.92rem !important;
-  cursor: pointer !important;
-  color-scheme: dark !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  background-color: var(--input-bg);
+  background: var(--input-bg);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
 }
 
 .m3-field-box select option {
@@ -648,11 +644,6 @@ section { padding: 40px 20px; }
   padding: 8px 12px;
 }
 
-#gender-input {
-  width: 100% !important;
-  flex: 1 !important;
-  min-width: 0 !important;
-}
 .m3-field-box input::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
 
 .m3-field-btn {
