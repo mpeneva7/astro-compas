@@ -744,7 +744,12 @@ section { padding: 40px 20px; }
 .city-dropdown .city-oblast { color: var(--outline); font-size: 0.74rem; white-space: nowrap; flex-shrink: 0; }
 
 /* ── Gender Dropdown ─────────────────────────────────────────────────── */
-.gender-dropdown-btn { cursor: pointer; }
+.gender-dropdown-btn {
+  cursor: pointer; width: 100%; border: none; background: transparent;
+  display: flex; align-items: center; gap: 10px; padding: 0 16px;
+  font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
+  text-align: left;
+}
 .gender-dropdown-btn:not(:focus-visible) { outline: none; }
 .gender-dropdown-menu {
   position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
