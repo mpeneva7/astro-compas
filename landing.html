@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dieila - Astrology Insights & Guidance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-light: #ffffff;
+            --bg-dark: #0f172a;
+            --text-light: #1e293b;
+            --text-dark: #f1f5f9;
+            --accent-light: #7c3aed;
+            --accent-dark: #a78bfa;
+            --border-light: #e2e8f0;
+            --border-dark: #1e293b;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(124, 58, 237, 0.6);
+            }
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .animate-slideIn {
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .glow-effect {
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom-color: var(--border-dark);
+        }
+
+        .navbar-container {
+            max-width: 7xl;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .nav-link {
+            color: var(--text-dark);
+        }
+
+        .nav-link:hover {
+            color: var(--accent-light);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 5rem;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+            min-height: calc(100vh - 5rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode .hero {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(168, 85, 247, 0.08) 100%);
+        }
+
+        .hero-content {
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .btn-primary {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-secondary {
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 2px solid var(--accent-light);
+            background: transparent;
+            color: var(--accent-light);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        body.dark-mode .btn-secondary {
+            border-color: var(--accent-dark);
+            color: var(--accent-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-light);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            padding: 2rem;
+            border-radius: 1rem;
+            background: rgba(124, 58, 237, 0.05);
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .feature-card {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: rgba(124, 58, 237, 0.2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-light);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            opacity: 0.7;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 4rem 2rem;
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        body.dark-mode .testimonials {
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .testimonials .section-title {
+            margin-bottom: 3rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            padding: 2rem;
+            background: var(--bg-light);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode .testimonial-card {
+            background: #1e293b;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .stars {
+            color: #fbbf24;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .testimonial-text {
+            margin-bottom: 1rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--accent-light);
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            padding: 2rem;
+            border-radius: 1rem;
+            background: rgba(124, 58, 237, 0.05);
+            border: 2px solid rgba(124, 58, 237, 0.2);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode .pricing-card {
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent-light);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.2);
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .price-description {
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 1.5rem 0;
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(124, 58, 237, 0.2);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .feature-item {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-item::before {
+            content: "✓";
+            color: var(--accent-light);
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            opacity: 0.7;
+            border-top: 1px solid var(--border-light);
+        }
+
+        body.dark-mode .footer {
+            border-top-color: var(--border-dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-container {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .cta-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Focus styles */
+        button:focus,
+        a:focus {
+            outline: 2px solid var(--accent-light);
+            outline-offset: 2px;
+        }
+
+        body.dark-mode button:focus,
+        body.dark-mode a:focus {
+            outline-color: var(--accent-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar-container">
+            <div class="logo">✨ Dieila</div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#testimonials" class="nav-link">Reviews</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" aria-label="Hero section">
+        <div class="hero-content">
+            <div class="hero-badge">✨ Limited Time Offer</div>
+            <h1>Unlock Your Cosmic Blueprint</h1>
+            <p>Discover personalized astrology insights tailored to your unique journey. Dieila combines ancient wisdom with modern guidance to illuminate your path forward.</p>
+
+            <div class="cta-group">
+                <button class="btn-primary" data-gumroad-action="buy" aria-label="Get started with Dieila">
+                    🚀 Get Started Now
+                </button>
+                <a href="#features" class="btn-secondary" aria-label="Learn more about features">
+                    Learn More
+                </a>
+            </div>
+
+            <p style="opacity: 0.6; font-size: 0.95rem;">
+                ⭐ <span data-gumroad-field="rating">4.9</span>/5 from <span data-gumroad-field="review-count">Be the first to review</span> reviews
+            </p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features" aria-label="Features">
+        <h2 class="section-title">Why Choose Dieila?</h2>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🌙</div>
+                <h3>Lunar Guidance</h3>
+                <p>Track moon phases and harness their energy for optimal timing in your life decisions.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">♈️</div>
+                <h3>Zodiac Insights</h3>
+                <p>Deep astrological analysis based on your birth chart and current planetary movements.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h3>Daily Readings</h3>
+                <p>Personalized daily horoscopes and cosmic guidance delivered right to you.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔮</div>
+                <h3>Tarot Spreads</h3>
+                <p>Interactive tarot readings for deeper self-reflection and spiritual guidance.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Mobile Friendly</h3>
+                <p>Access your cosmic insights anytime, anywhere with our fully responsive platform.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Personalized Path</h3>
+                <p>Custom recommendations based on your unique astrological profile and goals.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials" aria-label="Customer testimonials">
+        <h2 class="section-title">Loved by Our Community</h2>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">"Dieila has completely transformed how I approach my daily decisions. The insights are spot-on and incredibly helpful!"</p>
+                <p class="testimonial-author">— Sarah M.</p>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">"Finally, an astrology tool that's both beautiful and deeply meaningful. Highly recommend!"</p>
+                <p class="testimonial-author">— James T.</p>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">"The personalized readings are amazing. It feels like having a personal spiritual guide in my pocket."</p>
+                <p class="testimonial-author">— Emma L.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing" aria-label="Pricing plans">
+        <h2 class="section-title">Simple, Transparent Pricing</h2>
+
+        <div class="testimonials-grid" style="max-width: 900px; margin: 0 auto;">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="price">$9.99</div>
+                <p class="price-description">One-time access to Dieila</p>
+                <div class="features-list">
+                    <div class="feature-item">Full birth chart analysis</div>
+                    <div class="feature-item">Daily horoscope</div>
+                    <div class="feature-item">Tarot readings</div>
+                    <div class="feature-item">Lifetime updates</div>
+                </div>
+                <button class="btn-primary" data-gumroad-action="buy" style="width: 100%;">
+                    Get Starter
+                </button>
+            </div>
+
+            <div class="pricing-card featured">
+                <h3>✨ Premium</h3>
+                <div class="price">$24.99</div>
+                <p class="price-description">Most popular choice</p>
+                <div class="features-list">
+                    <div class="feature-item">Everything in Starter</div>
+                    <div class="feature-item">Advanced compatibility charts</div>
+                    <div class="feature-item">Monthly cosmic forecast</div>
+                    <div class="feature-item">Priority support</div>
+                </div>
+                <button class="btn-primary" data-gumroad-action="buy" style="width: 100%;">
+                    Get Premium
+                </button>
+            </div>
+
+            <div class="pricing-card">
+                <h3>Cosmic Master</h3>
+                <div class="price">$49.99</div>
+                <p class="price-description">Complete cosmic toolkit</p>
+                <div class="features-list">
+                    <div class="feature-item">Everything in Premium</div>
+                    <div class="feature-item">Personalized yearly report</div>
+                    <div class="feature-item">1-on-1 guidance session</div>
+                    <div class="feature-item">VIP community access</div>
+                </div>
+                <button class="btn-primary" data-gumroad-action="buy" style="width: 100%;">
+                    Get Master
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="cta-section" aria-label="Call to action">
+        <h2>Ready to Explore Your Cosmic Blueprint?</h2>
+        <p>Join thousands of people discovering their path through astrology</p>
+        <button class="btn-primary" data-gumroad-action="buy" style="background: white; color: #7c3aed; font-weight: 700;">
+            Start Your Journey Now 🚀
+        </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <p>&copy; 2024 Dieila. All rights reserved. Made with ✨ and cosmic energy.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            <span data-gumroad-field="description">Unlock personalized astrology insights and guidance</span>
+        </p>
+    </footer>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Initialize theme
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                if (this.getAttribute('href') === '#') return;
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Add scroll animation for feature cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .testimonial-card, .pricing-card').forEach(el => {
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.1)';
+            } else {
+                navbar.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
