@@ -745,8 +745,7 @@ section { padding: 40px 20px; }
 
 /* ── Gender Dropdown ─────────────────────────────────────────────────── */
 .gender-dropdown-btn {
-  cursor: pointer; width: 100%; border: none; background: transparent;
-  display: flex; align-items: center; gap: 10px; padding: 0 16px;
+  cursor: pointer; width: 100%;
   font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
   text-align: left;
 }
