@@ -109,6 +109,43 @@
       }
     });
 
+    // "Още" странично меню
+    var navMoreBtn = $('nav-more-btn');
+    var navMoreOverlay = $('nav-more-overlay');
+
+    if (navMoreBtn && navMoreOverlay) {
+      var closeNavMore = function () {
+        navMoreOverlay.classList.remove('open');
+        navMoreBtn.setAttribute('aria-expanded', 'false');
+      };
+
+      var openNavMore = function () {
+        navMoreOverlay.classList.add('open');
+        navMoreBtn.setAttribute('aria-expanded', 'true');
+      };
+
+      navMoreBtn.addEventListener('click', function () {
+        if (navMoreOverlay.classList.contains('open')) {
+          closeNavMore();
+        } else {
+          openNavMore();
+        }
+      });
+
+      $('nav-more-close').addEventListener('click', closeNavMore);
+      $('nav-more-scrim').addEventListener('click', closeNavMore);
+
+      navMoreOverlay.querySelectorAll('.drawer-nav a').forEach(function (a) {
+        a.addEventListener('click', function () { closeNavMore(); });
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && navMoreOverlay.classList.contains('open')) {
+          closeNavMore();
+        }
+      });
+    }
+
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
@@ -431,11 +468,6 @@
   function clearCityError() {
     $('city-error').classList.remove('show');
     $('city-field-box').classList.remove('error');
-  }
-
-  function clearGenderError() {
-    var err = $('gender-error');
-    if (err) { err.classList.remove('show'); err.textContent = ''; }
   }
 
   /* ───────────────────────── Натална карта — колело (SVG) ───────────────────────── */
@@ -1170,56 +1202,51 @@
   }
 
   function initGenderDropdown() {
-    var trigger = $('gender-dropdown-trigger');
-    var menu = $('gender-dropdown-menu');
+    var btn = $('gender-btn');
+    var menu = $('gender-menu');
     var input = $('gender-input');
-    var selectedText = $('gender-selected-text');
-    var options = menu.querySelectorAll('.gender-option');
+    var value = $('gender-value');
+    var label = $('gender-label');
 
-    function closeDropdown() {
-      menu.classList.remove('open');
-    }
-
-    function updateSelected(value, text) {
-      input.value = value;
-      selectedText.textContent = text;
-      selectedText.style.color = value ? 'var(--foreground)' : 'var(--outline)';
-      closeDropdown();
-      clearGenderError();
-    }
-
-    trigger.addEventListener('click', function (e) {
+    btn.addEventListener('click', function (e) {
       e.preventDefault();
+      var isOpen = menu.classList.contains('open');
       menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', !isOpen);
     });
 
-    options.forEach(function (option) {
-      option.addEventListener('click', function (e) {
+    Array.from(menu.querySelectorAll('.gender-option')).forEach(function (option) {
+      option.addEventListener('mousedown', function (e) {
         e.preventDefault();
-        var value = option.getAttribute('data-value');
-        var text = option.textContent;
-        updateSelected(value, text);
+        var selectedValue = option.getAttribute('data-value');
+        input.value = selectedValue;
+        var selectedText = option.textContent;
+        value.textContent = selectedText;
+        value.classList.toggle('filled', !!selectedValue);
+        label.classList.toggle('filled', !!selectedValue);
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        clearGenderError();
       });
     });
 
     document.addEventListener('click', function (e) {
-      if (!e.target.closest('.m3-field')) {
-        closeDropdown();
-      }
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeDropdown();
+      if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
       }
     });
   }
 
+  function clearGenderError() {
+    $('gender-error').classList.remove('show');
+  }
+
   function initNatalForm() {
     initCityAutocomplete();
+    initGenderDropdown();
     updateDateField();
     updateTimeField();
-    initGenderDropdown();
 
     $('date-field-btn').addEventListener('click', function () {
       openDatePicker(selectedBirthDate, function (d) { selectedBirthDate = d; updateDateField(); });

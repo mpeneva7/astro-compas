@@ -302,7 +302,7 @@ section { padding: 40px 20px; }
 
 /* ── Tarot section ────────────────────────────────────────────────── */
 :root {
-  --card-ratio: 2 / 2.4;
+  --card-ratio: 2 / 3;
 }
 
 #tarot-section { background: linear-gradient(180deg, #1E1428 0%, #251A32 100%); padding: 60px 0; }
@@ -340,7 +340,7 @@ section { padding: 40px 20px; }
 
 .tarot-columns-header {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-  width: 100%; max-width: 1200px; padding: 0 16px; margin: 20px auto 0;
+  width: 100%; max-width: 900px; padding: 0 16px; margin: 20px auto 0;
   text-align: center;
 }
 
@@ -350,8 +350,8 @@ section { padding: 40px 20px; }
 }
 
 .tarot-cards {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
-  width: 100%; max-width: 1200px; padding: 0 16px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  width: 100%; max-width: 900px; padding: 0 16px;
   margin: 0 auto;
   align-items: stretch;
 }
@@ -428,29 +428,23 @@ section { padding: 40px 20px; }
   }
 
   .card-info {
-    padding: 14px 12px;
+    padding: 12px 10px;
   }
 
   .card-name {
-    font-size: 0.95rem;
-  }
-
-  .card-status {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
 
   .card-meaning {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
   }
 }
 
 .card {
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; height: 100%;
   overflow: hidden;
   background: #1a1428;
-  border-radius: 16px 16px 0 0;
-  border: none;
-  min-height: 520px;
+  border-radius: 16px;
 }
 
 .card__front {
@@ -486,27 +480,26 @@ section { padding: 40px 20px; }
   flex: 1; display: flex; flex-direction: column;
   justify-content: flex-start; text-align: center; padding: 16px 12px;
   background: #1a1428;
-  border-radius: 0;
-  border: none;
+  border-radius: 0 0 16px 16px;
 }
 
 .card-name {
-  font-size: 1.05rem; font-weight: 600; color: var(--primary);
-  margin: 0 0 8px 0; line-height: 1.2;
+  font-size: 0.95rem; font-weight: 600; color: var(--primary);
+  margin: 0 0 6px 0; line-height: 1.2;
   width: 100%;
   box-sizing: border-box;
 }
 
 .card-status {
-  font-size: 0.8rem; color: var(--muted-foreground);
-  margin: 0 0 8px 0; font-weight: 500;
+  font-size: 0.75rem; color: var(--muted-foreground);
+  margin: 0 0 6px 0; font-weight: 500;
   width: 100%;
   box-sizing: border-box;
 }
 
 .card-meaning {
-  font-size: 0.9rem; color: var(--muted-foreground);
-  margin: 0; line-height: 1.6;
+  font-size: 0.8rem; color: var(--muted-foreground);
+  margin: 0; line-height: 1.5;
   width: 100%;
   box-sizing: border-box;
 }
@@ -603,11 +596,9 @@ section { padding: 40px 20px; }
 @media (min-width: 640px) { .natal-form-card { padding: 40px; } }
 .natal-form-grid { display: grid; gap: 20px; grid-template-columns: 1fr; margin-bottom: 28px; }
 @media (min-width: 640px) { .natal-form-grid { grid-template-columns: repeat(3, 1fr); } }
-.natal-form-grid:nth-of-type(2) { grid-template-columns: 1fr; }
-@media (min-width: 640px) { .natal-form-grid:nth-of-type(2) { grid-template-columns: repeat(2, 1fr); } }
 .natal-form-grid:last-of-type { margin-bottom: 0; }
 
-.m3-field { position: relative; overflow: visible; min-width: 0; }
+.m3-field { position: relative; overflow: visible; }
 .m3-field-label {
   position: absolute; z-index: 2; top: 0; left: 46px; transform: translateY(-50%);
   font-size: 0.72rem; font-weight: 500; color: var(--primary);
@@ -621,31 +612,11 @@ section { padding: 40px 20px; }
 }
 .m3-field-box:focus-within { border-color: var(--primary); }
 .m3-field-icon { color: var(--primary); flex-shrink: 0; display: flex; }
-.m3-field-box input {
+.m3-field-box input, .m3-field-box select {
   flex: 1; border: none; background: transparent; outline: none;
   font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
-  min-width: 0; color-scheme: dark; width: 100%;
+  min-width: 0; color-scheme: dark;
 }
-.m3-field-box select {
-  flex: 1; border: none; outline: none;
-  font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
-  min-width: 0; color-scheme: dark; width: 100%;
-}
-
-.m3-field-box select {
-  background-color: var(--input-bg);
-  background: var(--input-bg);
-  cursor: pointer;
-  padding: 0;
-  margin: 0;
-}
-
-.m3-field-box select option {
-  background: var(--card-2) !important;
-  color: var(--foreground) !important;
-  padding: 8px 12px;
-}
-
 .m3-field-box input::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
 
 .m3-field-btn {
@@ -772,23 +743,22 @@ section { padding: 40px 20px; }
 .gender-dropdown-btn:not(:focus-visible) { outline: none; }
 .gender-dropdown-menu {
   position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
-  margin-top: 8px; border-radius: var(--radius-md); background: rgb(48, 36, 62);
-  border: 1px solid rgba(168, 112, 200, 0.4); box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  margin-top: 8px; border-radius: var(--radius-md); background: var(--surface);
+  border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   max-height: 0; overflow: hidden; opacity: 0; pointer-events: none;
   transition: max-height 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
-  min-width: 100%;
 }
 .gender-dropdown-menu.open {
   max-height: 300px; opacity: 1; pointer-events: auto;
 }
 .gender-option {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-  padding: 12px 16px; background: rgb(48, 36, 62); border: none; cursor: pointer;
+  padding: 12px 16px; background: none; border: none; cursor: pointer;
   font-family: var(--font-body); font-size: 0.92rem; color: var(--foreground);
   transition: background 0.15s ease;
 }
-.gender-option:hover { background: rgba(122, 81, 149, 0.8); }
-.gender-option:focus-visible { background: rgba(122, 81, 149, 0.8); outline: none; }
+.gender-option:hover { background: rgba(182,157,232,0.12); }
+.gender-option:focus-visible { background: rgba(182,157,232,0.14); outline: none; }
 
 .field-error { display: none; margin: 6px 2px 0; font-size: 0.78rem; color: var(--destructive); }
 .field-error.show { display: block; }
