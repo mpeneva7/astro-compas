@@ -603,8 +603,8 @@ section { padding: 40px 20px; }
 @media (min-width: 640px) { .natal-form-card { padding: 40px; } }
 .natal-form-grid { display: grid; gap: 20px; grid-template-columns: 1fr; margin-bottom: 28px; }
 @media (min-width: 640px) { .natal-form-grid { grid-template-columns: repeat(3, 1fr); } }
-.natal-form-grid:nth-of-type(3) { grid-template-columns: 1fr; }
-@media (min-width: 640px) { .natal-form-grid:nth-of-type(3) { grid-template-columns: repeat(2, 1fr); } }
+.natal-form-grid:nth-of-type(2) { grid-template-columns: 1fr; }
+@media (min-width: 640px) { .natal-form-grid:nth-of-type(2) { grid-template-columns: repeat(2, 1fr); } }
 .natal-form-grid:last-of-type { margin-bottom: 0; }
 
 .m3-field { position: relative; overflow: visible; min-width: 0; }
